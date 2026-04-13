@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow - Docs</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307070a'/%3E%3Ctext x='3' y='24' font-family='sans-serif' font-weight='900' font-size='22' fill='white'%3ER%3C/text%3E%3Ctext x='14' y='24' font-family='sans-serif' font-weight='900' font-size='22' fill='%23a855f7'%3EF%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#07070a;--bg1:#0e0e14;--bg2:#13131b;--bg3:#1a1a26;
+    --border:#1e1e2e;--muted:#42425a;--muted2:#686880;
+    --text:#c8c8e0;--bright:#e8e8f8;
+    --purple:#a855f7;--purple2:#7c3aed;
+    --green:#00d17a;--red:#ff2d4a;--yellow:#ffc940;--cyan:#3dddff;--blue:#4f8ef7;
+    --accent-glow:rgba(168,85,247,.15);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");background-size:180px;pointer-events:none;opacity:.5}
+
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:250px;background:var(--bg1);border-right:1px solid var(--border);z-index:100;overflow-y:auto;display:flex;flex-direction:column;padding:0 0 32px}
+  .sidebar::-webkit-scrollbar{width:4px}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .logo-wrap{padding:28px 24px 24px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--bright);letter-spacing:-.5px}
+  .logo span{color:var(--purple)}
+  .logo-sub{font-size:10px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+  .nav-section{padding:8px 16px 4px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:12px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:7px 24px;color:var(--muted2);text-decoration:none;font-size:12px;transition:color .15s,background .15s;cursor:pointer;border-left:2px solid transparent}
+  .nav-item:hover{color:var(--bright);background:rgba(255,255,255,.03)}
+  .nav-item.active{color:var(--purple);border-left-color:var(--purple);background:var(--accent-glow)}
+  .nav-dot{width:5px;height:5px;border-radius:50%;background:var(--muted);flex-shrink:0}
+  .nav-item.active .nav-dot{background:var(--purple);box-shadow:0 0 6px var(--purple)}
+  .sidebar-footer{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)}
+  .version-badge{display:inline-block;background:var(--accent-glow);border:1px solid rgba(168,85,247,.3);color:var(--purple);padding:2px 8px;border-radius:3px;font-size:10px;margin-bottom:6px}
+
+  .main{margin-left:250px;position:relative;z-index:1;min-height:100vh}
+
+  .hero{padding:80px 80px 60px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(168,85,247,.12) 0%,transparent 70%);pointer-events:none}
+  .hero-eyebrow{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+  .hero-eyebrow::before{content:'';display:block;width:32px;height:1px;background:var(--purple)}
+  .hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:52px;line-height:1.05;color:var(--bright);letter-spacing:-2px;margin-bottom:20px}
+  .hero-title span{color:var(--purple)}
+  .hero-desc{font-size:14px;color:var(--muted2);max-width:600px;line-height:1.8;font-weight:300}
+  .hero-stats{display:flex;gap:40px;margin-top:48px}
+  .stat{display:flex;flex-direction:column;gap:4px}
+  .stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--bright);letter-spacing:-1px}
+  .stat-val.green{color:var(--green)}.stat-val.purple{color:var(--purple)}.stat-val.yellow{color:var(--yellow)}.stat-val.cyan{color:var(--cyan)}
+  .stat-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+
+  .content{padding:0 80px 120px}
+  .section{padding-top:72px}
+  .section-header{display:flex;align-items:baseline;gap:16px;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .section-num{font-size:11px;color:var(--purple);font-family:'IBM Plex Mono',monospace;opacity:.7}
+  .section-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--bright);letter-spacing:-1px}
+  .section-subtitle{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--bright);letter-spacing:-.5px;margin:32px 0 12px}
+
+  .prose{font-size:12.5px;color:var(--muted2);line-height:1.85;margin-bottom:20px;max-width:780px}
+  .prose strong{color:var(--text)}
+
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:24px 0}
+  .card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:24px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+  .card:hover{border-color:var(--muted);transform:translateY(-2px)}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+  .card.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+  .card.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+  .card.yellow::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+  .card.red::before{background:linear-gradient(90deg,var(--red),transparent)}
+  .card.cyan::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+  .card.blue::before{background:linear-gradient(90deg,var(--blue),transparent)}
+  .card-icon{font-size:22px;margin-bottom:14px;display:block}
+  .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--bright);margin-bottom:8px}
+  .card-desc{font-size:11.5px;color:var(--muted2);line-height:1.7}
+
+  .ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+  .ex-card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;transition:border-color .2s}
+  .ex-card:hover{border-color:var(--purple)}
+  .ex-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--bright);margin-bottom:8px}
+  .ex-tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:9px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+  .ex-tag.supported{background:rgba(0,209,122,.1);color:var(--green);border:1px solid rgba(0,209,122,.25)}
+  .ex-tag.demo{background:rgba(247,166,0,.12);color:#f7a600;border:1px solid rgba(247,166,0,.3)}
+  .ex-features{list-style:none;text-align:left;font-size:11px;color:var(--muted2);line-height:2}
+  .ex-features li::before{content:'✓ ';color:var(--green)}
+
+  .steps{display:flex;flex-direction:column;gap:0;margin:24px 0;position:relative}
+  .steps::before{content:'';position:absolute;left:19px;top:20px;bottom:20px;width:1px;background:var(--border)}
+  .step{display:flex;gap:20px;align-items:flex-start;padding:20px 0}
+  .step-num{width:38px;height:38px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--purple);flex-shrink:0;z-index:1}
+  .step-body{padding-top:6px}
+  .step-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--bright);margin-bottom:6px}
+  .step-desc{font-size:12px;color:var(--muted2);line-height:1.7}
+
+  .param-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
+  .param-table th{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:400}
+  .param-table td{padding:10px 14px;border-bottom:1px solid rgba(30,30,46,.5);color:var(--muted2);vertical-align:top}
+  .param-table tr:last-child td{border-bottom:none}
+  .param-table tr:hover td{background:rgba(255,255,255,.02)}
+  .param-name{color:var(--cyan);font-size:11px}
+  .param-req{color:var(--green);font-size:10px}
+  .param-opt{color:var(--muted2);font-size:10px}
+  .param-type{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+  .param-type.number{background:rgba(79,142,247,.15);color:var(--blue);border:1px solid rgba(79,142,247,.25)}
+  .param-type.select{background:rgba(255,201,64,.1);color:var(--yellow);border:1px solid rgba(255,201,64,.2)}
+
+  .callout{display:flex;gap:14px;padding:14px 18px;border-radius:7px;margin:16px 0;font-size:12px;line-height:1.65}
+  .callout-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+  .callout.info{background:rgba(61,221,255,.07);border:1px solid rgba(61,221,255,.2);color:var(--muted2)}
+  .callout.warning{background:rgba(255,201,64,.07);border:1px solid rgba(255,201,64,.2);color:var(--muted2)}
+  .callout.success{background:rgba(0,209,122,.07);border:1px solid rgba(0,209,122,.2);color:var(--muted2)}
+  .callout.danger{background:rgba(255,45,74,.07);border:1px solid rgba(255,45,74,.2);color:var(--muted2)}
+  .callout strong{color:var(--bright)}
+
+  .mockup-wrap{margin:28px 0;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .mockup-caption{padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;background:var(--bg3);display:flex;align-items:center;gap:8px}
+  .mockup-caption::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--purple);box-shadow:0 0 6px var(--purple)}
+  .mockup-inner{padding:0}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:16px 0}
+
+  .badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+  .badge.new{background:rgba(168,85,247,.2);color:var(--purple);border:1px solid rgba(168,85,247,.3)}
+  .badge.live{background:rgba(0,209,122,.15);color:var(--green);border:1px solid rgba(0,209,122,.25)}
+  .badge.demo{background:rgba(247,166,0,.15);color:#f7a600;border:1px solid rgba(247,166,0,.25)}
+
+  kbd{display:inline-block;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text)}
+
+  .formula-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin:16px 0;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:2.2}
+  .formula-line{display:flex;align-items:baseline;gap:12px}
+  .formula-var{color:var(--cyan)}
+  .formula-op{color:var(--muted2)}
+  .formula-val{color:var(--yellow)}
+  .formula-comment{color:var(--muted);font-size:10px;margin-left:8px}
+
+  .back-btn{display:flex;align-items:center;gap:8px;padding:8px 24px;color:var(--muted2);text-decoration:none;font-size:11px;transition:color .15s,background .15s;margin-bottom:4px}
+  .back-btn:hover{color:var(--bright);background:rgba(255,255,255,.03)}
+  .back-btn svg{flex-shrink:0}
+  .social-bar{display:flex;align-items:center;gap:10px;padding:12px 24px 0;flex-wrap:wrap}
+  .social-link{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:var(--muted2);text-decoration:none;transition:color .15s,border-color .15s,background .15s;flex-shrink:0}
+  .social-link:hover{color:var(--bright);border-color:var(--purple);background:var(--accent-glow)}
+  .social-link svg{width:14px;height:14px;fill:currentColor}
+  @media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.hero{padding:40px 24px 32px}.content{padding:0 24px 80px}.hero-title{font-size:32px}.ex-grid{grid-template-columns:1fr 1fr}.two-col,.three-col{grid-template-columns:1fr}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .hero-title{animation:fadeUp .5s ease both}
+  .hero-eyebrow{animation:fadeUp .4s ease both}
+  .hero-desc{animation:fadeUp .6s .1s ease both}
+  .hero-stats{animation:fadeUp .6s .2s ease both}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo">Risk<span>Flow</span></div>
+    <div class="logo-sub">Guida all'utilizzo v3</div>
+  </div>
+
+  <div class="nav-section">Introduzione</div>
+  <a class="nav-item active" href="#overview"><span class="nav-dot"></span>Overview</a>
+  <a class="nav-item" href="#architettura"><span class="nav-dot"></span>Come funziona</a>
+  <a class="nav-item" href="#exchanges"><span class="nav-dot"></span>Exchange supportati</a>
+
+  <div class="nav-section">Setup</div>
+  <a class="nav-item" href="#auth"><span class="nav-dot"></span>Autenticazione</a>
+  <a class="nav-item" href="#api-setup"><span class="nav-dot"></span>Configurazione API</a>
+  <a class="nav-item" href="#security"><span class="nav-dot"></span>Sicurezza</a>
+
+  <div class="nav-section">Interfaccia</div>
+  <a class="nav-item" href="#topbar"><span class="nav-dot"></span>Topbar</a>
+  <a class="nav-item" href="#chart"><span class="nav-dot"></span>Chart interattiva</a>
+  <a class="nav-item" href="#lines"><span class="nav-dot"></span>Linee draggabili</a>
+  <a class="nav-item" href="#pair-modal"><span class="nav-dot"></span>Selezione pair</a>
+
+  <div class="nav-section">Trading</div>
+  <a class="nav-item" href="#risk"><span class="nav-dot"></span>Calcolo rischio</a>
+  <a class="nav-item" href="#order-types"><span class="nav-dot"></span>Tipi di ordine</a>
+  <a class="nav-item" href="#sl-tp"><span class="nav-dot"></span>SL / TP</a>
+  <a class="nav-item" href="#ladder"><span class="nav-dot"></span>Ladder Orders</a>
+  <a class="nav-item" href="#confirm-modal"><span class="nav-dot"></span>Conferma ordine</a>
+
+  <div class="nav-section">Risk Management</div>
+  <a class="nav-item" href="#sl-shield"><span class="nav-dot"></span>SL Shield</a>
+  <a class="nav-item" href="#dll"><span class="nav-dot"></span>Daily Loss Limit</a>
+  <a class="nav-item" href="#fee-settings"><span class="nav-dot"></span>Fee Exchange</a>
+
+  <div class="nav-section">Posizioni</div>
+  <a class="nav-item" href="#positions"><span class="nav-dot"></span>Dashboard posizioni</a>
+  <a class="nav-item" href="#modify-sl-tp"><span class="nav-dot"></span>Modifica SL/TP live</a>
+  <a class="nav-item" href="#breakeven"><span class="nav-dot"></span>Breakeven</a>
+  <a class="nav-item" href="#partial-close"><span class="nav-dot"></span>Chiusura parziale</a>
+  <a class="nav-item" href="#pnl"><span class="nav-dot"></span>PnL realtime</a>
+  <a class="nav-item" href="#money-shot"><span class="nav-dot"></span>Money Shot</a>
+
+  <div class="nav-section">Reference</div>
+  <a class="nav-item" href="#formulas"><span class="nav-dot"></span>Formule & calcoli</a>
+  <a class="nav-item" href="#troubleshooting"><span class="nav-dot"></span>Troubleshooting</a>
+
+  <div class="sidebar-footer">
+    <a href="riskflow.html" class="back-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Torna a RiskFlow
+    </a>
+    <div class="social-bar">
+      <!-- Discord -->
+      <span class="social-link" title="Discord" aria-label="Discord">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      </span>
+      <!-- X / Twitter -->
+      <span class="social-link" title="X (Twitter)" aria-label="X Twitter">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </span>
+      <!-- YouTube -->
+      <span class="social-link" title="YouTube" aria-label="YouTube">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </span>
+      <!-- TikTok -->
+      <span class="social-link" title="TikTok" aria-label="TikTok">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.73a4.85 4.85 0 0 1-1.01-.04z"/></svg>
+      </span>
+      <!-- Facebook -->
+      <span class="social-link" title="Facebook" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </span>
+    </div>
+    <div style="padding:12px 24px 0;font-size:10px;color:var(--muted)">
+      <div class="version-badge">v3.0</div>
+      <div>RiskFlow</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<section class="hero" id="overview">
+  <div class="hero-eyebrow">Guida completa all'utilizzo</div>
+  <h1 class="hero-title">Risk<span>Flow</span><br>Trading Tool</h1>
+  <p class="hero-desc">
+    Piattaforma avanzata per la gestione del rischio, il piazzamento ordini e il monitoraggio delle posizioni su futures perpetui USDT-M. Supporta Bitget, Bybit, Bybit Demo, Weex e BingX con chart interattiva live, linee draggabili, calcolo size automatico con fee integrata, DCA ladder, SL Shield, Daily Loss Limit e PnL realtime.
+  </p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-val green">5</div><div class="stat-label">Exchange</div></div>
+    <div class="stat"><div class="stat-val purple">3</div><div class="stat-label">Order Types</div></div>
+    <div class="stat"><div class="stat-val yellow">3</div><div class="stat-label">TP Levels</div></div>
+    <div class="stat"><div class="stat-val cyan">4</div><div class="stat-label">Ladder Levels</div></div>
+  </div>
+</section>
+
+<div class="content">
+
+<!-- COME FUNZIONA -->
+<section class="section" id="architettura">
+  <div class="section-header">
+    <span class="section-num">00</span>
+    <h2 class="section-title">Come funziona</h2>
+  </div>
+  <p class="prose">RiskFlow è un'applicazione che gira interamente nel browser, senza richiedere installazioni. Tutta la logica di calcolo — size, rischio, R:R, ladder, PnL, fee — viene eseguita localmente sul tuo dispositivo. Le uniche comunicazioni esterne riguardano l'autenticazione utente, il salvataggio cifrato delle credenziali API, e il collegamento sicuro agli exchange tramite un proxy intermedio che si occupa di firmare le richieste.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Diagramma architettura sistema</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <!-- Browser box -->
+        <rect x="14" y="20" width="368" height="280" rx="8" fill="#13131b" stroke="#1e1e2e" stroke-width="1.5"/>
+        <text x="198" y="42" text-anchor="middle" fill="#686880" font-family="monospace" font-size="9" letter-spacing="2">BROWSER — CLIENT</text>
+        <!-- Chart box -->
+        <rect x="30" y="54" width="156" height="66" rx="5" fill="#1a1a26" stroke="#a855f740"/>
+        <text x="108" y="83" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="10">Chart</text>
+        <text x="108" y="98" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">Canvas + drag overlay</text>
+        <!-- Calcoli box -->
+        <rect x="196" y="54" width="166" height="66" rx="5" fill="#1a1a26" stroke="#00d17a40"/>
+        <text x="279" y="83" text-anchor="middle" fill="#00d17a" font-family="monospace" font-size="10">Calcoli locali</text>
+        <text x="279" y="98" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">Risk / Size / Fee / Ladder</text>
+        <!-- Risk Tools box -->
+        <rect x="30" y="132" width="156" height="58" rx="5" fill="#1a1a26" stroke="#ff2d4a40"/>
+        <text x="108" y="157" text-anchor="middle" fill="#ff2d4a" font-family="monospace" font-size="10">Risk Tools</text>
+        <text x="108" y="172" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">SL Shield · DLL</text>
+        <!-- Auth box -->
+        <rect x="196" y="132" width="166" height="58" rx="5" fill="#1a1a26" stroke="#ffc94040"/>
+        <text x="279" y="157" text-anchor="middle" fill="#ffc940" font-family="monospace" font-size="10">Auth + API Keys</text>
+        <text x="279" y="172" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">Cifrate &amp; protette</text>
+        <!-- State bar -->
+        <rect x="30" y="204" width="332" height="34" rx="5" fill="#1a1a26" stroke="#a855f720"/>
+        <text x="196" y="225" text-anchor="middle" fill="#a855f780" font-family="monospace" font-size="8.5">Stato locale · Impostazioni · Posizioni · Fee</text>
+
+        <!-- arrow: browser → proxy -->
+        <line x1="384" y1="162" x2="462" y2="162" stroke="#a855f760" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="459,157 469,162 459,167" fill="#a855f760"/>
+        <text x="422" y="154" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">HTTPS</text>
+
+        <!-- Proxy box -->
+        <rect x="470" y="126" width="130" height="72" rx="8" fill="#13131b" stroke="#a855f740" stroke-width="1.5"/>
+        <text x="535" y="152" text-anchor="middle" fill="#a855f7" font-family="monospace" font-size="10">Proxy sicuro</text>
+        <text x="535" y="167" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">Firma richieste</text>
+        <text x="535" y="181" text-anchor="middle" fill="#686880" font-family="monospace" font-size="8">5 exchange</text>
+
+        <!-- arrow: proxy → exchange -->
+        <line x1="600" y1="162" x2="672" y2="162" stroke="#00d17a60" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="669,157 679,162 669,167" fill="#00d17a60"/>
+
+        <!-- Exchanges box -->
+        <rect x="680" y="36" width="204" height="248" rx="8" fill="#13131b" stroke="#1e1e2e" stroke-width="1.5"/>
+        <text x="782" y="58" text-anchor="middle" fill="#686880" font-family="monospace" font-size="9" letter-spacing="1.5">EXCHANGES</text>
+        <!-- Exchange rows - each 38px tall, 10px gap -->
+        <rect x="692" y="66" width="180" height="32" rx="4" fill="#1a1a26" stroke="#00b96b40"/>
+        <text x="782" y="86" text-anchor="middle" fill="#00b96b" font-family="monospace" font-size="10">Bitget</text>
+        <rect x="692" y="104" width="180" height="32" rx="4" fill="#1a1a26" stroke="#f7a60040"/>
+        <text x="782" y="124" text-anchor="middle" fill="#f7a600" font-family="monospace" font-size="10">Bybit Live</text>
+        <rect x="692" y="142" width="180" height="32" rx="4" fill="#1a1a26" stroke="#f7a60020"/>
+        <text x="782" y="162" text-anchor="middle" fill="#f7a60060" font-family="monospace" font-size="10">Bybit Demo</text>
+        <rect x="692" y="180" width="180" height="32" rx="4" fill="#1a1a26" stroke="#00c2cb40"/>
+        <text x="782" y="200" text-anchor="middle" fill="#00c2cb" font-family="monospace" font-size="10">Weex</text>
+        <rect x="692" y="218" width="180" height="32" rx="4" fill="#1a1a26" stroke="#1da2ff40"/>
+        <text x="782" y="238" text-anchor="middle" fill="#1da2ff" font-family="monospace" font-size="10">BingX</text>
+
+        <!-- public data arrow (top) -->
+        <line x1="384" y1="86" x2="678" y2="86" stroke="#4f8ef750" stroke-width="1" stroke-dasharray="3,3"/>
+        <polygon points="675,81 685,86 675,91" fill="#4f8ef750"/>
+        <text x="528" y="78" text-anchor="middle" fill="#42425a" font-family="monospace" font-size="8">Candele / Prezzi (API pubbliche)</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card purple">
+      <span class="card-icon">🖥️</span>
+      <div class="card-title">Tutto nel browser</div>
+      <div class="card-desc">Tutta la logica di calcolo — size, rischio, R:R, ladder, PnL — viene eseguita localmente nel tuo browser. Nessun dato sensibile viene elaborato su server applicativi esterni.</div>
+    </div>
+    <div class="card cyan">
+      <span class="card-icon">🔐</span>
+      <div class="card-title">Credenziali protette</div>
+      <div class="card-desc">Il tuo account è protetto da autenticazione email/password. Le API key vengono cifrate con crittografia avanzata prima di essere salvate, e sono accessibili solo dal tuo account. Non vengono mai trasmesse in chiaro.</div>
+    </div>
+    <div class="card green">
+      <span class="card-icon">🔀</span>
+      <div class="card-title">Proxy sicuro</div>
+      <div class="card-desc">Tutte le richieste agli exchange passano attraverso un proxy intermedio che firma ogni chiamata in modo sicuro lato server. La tua secret key non viene mai esposta nel browser.</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXCHANGE SUPPORTATI -->
+<section class="section" id="exchanges">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Exchange Supportati</h2>
+  </div>
+  <p class="prose">RiskFlow si connette alle API ufficiali di Bitget, Bybit Live, Bybit Demo, Weex e BingX. Ogni exchange è configurato in modo completamente indipendente: le API key sono salvate separatamente per exchange, e switchare da uno all'altro ricarica automaticamente la chart e tutti i dati di account. Ogni exchange ha un proxy dedicato per gestire la firma delle richieste.</p>
+
+  <div class="ex-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+    <div class="ex-card">
+      <div class="ex-name">Bitget</div>
+      <div><span class="ex-tag supported">Live</span></div>
+      <ul class="ex-features">
+        <li>USDT-M Futures perpetui</li>
+        <li>Market, Limit &amp; Ladder</li>
+        <li>SL / TP preset su ordine</li>
+        <li>Modifica SL/TP su posizioni</li>
+        <li>Key + Secret + <strong>Passphrase</strong></li>
+        <li>Dati di mercato pubblici</li>
+      </ul>
+    </div>
+    <div class="ex-card">
+      <div class="ex-name">Bybit</div>
+      <div><span class="ex-tag supported">Live</span></div>
+      <ul class="ex-features">
+        <li>Linear Perpetual (USDT)</li>
+        <li>Market, Limit &amp; Ladder</li>
+        <li>SL / TP separati</li>
+        <li>Modifica SL/TP live</li>
+        <li>Key + Secret (no passphrase)</li>
+        <li>One-Way e Hedge mode</li>
+      </ul>
+    </div>
+    <div class="ex-card">
+      <div class="ex-name">Bybit Demo</div>
+      <div><span class="ex-tag demo">Demo</span></div>
+      <ul class="ex-features">
+        <li>Ambiente di test ufficiale</li>
+        <li>Stesse funzionalità Bybit Live</li>
+        <li>Fondi virtuali illimitati</li>
+        <li>Endpoint separati dal live</li>
+        <li>Chiavi scadono ogni 3 mesi</li>
+        <li>Key dedicati Demo</li>
+      </ul>
+    </div>
+    <div class="ex-card">
+      <div class="ex-name">Weex</div>
+      <div><span class="ex-tag supported">Live</span></div>
+      <ul class="ex-features">
+        <li>USDT Futures perpetui</li>
+        <li>Market, Limit &amp; Ladder</li>
+        <li>SL / TP integrati</li>
+        <li>Key + Secret + <strong>Passphrase</strong></li>
+        <li>Proxy dedicato Weex</li>
+        <li>Pair caricati dinamicamente</li>
+      </ul>
+    </div>
+    <div class="ex-card">
+      <div class="ex-name">BingX</div>
+      <div><span class="ex-tag supported">Live</span></div>
+      <ul class="ex-features">
+        <li>Swap Perpetual (USDT)</li>
+        <li>Market, Limit &amp; Ladder</li>
+        <li>Simboli formato BTC-USDT</li>
+        <li>Key + Secret (no passphrase)</li>
+        <li>Proxy dedicato BingX</li>
+        <li>Pair caricati dinamicamente</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>I dati di candele e prezzi per la chart vengono scaricati tramite le API pubbliche di ciascun exchange, dal proxy corrispondente all'exchange attivo. Questo garantisce dati sempre disponibili anche senza API key configurate. Solo le operazioni di account (ordini, posizioni, balance) usano le credenziali dell'exchange attivo.</div>
+  </div>
+
+  <table class="param-table" style="margin-top:24px">
+    <thead><tr><th>Exchange</th><th>API Key</th><th>Secret</th><th>Passphrase</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--bright);font-weight:600">Bitget</td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td></tr>
+      <tr><td style="color:var(--bright);font-weight:600">Bybit</td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-opt">— Non necessaria</span></td></tr>
+      <tr><td style="color:var(--bright);font-weight:600">Bybit Demo</td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-opt">— Non necessaria</span></td></tr>
+      <tr><td style="color:var(--bright);font-weight:600">Weex</td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td></tr>
+      <tr><td style="color:var(--bright);font-weight:600">BingX</td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-req">✓ Richiesta</span></td><td><span class="param-opt">— Non necessaria</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- AUTH -->
+<section class="section" id="auth">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Autenticazione</h2>
+  </div>
+  <p class="prose">RiskFlow usa un sistema di autenticazione email/password. La schermata di login copre l'intera applicazione e viene rimossa solo dopo l'accesso avvenuto con successo. Una volta autenticato, la sessione viene mantenuta automaticamente: non è necessario rifare il login ad ogni visita.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Schermata di autenticazione</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 500 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#07070a">
+        <rect width="500" height="380" fill="#07070a"/>
+        <!-- card -->
+        <rect x="140" y="20" width="220" height="340" rx="12" fill="#0e0e14" stroke="#1e1e2e" stroke-width="1.5"/>
+        <!-- logo -->
+        <text x="250" y="62" text-anchor="middle" font-family="'Syne',sans-serif" font-size="22" font-weight="800" fill="white">Risk<tspan fill="#a855f7">Flow</tspan></text>
+
+        <text x="250" y="94" text-anchor="middle" font-family="monospace" font-size="9" fill="#686880">Position sizing &amp; risk management</text>
+        <!-- tabs -->
+        <rect x="152" y="106" width="60" height="22" rx="4" fill="#a855f720" stroke="#a855f7" stroke-width="1"/>
+        <text x="182" y="121" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">Accedi</text>
+        <text x="234" y="121" text-anchor="middle" font-family="monospace" font-size="9" fill="#42425a">Registrati</text>
+        <text x="316" y="121" text-anchor="middle" font-family="monospace" font-size="9" fill="#42425a">Password</text>
+        <!-- divider -->
+        <line x1="152" y1="132" x2="348" y2="132" stroke="#1e1e2e" stroke-width="1"/>
+        <!-- username label + input -->
+        <text x="152" y="150" font-family="monospace" font-size="9" fill="#686880">Username</text>
+        <rect x="152" y="156" width="196" height="26" rx="4" fill="#13131b" stroke="#1e1e2e"/>
+        <text x="162" y="173" font-family="monospace" font-size="9" fill="#42425a">il tuo username</text>
+        <!-- password label + input -->
+        <text x="152" y="198" font-family="monospace" font-size="9" fill="#686880">Password</text>
+        <rect x="152" y="204" width="196" height="26" rx="4" fill="#13131b" stroke="#1e1e2e"/>
+        <text x="162" y="221" font-family="monospace" font-size="9" fill="#42425a">••••••••</text>
+        <!-- button -->
+        <rect x="152" y="244" width="196" height="32" rx="6" fill="#a855f7"/>
+        <text x="250" y="264" text-anchor="middle" font-family="'Syne',sans-serif" font-size="11" font-weight="700" fill="white">Accedi</text>
+        <!-- forgot -->
+        <text x="250" y="296" text-anchor="middle" font-family="monospace" font-size="9" fill="#686880">Password dimenticata?</text>
+        <!-- divider + footer -->
+        <line x1="155" y1="310" x2="345" y2="310" stroke="#1e1e2e" stroke-width="1"/>
+        <text x="250" y="326" text-anchor="middle" font-family="monospace" font-size="8" fill="#42425a">Accesso sicuro · Email / Password</text>
+        <!-- lock icon -->
+        <text x="250" y="348" text-anchor="middle" font-size="14">🔒</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Flusso di accesso</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Login con username + password</div>
+        <div class="step-desc">Inserisci il tuo username e la password. RiskFlow recupera automaticamente l'email associata all'account e autentica la sessione in modo sicuro.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Sessione persistente</div>
+        <div class="step-desc">La sessione rimane attiva anche dopo aver ricaricato la pagina. Non è necessario rifare il login ad ogni accesso: l'applicazione riconosce automaticamente l'utente autenticato.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Recupero API key</div>
+        <div class="step-desc">Al login, le API key cifrate vengono recuperate automaticamente dal cloud e decifrate localmente. Se è il primo accesso, le key non saranno presenti finché non le configuri nel pannello API.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Caricamento dell'interfaccia</div>
+        <div class="step-desc">Una volta autenticato, vengono avviati il caricamento della chart per il pair di default (BTCUSDT / 15m), la lista dei pair disponibili e il balance dell'account se le API key sono presenti.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Registrazione</div>
+  <p class="prose">La registrazione richiede username, email, password (minimo 6 caratteri) e l'accettazione della Privacy Policy (obbligatoria). Lo username viene verificato come unico al momento della registrazione. Una volta creato l'account, puoi accedere subito con le tue credenziali.</p>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div>Il <strong>recupero password</strong> avviene tramite l'email associata all'account, non tramite username. Riceverai un link di reset direttamente all'indirizzo email registrato.</div>
+  </div>
+</section>
+
+<!-- API SETUP -->
+<section class="section" id="api-setup">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Configurazione API</h2>
+  </div>
+  <p class="prose">Il pannello API si apre cliccando il pulsante <kbd>🔑 API</kbd> nella topbar in alto a destra. Qui puoi configurare le credenziali per tutti e cinque gli exchange, verificare lo stato della connessione in tempo reale e sincronizzare balance e posizioni.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Modal configurazione API keys</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#07070a">
+        <rect width="620" height="380" fill="#07070a"/>
+        <!-- card -->
+        <rect x="60" y="16" width="500" height="348" rx="10" fill="#0e0e14" stroke="#1e1e2e" stroke-width="1.5"/>
+        <!-- title -->
+        <text x="80" y="46" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#e8e8f8">🔑 Connetti Exchange</text>
+        <!-- 5 exchange tabs - row 1: Bitget Bybit BybitDemo -->
+        <rect x="72" y="56" width="92" height="44" rx="6" fill="#a855f720" stroke="#a855f7" stroke-width="1.2"/>
+        <text x="118" y="74" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#00b96b">Bitget</text>
+        <rect x="116" y="90" width="30" height="10" rx="2" fill="#00b96b22" stroke="#00b96b44"/>
+        <text x="131" y="99" text-anchor="middle" font-family="monospace" font-size="7" fill="#00b96b">Live</text>
+
+        <rect x="170" y="56" width="92" height="44" rx="6" fill="#13131b" stroke="#252530"/>
+        <text x="216" y="74" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#f7a600">Bybit</text>
+        <rect x="205" y="90" width="22" height="10" rx="2" fill="#f7a60022" stroke="#f7a60044"/>
+        <text x="216" y="99" text-anchor="middle" font-family="monospace" font-size="7" fill="#f7a600">Live</text>
+
+        <rect x="268" y="56" width="100" height="44" rx="6" fill="#13131b" stroke="#252530"/>
+        <text x="318" y="74" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#f7a60070">Bybit</text>
+        <rect x="300" y="90" width="36" height="10" rx="2" fill="#f7a60015" stroke="#f7a60030"/>
+        <text x="318" y="99" text-anchor="middle" font-family="monospace" font-size="7" fill="#f7a60070">Demo</text>
+
+        <rect x="374" y="56" width="92" height="44" rx="6" fill="#13131b" stroke="#252530"/>
+        <text x="420" y="74" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#00c2cb">Weex</text>
+        <rect x="409" y="90" width="22" height="10" rx="2" fill="#00c2cb22" stroke="#00c2cb44"/>
+        <text x="420" y="99" text-anchor="middle" font-family="monospace" font-size="7" fill="#00c2cb">Live</text>
+
+        <rect x="472" y="56" width="80" height="44" rx="6" fill="#13131b" stroke="#252530"/>
+        <text x="512" y="74" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#1da2ff">BingX</text>
+        <rect x="501" y="90" width="22" height="10" rx="2" fill="#1da2ff22" stroke="#1da2ff44"/>
+        <text x="512" y="99" text-anchor="middle" font-family="monospace" font-size="7" fill="#1da2ff">Live</text>
+
+        <!-- status bar -->
+        <rect x="72" y="108" width="476" height="20" rx="3" fill="#00d17a15" stroke="#00d17a30"/>
+        <text x="84" y="122" font-family="monospace" font-size="9" fill="#00d17a">✓ API keys salvate — Connesso</text>
+
+        <!-- stats row -->
+        <rect x="72" y="134" width="232" height="44" rx="5" fill="#121218" stroke="#1a1a22"/>
+        <text x="84" y="148" font-family="monospace" font-size="7" fill="#686880" letter-spacing="1">BALANCE</text>
+        <text x="84" y="168" font-family="'Syne',sans-serif" font-size="16" font-weight="700" fill="#a855f7">$4,250.00</text>
+
+        <rect x="316" y="134" width="232" height="44" rx="5" fill="#121218" stroke="#1a1a22"/>
+        <text x="328" y="148" font-family="monospace" font-size="7" fill="#686880" letter-spacing="1">UNREALIZED PNL</text>
+        <text x="328" y="168" font-family="'Syne',sans-serif" font-size="16" font-weight="700" fill="#00d17a">+$124.50</text>
+
+        <!-- pos count + sync time -->
+        <text x="84" y="195" font-family="monospace" font-size="9" fill="#686880">Posizioni aperte: <tspan fill="#e8e8f8">3</tspan></text>
+        <text x="546" y="195" text-anchor="end" font-family="monospace" font-size="9" fill="#42425a">Sync 14:32:07</text>
+
+        <!-- API Key -->
+        <text x="72" y="214" font-family="monospace" font-size="9" fill="#686880">API Key</text>
+        <rect x="72" y="220" width="476" height="26" rx="4" fill="#121218" stroke="#1a1a22"/>
+        <text x="84" y="237" font-family="monospace" font-size="9" fill="#42425a">la tua API key</text>
+
+        <!-- Secret -->
+        <text x="72" y="260" font-family="monospace" font-size="9" fill="#686880">Secret Key</text>
+        <rect x="72" y="266" width="476" height="26" rx="4" fill="#121218" stroke="#1a1a22"/>
+        <text x="84" y="283" font-family="monospace" font-size="9" fill="#42425a">••••••••••••••••</text>
+
+        <!-- Passphrase -->
+        <text x="72" y="306" font-family="monospace" font-size="9" fill="#686880">Passphrase <tspan fill="#42425a">(Bitget / Weex)</tspan></text>
+        <rect x="72" y="312" width="476" height="26" rx="4" fill="#121218" stroke="#1a1a22"/>
+        <text x="84" y="329" font-family="monospace" font-size="9" fill="#42425a">••••••••</text>
+
+        <!-- buttons -->
+        <rect x="72" y="346" width="154" height="26" rx="4" fill="#a855f7"/>
+        <text x="149" y="363" text-anchor="middle" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="white">Salva &amp; Connetti</text>
+
+        <rect x="232" y="346" width="74" height="26" rx="4" fill="#18181f" stroke="#252530"/>
+        <text x="269" y="363" text-anchor="middle" font-family="monospace" font-size="9" fill="#e8e8f8">⟳ Sync</text>
+
+        <rect x="312" y="346" width="74" height="26" rx="4" fill="#ff2d4a15" stroke="#ff2d4a40"/>
+        <text x="349" y="363" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff2d4a">Elimina</text>
+
+        <rect x="392" y="346" width="74" height="26" rx="4" fill="#13131b" stroke="#1a1a26"/>
+        <text x="429" y="363" text-anchor="middle" font-family="monospace" font-size="9" fill="#686880">✕ Chiudi</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Apri il pannello API</div>
+        <div class="step-desc">Clicca su <kbd>🔑 API</kbd> nella topbar. Il pannello si apre con i tab per i tre exchange. L'exchange attivo è evidenziato con il bordo viola. Se ci sono già key salvate, i campi mostreranno caratteri mascherati (••••••••).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Seleziona l'exchange</div>
+        <div class="step-desc">Clicca sul tab dell'exchange che vuoi configurare. Per <strong>Bitget</strong>, compaiono tre campi (Key, Secret, Passphrase). Per <strong>Bybit</strong> e <strong>Bybit Demo</strong>, il campo Passphrase è nascosto perché non necessario.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Inserisci le credenziali</div>
+        <div class="step-desc">Incolla API Key, Secret e (solo Bitget) la Passphrase nei rispettivi campi. Se i campi mostrano ••••••••, significa che ci sono già chiavi salvate — puoi lasciarli così per mantenere quelle esistenti, oppure sovrascriverle con nuove credenziali.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Salva e connetti</div>
+        <div class="step-desc">Clicca <strong>Salva &amp; Connetti</strong>. Le chiavi vengono cifrate automaticamente e salvate in modo sicuro. Dopo pochi istanti viene eseguito un test di connessione che recupera balance e posizioni dall'exchange.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Verifica balance e posizioni</div>
+        <div class="step-desc">Il pannello API mostra in tempo reale il Balance totale (equity), l'Unrealized PnL aggregato e il numero di posizioni aperte. Il timestamp di ultima sincronizzazione è visibile in basso a destra. Usa <strong>⟳ Sync</strong> per forzare un aggiornamento manuale.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Guida — Bitget</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(0,185,107,.12);border:1px solid rgba(0,185,107,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#00b96b;font-family:'Syne',sans-serif">B</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--bright)">Bitget — Creazione API Key</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">Richiede: API Key · Secret · Passphrase</div>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div class="steps" style="margin:0">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Accedi a Bitget</div><div class="step-desc">Vai su bitget.com → clicca sulla tua foto profilo in alto a destra → <strong>API Management</strong>.</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Crea nuova API Key</div><div class="step-desc">Clicca <strong>Create API Key</strong>. Scegli un nome (es. "RiskFlow"). Imposta una <strong>Passphrase</strong> personalizzata — annotala subito, non sarà più visibile dopo la creazione.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Imposta i permessi</div><div class="step-desc">Abilita <strong>Read</strong> e <strong>Trade</strong>. <span style="color:var(--red)">Non abilitare mai Withdraw</span> per sicurezza. Puoi lasciare vuoto il campo IP o whitelistare l'IP del proxy RiskFlow.</div></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Copia le credenziali</div><div class="step-desc">Bitget mostra API Key e Secret <strong>una sola volta</strong> subito dopo la creazione. Copiati immediatamente entrambi insieme alla Passphrase. Se perdi la Secret, devi rigenerare la key.</div></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Inserisci in RiskFlow</div><div class="step-desc">Pannello API → tab Bitget → incolla tutti e tre i valori → <strong>Salva &amp; Connetti</strong>.</div></div></div>
+      </div>
+      <div class="callout info" style="margin-top:16px"><span class="callout-icon">ℹ</span><div>La Passphrase di Bitget è un secondo livello di sicurezza specifico di questo exchange. Senza di essa le chiamate autenticate verranno rifiutate con un errore di autenticazione.</div></div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Guida — Bybit Live</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(247,166,0,.12);border:1px solid rgba(247,166,0,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#f7a600;font-family:'Syne',sans-serif">◈</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--bright)">Bybit Live — Creazione API Key</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">Richiede: API Key · Secret (no Passphrase)</div>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div class="steps" style="margin:0">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Accedi a Bybit</div><div class="step-desc">Vai su bybit.com → foto profilo → <strong>API</strong>, oppure direttamente alla sezione API Management del tuo account.</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Crea nuova key</div><div class="step-desc">Clicca <strong>Create New Key</strong>. Seleziona le chiavi di sistema (HMAC). Dai un nome alla chiave, ad esempio "RiskFlow".</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Imposta permessi</div><div class="step-desc">In <strong>API Key Usage</strong> seleziona <strong>Unified Trading</strong>. Abilita <strong>Read-Write</strong> e spunta <strong>Contract</strong> (Derivatives/Futures). <span style="color:var(--red)">Non abilitare Assets/Withdraw.</span></div></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Copia API Key e Secret</div><div class="step-desc">La Secret Key viene mostrata <strong>una sola volta</strong>. Bybit non richiede Passphrase.</div></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Inserisci in RiskFlow</div><div class="step-desc">Pannello API → tab Bybit → incolla Key e Secret → Salva. Il campo Passphrase non compare — è normale.</div></div></div>
+      </div>
+      <div class="callout success" style="margin-top:16px"><span class="callout-icon">✓</span><div>Assicurati che il tuo account Bybit abbia il <strong>Unified Trading Account</strong> attivo. RiskFlow usa esclusivamente i contratti <strong>Linear Perpetual</strong> (USDT-margined).</div></div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Guida — Bybit Demo</div>
+  <div class="callout warning"><span class="callout-icon">⚠</span><div>L'ambiente Demo di Bybit è <strong>completamente separato</strong> dal live. Le API key del Demo non funzionano sul live e viceversa. Devi creare chiavi apposite dall'interfaccia Demo. Vai su Bybit → foto profilo → <strong>Demo Trading</strong> → <strong>Try Demo Trading</strong> per attivarlo → poi crea le API key dalla sezione API Management dell'account Demo.</div></div>
+
+  <div class="section-subtitle">Guida — Weex</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(0,194,203,.12);border:1px solid rgba(0,194,203,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#00c2cb;font-family:'Syne',sans-serif">W</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--bright)">Weex — Creazione API Key</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">Richiede: API Key · Secret · Passphrase</div>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div class="steps" style="margin:0">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Accedi a Weex</div><div class="step-desc">Vai su weex.com → icona profilo in alto a destra → <strong>API Management</strong>.</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Crea nuova API Key</div><div class="step-desc">Clicca <strong>Create API</strong>. Scegli un nome e imposta una <strong>Passphrase</strong> (obbligatoria come per Bitget) — annotala subito.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Imposta i permessi</div><div class="step-desc">Abilita <strong>Read</strong> e <strong>Trade</strong> per i contratti futures. <span style="color:var(--red)">Non abilitare Withdraw.</span></div></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Inserisci in RiskFlow</div><div class="step-desc">Pannello API → tab Weex → incolla Key, Secret e Passphrase → <strong>Salva &amp; Connetti</strong>.</div></div></div>
+      </div>
+      <div class="callout info" style="margin-top:16px"><span class="callout-icon">ℹ</span><div>Weex richiede Passphrase, esattamente come Bitget. Il campo compare automaticamente quando è selezionato il tab Weex nel pannello API.</div></div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Guida — BingX</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(29,162,255,.12);border:1px solid rgba(29,162,255,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#1da2ff;font-family:'Syne',sans-serif">BX</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--bright)">BingX — Creazione API Key</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px">Richiede: API Key · Secret (no Passphrase)</div>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div class="steps" style="margin:0">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Accedi a BingX</div><div class="step-desc">Vai su bingx.com → avatar profilo → <strong>API Management</strong>.</div></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Crea nuova key</div><div class="step-desc">Clicca <strong>Create API Key</strong>. Scegli un nome, es. "RiskFlow". BingX non richiede Passphrase.</div></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Imposta i permessi</div><div class="step-desc">Abilita <strong>Perpetual Futures Trading</strong> in lettura e scrittura. <span style="color:var(--red)">Non abilitare Wallet/Withdraw.</span></div></div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Nota sui simboli</div><div class="step-desc">BingX usa simboli nel formato <strong>BTC-USDT</strong> (con trattino). RiskFlow gestisce la conversione automaticamente — tu selezioni il pair normalmente come sugli altri exchange.</div></div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Inserisci in RiskFlow</div><div class="step-desc">Pannello API → tab BingX → incolla Key e Secret → <strong>Salva &amp; Connetti</strong>. Il campo Passphrase non compare.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+<!-- SECURITY -->
+<section class="section" id="security">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">Sicurezza API Keys</h2>
+  </div>
+  <p class="prose">La gestione delle API key è progettata per garantire che le credenziali non vengano mai trasmesse in chiaro o esposte. Il sistema usa tre livelli di protezione indipendenti: cifratura avanzata delle chiavi, storage sicuro con accesso limitato al tuo account, e un proxy lato server che firma ogni chiamata agli exchange senza esporre le credenziali nel browser.</p>
+
+  <div class="three-col">
+    <div class="card purple">
+      <span class="card-icon">🔑</span>
+      <div class="card-title">Cifratura end-to-end</div>
+      <div class="card-desc">Le API key vengono cifrate nel browser con crittografia a 256-bit prima di essere salvate. La chiave di cifratura è legata al tuo account ed è unica: nessun altro può decifrarle, nemmeno accedendo al database.</div>
+    </div>
+    <div class="card cyan">
+      <span class="card-icon">🗄️</span>
+      <div class="card-title">Storage per account</div>
+      <div class="card-desc">Le credenziali sono salvate in modo isolato per ogni account: solo l'utente autenticato con le credenziali corrette può leggere e usare le proprie key. Nessun altro utente può accedere ai dati di un altro account.</div>
+    </div>
+    <div class="card yellow">
+      <span class="card-icon">🛡️</span>
+      <div class="card-title">Proxy lato server</div>
+      <div class="card-desc">Le richieste autenticate agli exchange non vengono firmate nel browser. Il client invia le credenziali via connessione HTTPS sicura al proxy, che firma la richiesta lato server e la inoltra all'exchange. La secret key non è mai esposta nel JavaScript del browser.</div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <span class="callout-icon">⛔</span>
+    <div><strong>Regola fondamentale:</strong> crea sempre le API key con solo i permessi <strong>Read</strong> e <strong>Trade</strong>. <strong>Non abilitare mai il permesso Withdraw</strong>. In caso di compromissione delle chiavi, senza il permesso di prelievo i tuoi fondi non possono essere trasferiti. RiskFlow non ha mai bisogno del permesso Withdraw per operare.</div>
+  </div>
+
+  <table class="param-table">
+    <thead><tr><th>Layer di protezione</th><th>Cosa protegge</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Cifratura lato client</span></td><td>Le API key in chiaro non vengono mai salvate — vengono cifrate prima di qualsiasi trasmissione o storage</td></tr>
+      <tr><td><span class="param-name">Storage per account</span></td><td>Solo l'utente con le credenziali corrette può leggere le proprie key</td></tr>
+      <tr><td><span class="param-name">Cache locale cifrata</span></td><td>Le key decifrate sono disponibili localmente senza doverle re-decriptare ad ogni uso</td></tr>
+      <tr><td><span class="param-name">Proxy lato server</span></td><td>La secret key non viene mai usata per firmare direttamente nel browser</td></tr>
+      <tr><td><span class="param-name">Campi mascherati</span></td><td>Se ci sono key già salvate, i campi nel pannello mostrano caratteri • invece del valore reale</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- TOPBAR -->
+<section class="section" id="topbar">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Topbar — Barra superiore</h2>
+  </div>
+  <p class="prose">La topbar è fissa in cima all'interfaccia e contiene tutte le informazioni di contesto e i controlli di navigazione principali. Da sinistra a destra mostra: logo, selettore pair, timeframe, prezzo live con variazione 24h, toggle SL Shield, e a destra balance, PnL e controlli utente.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Topbar completa — layout annotato</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 980 56" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <rect width="980" height="56" fill="#0d0d11"/>
+        <line x1="0" y1="55" x2="980" y2="55" stroke="#1a1a22" stroke-width="1"/>
+        <!-- Logo -->
+        <text x="14" y="32" font-family="'Syne',sans-serif" font-size="13" font-weight="800" fill="white">Risk<tspan fill="#a855f7">Flow</tspan></text>
+
+        <line x1="156" y1="14" x2="156" y2="42" stroke="#252530" stroke-width="1"/>
+        <!-- Pair selector -->
+        <rect x="163" y="12" width="98" height="28" rx="5" fill="#121218" stroke="#1a1a22"/>
+        <text x="173" y="30" font-family="monospace" font-size="10" fill="#686878">▼ BTCUSDT</text>
+        <line x1="266" y1="14" x2="266" y2="42" stroke="#252530" stroke-width="1"/>
+        <!-- Timeframes -->
+        <text x="274" y="31" font-family="monospace" font-size="10" fill="#686878">1m</text>
+        <text x="298" y="31" font-family="monospace" font-size="10" fill="#686878">5m</text>
+        <rect x="316" y="13" width="28" height="22" rx="3" fill="#18181f" stroke="#252530"/>
+        <text x="330" y="28" text-anchor="middle" font-family="monospace" font-size="10" fill="#a855f7">15m</text>
+        <text x="352" y="31" font-family="monospace" font-size="10" fill="#686878">1h</text>
+        <text x="374" y="31" font-family="monospace" font-size="10" fill="#686878">4h</text>
+        <text x="396" y="31" font-family="monospace" font-size="10" fill="#686878">1D</text>
+        <line x1="418" y1="14" x2="418" y2="42" stroke="#252530" stroke-width="1"/>
+        <!-- Price -->
+        <text x="426" y="33" font-family="'Syne',sans-serif" font-size="15" font-weight="500" fill="#dddde8">$84,320</text>
+        <rect x="496" y="16" width="52" height="18" rx="3" fill="#00d17a20"/>
+        <text x="522" y="28" text-anchor="middle" font-family="monospace" font-size="9" fill="#00d17a">+1.24%</text>
+        <line x1="554" y1="14" x2="554" y2="42" stroke="#252530" stroke-width="1"/>
+        <!-- SL Shield: icon + label + toggle switch + state text -->
+        <rect x="561" y="12" width="116" height="28" rx="5" fill="rgba(245,158,11,.10)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="573" y="30" font-family="monospace" font-size="11" fill="#f59e0b">🛡</text>
+        <text x="590" y="29" font-family="monospace" font-size="8" fill="#f59e0b" letter-spacing=".3">SL SHIELD</text>
+        <!-- toggle pill -->
+        <rect x="633" y="20" width="22" height="11" rx="5.5" fill="#f59e0b33" stroke="#f59e0b" stroke-width="1"/>
+        <circle cx="646" cy="25.5" r="3.5" fill="#f59e0b"/>
+        <text x="659" y="30" font-family="monospace" font-size="8" font-weight="600" fill="#f59e0b">ON</text>
+        <line x1="682" y1="14" x2="682" y2="42" stroke="#252530" stroke-width="1"/>
+        <!-- Live dot + Balance + PnL -->
+        <circle cx="692" cy="28" r="3" fill="#00d17a"/>
+        <text x="702" y="22" font-family="monospace" font-size="7" fill="#42425a" letter-spacing=".5">BALANCE</text>
+        <text x="702" y="35" font-family="monospace" font-size="12" font-weight="500" fill="#a855f7">$4,250</text>
+        <text x="756" y="22" font-family="monospace" font-size="7" fill="#42425a" letter-spacing=".5">PNL</text>
+        <text x="756" y="35" font-family="monospace" font-size="12" font-weight="500" fill="#00d17a">+$124</text>
+        <!-- User + buttons -->
+        <circle cx="810" cy="28" r="3" fill="#a855f7"/>
+        <text x="820" y="32" font-family="monospace" font-size="10" fill="#dddde8">trader99</text>
+        <rect x="868" y="15" width="46" height="22" rx="3" fill="#18181f" stroke="#1a1a22"/>
+        <text x="891" y="30" text-anchor="middle" font-family="monospace" font-size="9" fill="#686878">Logout</text>
+        <rect x="920" y="15" width="50" height="22" rx="3" fill="#a855f715" stroke="#a855f740"/>
+        <text x="945" y="30" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">🔑 API</text>
+      </svg>
+    </div>
+  </div>
+
+  <table class="param-table">
+    <thead><tr><th>Elemento</th><th>Funzione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Logo RiskFlow</span></td><td>Link al sito ufficiale, apre in una nuova tab</td></tr>
+      <tr><td><span class="param-name">Pair Selector</span></td><td>Mostra il pair correntemente selezionato. Un click apre il modal di selezione pair con ricerca e categorie</td></tr>
+      <tr><td><span class="param-name">Timeframe</span></td><td>Pulsanti 1m / 5m / 15m / 1h / 4h / 1D — cambiano il timeframe della chart e ricaricano le candele</td></tr>
+      <tr><td><span class="param-name">Prezzo live</span></td><td>Last price del pair attivo, aggiornato ogni pochi secondi in tempo reale</td></tr>
+      <tr><td><span class="param-name">Variazione 24h</span></td><td>Variazione percentuale rispetto all'apertura delle 24 ore. Verde per positiva, rosso per negativa</td></tr>
+      <tr><td><span class="param-name">🛡 SL Shield</span></td><td>Toggle che impedisce di allargare lo SL su posizioni aperte. Arancione quando attivo, si blocca automaticamente con posizioni aperte. <a href="#sl-shield" style="color:var(--purple)">→ Dettagli</a></td></tr>
+      <tr><td><span class="param-name">Live dot</span></td><td>Puntino verde lampeggiante — indica che il feed prezzi è attivo e funzionante</td></tr>
+      <tr><td><span class="param-name">Balance</span></td><td>Equity totale dell'account sull'exchange attivo, aggiornato automaticamente</td></tr>
+      <tr><td><span class="param-name">PnL</span></td><td>Unrealized PnL aggregato di tutte le posizioni aperte, aggiornato ogni mezzo secondo</td></tr>
+      <tr><td><span class="param-name">Username</span></td><td>Username dell'utente loggato. Il puntino viola indica sessione autenticata attiva</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- CHART -->
+<section class="section" id="chart">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">Chart Interattiva</h2>
+  </div>
+  <p class="prose">La chart occupa la porzione principale dell'interfaccia a sinistra del pannello di trading ed è di tipo candlestick. I dati vengono scaricati automaticamente con paginazione: il sistema carica l'intera storia disponibile del pair selezionato sul timeframe scelto, fino a diverse centinaia di migliaia di candele.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Chart con linee di trading — Entry, SL, TP con badge informativi</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#07070a">
+        <rect width="700" height="380" fill="#07070a"/>
+        <line x1="0" y1="80" x2="700" y2="80" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="0" y1="150" x2="700" y2="150" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="0" y1="220" x2="700" y2="220" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="0" y1="290" x2="700" y2="290" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="100" y1="0" x2="100" y2="380" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="220" y1="0" x2="220" y2="380" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="340" y1="0" x2="340" y2="380" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="460" y1="0" x2="460" y2="380" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="580" y1="0" x2="580" y2="380" stroke="#12121680" stroke-width="1" stroke-dasharray="2,4"/>
+        <line x1="30" y1="200" x2="30" y2="280" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="24" y="220" width="12" height="40" rx="1" fill="#ff2d4a"/>
+        <line x1="60" y1="170" x2="60" y2="260" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="54" y="195" width="12" height="45" rx="1" fill="#ff2d4a"/>
+        <line x1="90" y1="180" x2="90" y2="240" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="84" y="195" width="12" height="30" rx="1" fill="#00d17a"/>
+        <line x1="120" y1="160" x2="120" y2="230" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="114" y="170" width="12" height="35" rx="1" fill="#00d17a"/>
+        <line x1="150" y1="155" x2="150" y2="210" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="144" y="170" width="12" height="25" rx="1" fill="#ff2d4a"/>
+        <line x1="180" y1="145" x2="180" y2="200" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="174" y="155" width="12" height="28" rx="1" fill="#00d17a"/>
+        <line x1="210" y1="140" x2="210" y2="185" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="204" y="148" width="12" height="24" rx="1" fill="#00d17a"/>
+        <line x1="240" y1="130" x2="240" y2="175" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="234" y="145" width="12" height="20" rx="1" fill="#ff2d4a"/>
+        <line x1="270" y1="125" x2="270" y2="165" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="264" y="133" width="12" height="20" rx="1" fill="#00d17a"/>
+        <line x1="300" y1="118" x2="300" y2="160" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="294" y="126" width="12" height="22" rx="1" fill="#00d17a"/>
+        <line x1="330" y1="115" x2="330" y2="155" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="324" y="122" width="12" height="20" rx="1" fill="#00d17a"/>
+        <line x1="360" y1="108" x2="360" y2="148" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="354" y="120" width="12" height="18" rx="1" fill="#ff2d4a"/>
+        <line x1="390" y1="110" x2="390" y2="145" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="384" y="116" width="12" height="18" rx="1" fill="#00d17a"/>
+        <line x1="420" y1="105" x2="420" y2="140" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="414" y="112" width="12" height="16" rx="1" fill="#00d17a"/>
+        <line x1="450" y1="100" x2="450" y2="135" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="444" y="110" width="12" height="15" rx="1" fill="#ff2d4a"/>
+        <line x1="480" y1="98" x2="480" y2="130" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="474" y="106" width="12" height="14" rx="1" fill="#00d17a"/>
+        <line x1="510" y1="92" x2="510" y2="125" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="504" y="100" width="12" height="14" rx="1" fill="#00d17a"/>
+        <line x1="540" y1="90" x2="540" y2="120" stroke="#ff2d4a88" stroke-width="1"/>
+        <rect x="534" y="97" width="12" height="13" rx="1" fill="#ff2d4a"/>
+        <line x1="570" y1="88" x2="570" y2="115" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="564" y="95" width="12" height="12" rx="1" fill="#00d17a"/>
+        <line x1="600" y1="85" x2="600" y2="112" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="594" y="91" width="12" height="14" rx="1" fill="#00d17a"/>
+        <line x1="630" y1="82" x2="630" y2="110" stroke="#00d17a88" stroke-width="1"/>
+        <rect x="624" y="88" width="12" height="14" rx="1" fill="#00d17a"/>
+        <!-- TP2 LINE -->
+        <line x1="0" y1="95" x2="660" y2="95" stroke="#00ffcc" stroke-width="1" stroke-dasharray="6,4"/>
+        <rect x="220" y="83" width="80" height="20" rx="4" fill="#00ffcc"/>
+        <text x="260" y="96" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">+$340  8.2%</text>
+        <rect x="310" y="83" width="72" height="20" rx="4" fill="#00ffcc"/>
+        <text x="346" y="96" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">R:R  1:3.4</text>
+        <text x="666" y="99" font-family="monospace" font-size="8" fill="#00ffcc">TP2</text>
+        <!-- TP1 LINE -->
+        <line x1="0" y1="140" x2="660" y2="140" stroke="#00d17a" stroke-width="1" stroke-dasharray="6,4"/>
+        <rect x="220" y="128" width="76" height="20" rx="4" fill="#00d17a"/>
+        <text x="258" y="141" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">+$200  4.8%</text>
+        <rect x="306" y="128" width="68" height="20" rx="4" fill="#00d17a"/>
+        <text x="340" y="141" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">R:R  1:2.0</text>
+        <text x="666" y="144" font-family="monospace" font-size="8" fill="#00d17a">TP1</text>
+        <!-- ENTRY LINE -->
+        <line x1="0" y1="200" x2="660" y2="200" stroke="#ffc940" stroke-width="1.5"/>
+        <rect x="175" y="189" width="90" height="22" rx="4" fill="#ffc940"/>
+        <text x="220" y="203" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="10" font-weight="bold">$6,024 USDT</text>
+        <rect x="275" y="189" width="80" height="22" rx="4" fill="#ffc940"/>
+        <text x="315" y="203" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="10" font-weight="bold">0.0713 BTC</text>
+        <text x="666" y="204" font-family="monospace" font-size="8" fill="#ffc940">ENTRY</text>
+        <circle cx="360" cy="186" r="7" fill="#07070a" stroke="#ffc940" stroke-width="1.2"/>
+        <text x="360" y="190" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffc940">⇅</text>
+        <!-- SL LINE -->
+        <line x1="0" y1="275" x2="660" y2="275" stroke="#ff2d4a" stroke-width="2" stroke-dasharray="6,4"/>
+        <rect x="200" y="263" width="58" height="20" rx="4" fill="#ff2d4a"/>
+        <text x="229" y="276" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">2.3%</text>
+        <rect x="266" y="263" width="80" height="20" rx="4" fill="#ff2d4a"/>
+        <text x="306" y="276" text-anchor="middle" fill="rgba(0,0,0,.9)" font-family="monospace" font-size="9" font-weight="bold">-$100 RISK</text>
+        <text x="666" y="279" font-family="monospace" font-size="8" fill="#ff2d4a">SL</text>
+      </svg>
+    </div>
+  </div>
+
+  <p class="prose">La chart supporta zoom (scroll del mouse), pan (click + drag), e si aggiorna in tempo reale con le candele live del pair selezionato. Il pulsante <kbd>⊙ live</kbd> in alto a destra riporta la visualizzazione al prezzo corrente se hai scrollato nel passato.</p>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Cambiando il timeframe dalla topbar, la chart ricarica automaticamente le candele per il periodo selezionato. Tutti i livelli impostati (Entry, SL, TP) vengono mantenuti — non vengono azzerati al cambio timeframe.</div>
+  </div>
+</section>
+
+<!-- LINEE DRAGGABILI -->
+<section class="section" id="lines">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">Linee Draggabili</h2>
+  </div>
+  <p class="prose">Sopra la chart è presente un layer overlay trasparente che gestisce il rendering di tutte le linee interattive (Entry, SL, TP1/2/3, livelli Ladder) e le overlay delle posizioni aperte. Le linee sono sempre visibili e interagibili senza interferire con il normale utilizzo della chart sottostante.</p>
+
+  <div class="two-col">
+    <div class="card purple">
+      <span class="card-icon">🖱️</span>
+      <div class="card-title">Drag to set</div>
+      <div class="card-desc">Avvicina il cursore a una linea impostata: appare la maniglia ⇅ e il cursore cambia forma. Tieni premuto e trascina verticalmente per aggiornare il prezzo in tempo reale — sia sulla chart che nel campo input del pannello. Il calcolo della size si riesegue ad ogni aggiornamento.</div>
+    </div>
+    <div class="card cyan">
+      <span class="card-icon">✕</span>
+      <div class="card-title">Rimuovi linea</div>
+      <div class="card-desc">Sopra ogni maniglia di drag appare un cerchietto <strong>✕</strong>. Cliccandolo si rimuove la linea dalla chart e si svuota il campo input corrispondente nel pannello.</div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Badge informativi sulle linee</div>
+  <p class="prose">Ogni linea viene disegnata con badge contestuali calcolati in tempo reale. I badge si aggiornano durante il drag, mostrando immediatamente il risultato dello spostamento.</p>
+
+  <table class="param-table">
+    <thead><tr><th>Linea</th><th>Badge sinistro</th><th>Badge destro</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name" style="color:var(--yellow)">ENTRY</span></td><td>Size della posizione in USDT (es. $6,024 USDT)</td><td>Quantità in coin (es. 0.0713 BTC)</td></tr>
+      <tr><td><span class="param-name" style="color:var(--red)">SL</span></td><td>Distanza percentuale dall'entry (es. 2.3%)</td><td>Rischio in USDT (es. –$100 RISK)</td></tr>
+      <tr><td><span class="param-name" style="color:var(--green)">TP1</span></td><td>Guadagno stimato (es. +$200) + distanza %</td><td>Rapporto Risk:Reward (es. R:R 1:2.0)</td></tr>
+      <tr><td><span class="param-name" style="color:#00ffcc">TP2</span></td><td>Guadagno stimato + distanza %</td><td>R:R calcolato</td></tr>
+      <tr><td><span class="param-name" style="color:var(--cyan)">TP3</span></td><td>Guadagno stimato + distanza %</td><td>R:R calcolato</td></tr>
+      <tr><td><span class="param-name" style="color:#ffc940">L1–L4</span></td><td>Peso % del livello ladder (es. 30%)</td><td>Size USDT del livello (es. $1,500)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-subtitle">Context menu (tasto destro)</div>
+  <p class="prose">Un click destro su un qualsiasi punto della chart apre un menu contestuale con le voci per impostare Entry, SL, TP1/2/3 al prezzo del punto cliccato. In modalità Market, la voce "Set Entry" è nascosta poiché l'entry segue sempre il prezzo live. In modalità Ladder, le voci TP vengono sostituite da "Set L1/L2/L3/L4".</p>
+
+  <div class="callout success">
+    <span class="callout-icon">✓</span>
+    <div>Le linee Entry, SL e TP <strong>non vengono resettate</strong> al cambio timeframe — i prezzi impostati rimangono invariati. Se dopo un cambio di TF le linee sembrano scomparse, è solo perché il range visibile dell'asse Y è cambiato. Usa <kbd>⊙ live</kbd> per tornare al prezzo corrente e le linee torneranno visibili.</div>
+  </div>
+</section>
+
+<!-- PAIR MODAL -->
+<section class="section" id="pair-modal">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2 class="section-title">Selezione Pair</h2>
+  </div>
+  <p class="prose">Il modal di selezione pair si apre cliccando sul selettore pair nella topbar. All'avvio dell'applicazione, RiskFlow scarica automaticamente la lista di tutti i contratti USDT-M disponibili e li organizza in categorie. La selezione di un nuovo pair ricarica immediatamente la chart con le candele del simbolo scelto.</p>
+
+  <div class="two-col">
+    <div class="card purple">
+      <span class="card-icon">🔍</span>
+      <div class="card-title">Ricerca live</div>
+      <div class="card-desc">Il campo di ricerca filtra i pair in tempo reale durante la digitazione. La ricerca è case-insensitive. Esempi: "BTC" mostra tutti i pair BTC, "PEPE" mostra tutti i PEPE, "sol" mostra SOLUSDT.</div>
+    </div>
+    <div class="card yellow">
+      <span class="card-icon">🏷️</span>
+      <div class="card-title">Categorie</div>
+      <div class="card-desc">I pair sono organizzati in categorie: <strong>Major</strong> (BTC, ETH, SOL...), <strong>Meme</strong> (PEPE, WIF, BONK...), <strong>DeFi</strong> (AAVE, UNI...), <strong>L1/L2</strong>, <strong>AI</strong> (FET, RENDER...), <strong>Gaming</strong>, <strong>Exchange</strong>, <strong>Altcoin</strong>. I tab categoria filtrano immediatamente la lista.</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Se il caricamento della lista pair non è disponibile (es. connessione temporaneamente assente), viene usata una lista di fallback con i pair principali. Al cambio pair, tutti i livelli impostati (Entry, SL, TP) vengono resettati per evitare inconsistenze tra i prezzi del vecchio e del nuovo simbolo.</div>
+  </div>
+</section>
+
+<!-- CALCOLO RISCHIO -->
+<section class="section" id="risk">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h2 class="section-title">Calcolo Rischio & Size</h2>
+  </div>
+  <p class="prose">Il cuore di RiskFlow è il motore di calcolo della position size. La logica è semplice: partendo dal rischio definito (in % o in USDT fisso), dalla distanza percentuale dello stop loss dall'entry e dal prezzo di entry, viene calcolata la size in USDT e poi convertita in numero di contratti. Il calcolo si aggiorna in tempo reale ad ogni variazione di un qualsiasi parametro di input — digitazione nel pannello, drag di una linea sulla chart, cambio modalità.</p>
+
+  <div class="section-subtitle">Parametri di input</div>
+  <table class="param-table">
+    <thead><tr><th>Parametro</th><th>Tipo</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Balance</span></td><td><span class="param-type number">USDT</span></td><td>Equity totale del conto. Sincronizzato automaticamente dall'exchange, oppure inseribile manualmente per calcoli simulati.</td></tr>
+      <tr><td><span class="param-name">Risk %</span></td><td><span class="param-type number">%</span></td><td>Percentuale del balance da rischiare. Si scala automaticamente al variare del balance.</td></tr>
+      <tr><td><span class="param-name">Risk $</span></td><td><span class="param-type number">USDT</span></td><td>Importo fisso in USDT da rischiare, indipendente dal balance.</td></tr>
+      <tr><td><span class="param-name">Leverage</span></td><td><span class="param-type number">1x–125x</span></td><td>Leva applicata alla posizione. Preset disponibili: 2x, 5x, 10x, 20x, 25x, 50x. Influenza il margine richiesto, NON la size calcolata né il rischio reale.</td></tr>
+      <tr><td><span class="param-name">Margin Mode</span></td><td><span class="param-type select">Crossed / Isolated</span></td><td>Crossed: l'intero balance serve da garanzia. Isolated: solo il margine allocato per questa posizione.</td></tr>
+      <tr><td><span class="param-name">Entry</span></td><td><span class="param-type number">USDT</span></td><td>In modalità Market: prezzo live aggiornato in tempo reale. In modalità Limit: valore inserito manualmente o impostato dalla chart.</td></tr>
+      <tr><td><span class="param-name">Stop Loss</span></td><td><span class="param-type number">USDT</span></td><td>Obbligatorio per il calcolo. Imposta la distanza di rischio. Deve essere sotto l'entry per un Long, sopra per uno Short.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-subtitle">Formula di calcolo</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">rischio USDT</span><span class="formula-op"> = </span><span class="formula-val">balance × (risk% / 100)</span><span class="formula-comment">// oppure importo fisso</span></div>
+    <div class="formula-line"><span class="formula-var">distanza SL%</span><span class="formula-op"> = </span><span class="formula-val">|entry − sl| / entry × 100</span><span class="formula-comment">// distanza percentuale</span></div>
+    <div class="formula-line"><span class="formula-var">size USDT</span><span class="formula-op"> = </span><span class="formula-val">rischio / (distanza SL% / 100)</span><span class="formula-comment">// posizione nominale</span></div>
+    <div class="formula-line"><span class="formula-var">contratti</span><span class="formula-op"> = </span><span class="formula-val">floor(size / entryPrice / step) × step</span><span class="formula-comment">// arrotondato allo step size dell'exchange</span></div>
+    <div class="formula-line"><span class="formula-var">margine</span><span class="formula-op"> = </span><span class="formula-val">size USDT / leverage</span><span class="formula-comment">// margine richiesto</span></div>
+  </div>
+
+  <div class="section-subtitle">Esempio pratico — BTCUSDT Long</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--bright)">Scenario: BTC Long a mercato — Balance $10,000 · Risk 1%</div>
+    <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Input</div>
+        <table class="param-table" style="margin:0">
+          <tbody>
+            <tr><td><span class="param-name">Balance</span></td><td style="color:var(--bright)">$10,000 USDT</td></tr>
+            <tr><td><span class="param-name">Risk %</span></td><td style="color:var(--bright)">1%</td></tr>
+            <tr><td><span class="param-name">Entry (market)</span></td><td style="color:var(--bright)">$84,500</td></tr>
+            <tr><td><span class="param-name">Stop Loss</span></td><td style="color:var(--red)">$83,100</td></tr>
+            <tr><td><span class="param-name">Leverage</span></td><td style="color:var(--bright)">10x</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Output calcolato</div>
+        <table class="param-table" style="margin:0">
+          <tbody>
+            <tr><td><span class="param-name">Risk $</span></td><td style="color:var(--red)">$100 USDT</td></tr>
+            <tr><td><span class="param-name">Distanza SL</span></td><td style="color:var(--bright)">1.657%</td></tr>
+            <tr><td><span class="param-name">Size USDT</span></td><td style="color:var(--green);font-weight:700">$6,036 USDT</td></tr>
+            <tr><td><span class="param-name">Contratti</span></td><td style="color:var(--bright)">0.071 BTC</td></tr>
+            <tr><td><span class="param-name">Margine req.</span></td><td style="color:var(--yellow)">$603 USDT</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">La leva non cambia il rischio</div>
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div><strong>Concetto chiave:</strong> aumentare la leva NON aumenta il rischio reale definito. Con Risk 1% e leva 10x rischi comunque $100, ma il margine bloccato è $603 invece di $6,036. La leva amplifica il rendimento sul margine (ROE), ma il P&L assoluto dipende solo dalla size e dalla distanza tra prezzo e entry. Aumentare la leva aumenta però il rischio di <strong>liquidazione</strong>, poiché riduce il buffer tra il prezzo corrente e il prezzo di liquidazione.</div>
+  </div>
+</section>
+
+<!-- ORDER TYPES -->
+<section class="section" id="order-types">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h2 class="section-title">Tipi di Ordine</h2>
+  </div>
+  <p class="prose">RiskFlow supporta tre modalità di inserimento ordini, selezionabili dai tab <strong>Market / Limit / Ladder</strong> nella sezione Trade del pannello. Cambiando modalità vengono aggiornati la visualizzazione dei campi, il comportamento della linea Entry sulla chart e il ricalcolo automatico della size.</p>
+
+  <div class="card-grid">
+    <div class="card green">
+      <span class="card-icon">⚡</span>
+      <div class="card-title">Market</div>
+      <div class="card-desc">
+        L'ordine viene eseguito immediatamente al prezzo di mercato corrente. La linea Entry sulla chart segue il prezzo live aggiornato in tempo reale e non è modificabile manualmente. Il campo Entry nel pannello mostra il prezzo live con sfondo giallo ed è bloccato in sola lettura.<br><br>
+        SL e TP vengono allegati direttamente all'ordine come ordini preset che diventano attivi al fill dell'ordine entry.
+      </div>
+    </div>
+    <div class="card yellow">
+      <span class="card-icon">📌</span>
+      <div class="card-title">Limit</div>
+      <div class="card-desc">
+        L'ordine viene inserito nel book a un prezzo specifico e attende l'esecuzione quando il mercato raggiunge quel livello. Richiede la linea Entry impostata manualmente tramite il campo input nel pannello oppure tramite drag sulla chart.<br><br>
+        Il prezzo viene arrotondato automaticamente al tick size corretto del simbolo.
+      </div>
+    </div>
+    <div class="card purple">
+      <span class="card-icon">🪜</span>
+      <div class="card-title">Ladder <span class="badge new">DCA</span></div>
+      <div class="card-desc">
+        DCA automatico su 2–4 livelli di prezzo. Ogni livello è un ordine Limit separato con la propria size calcolata in base al peso percentuale assegnato. SL e TP sono condivisi su tutti i livelli. L'entry media ponderata viene calcolata e mostrata automaticamente.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Flusso di esecuzione — Market e Limit</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Recupero info contratto</div><div class="step-desc">Prima dell'invio, RiskFlow recupera automaticamente le informazioni del contratto: decimali del prezzo, step size dei contratti e size minima dell'exchange. Questi dati vengono memorizzati localmente per evitare chiamate ripetute sullo stesso simbolo.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Impostazione margin mode e leva</div><div class="step-desc">Prima dell'ordine principale, RiskFlow configura automaticamente il margin mode (crossed/isolated) e la leva selezionata nel pannello. Se l'exchange restituisce un errore su questi step (ad esempio leva già impostata), l'operazione continua comunque.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Invio ordine</div><div class="step-desc">Viene inviato l'ordine all'exchange con tutti i parametri: simbolo, size (arrotondata allo step size corretto), direzione, tipo, prezzo (solo Limit), SL e TP preset.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Aggiornamento account</div><div class="step-desc">Dopo circa 2 secondi, balance e posizioni vengono aggiornati automaticamente. I campi del pannello vengono resettati pronti per un nuovo trade.</div></div></div>
+  </div>
+</section>
+
+<!-- SL / TP -->
+<section class="section" id="sl-tp">
+  <div class="section-header">
+    <span class="section-num">11</span>
+    <h2 class="section-title">Stop Loss & Take Profit</h2>
+  </div>
+  <p class="prose">SL e TP possono essere impostati in tre modi: digitando direttamente il prezzo nel campo numerico del pannello, cliccando il pulsante <kbd>⊕</kbd> accanto al campo e poi cliccando sulla chart al prezzo desiderato, oppure con un click destro sulla chart e selezionando la voce dal menu contestuale. RiskFlow valida sempre che il SL sia nella direzione corretta rispetto alla direzione del trade.</p>
+
+  <div class="two-col">
+    <div class="card red">
+      <span class="card-icon">🛑</span>
+      <div class="card-title">Stop Loss</div>
+      <div class="card-desc">
+        Obbligatorio per il calcolo della size. Controlla la distanza di rischio e determina l'importo che verrà perso se l'operazione va contro. Viene allegato direttamente all'ordine come SL preset che diventa attivo al fill dell'ordine entry.<br><br>
+        Per le posizioni già aperte, SL e TP possono essere modificati live tramite la sezione "Mod SL/TP" nel pannello posizioni, con drag sulla chart overlay, oppure cliccando il pulsante "Set SL".
+      </div>
+    </div>
+    <div class="card green">
+      <span class="card-icon">🎯</span>
+      <div class="card-title">Take Profit — fino a 3 livelli</div>
+      <div class="card-desc">
+        Fino a 3 livelli TP abilitabili indipendentemente con checkbox. Ogni TP ha un campo <strong>% position</strong> che indica la percentuale della size da chiudere a quel livello.<br><br>
+        Il guadagno stimato per ogni TP e il relativo R:R vengono calcolati e mostrati in tempo reale mentre si draggano le linee sulla chart.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Calcolo R:R e guadagno stimato</div>
+  <p class="prose">Per ogni TP attivo vengono calcolati in tempo reale: la distanza percentuale dall'entry, il guadagno stimato in USDT (considerando il rischio definito e la % position del TP), e il rapporto Risk:Reward.</p>
+
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">distanza TP</span><span class="formula-op"> = </span><span class="formula-val">|tpPrice − entry| / entry</span></div>
+    <div class="formula-line"><span class="formula-var">R:R</span><span class="formula-op"> = </span><span class="formula-val">distanza TP / distanza SL</span></div>
+    <div class="formula-line"><span class="formula-var">guadagno stimato</span><span class="formula-op"> = </span><span class="formula-val">rischio × R:R × (% position / 100)</span></div>
+  </div>
+
+  <div class="section-subtitle">Esempio R:R — SOLUSDT Long</div>
+  <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px">
+    <div style="background:var(--bg2);padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--bright)">SOLUSDT Long · Entry $142 · SL $138 · Risk $100</div>
+    <div style="padding:20px">
+      <table class="param-table" style="margin:0 0 16px">
+        <thead><tr><th>Livello</th><th>Prezzo</th><th>Dist. entry</th><th>R:R</th><th>% Position</th><th>Gain (risk $100)</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name" style="color:var(--red)">SL</span></td><td>$138.00</td><td style="color:var(--red)">–2.82%</td><td>—</td><td>100%</td><td style="color:var(--red)">–$100</td></tr>
+          <tr><td><span class="param-name" style="color:var(--green)">TP1</span></td><td>$150.00</td><td style="color:var(--green)">+5.63%</td><td style="color:var(--yellow);font-weight:700">1:2.0</td><td>25%</td><td style="color:var(--green)">+$50</td></tr>
+          <tr><td><span class="param-name" style="color:#00ffcc">TP2</span></td><td>$158.00</td><td style="color:var(--green)">+11.27%</td><td style="color:var(--yellow);font-weight:700">1:4.0</td><td>50%</td><td style="color:var(--green)">+$200</td></tr>
+          <tr><td><span class="param-name" style="color:var(--cyan)">TP3</span></td><td>$168.00</td><td style="color:var(--green)">+18.31%</td><td style="color:var(--yellow);font-weight:700">1:6.5</td><td>25%</td><td style="color:var(--green)">+$162</td></tr>
+        </tbody>
+      </table>
+      <div class="callout success" style="margin:0"><span class="callout-icon">✓</span><div>Con R:R 1:2.0 al TP1 basta avere ragione meno del <strong>34%</strong> delle volte per essere profittevole. Con 1:4 basta il <strong>20%</strong>. RiskFlow mostra questi valori in tempo reale mentre sposti le linee — fondamentale per valutare la qualità del setup prima di piazzare l'ordine.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LADDER -->
+<section class="section" id="ladder">
+  <div class="section-header">
+    <span class="section-num">12</span>
+    <h2 class="section-title">Ladder Orders — DCA automatico</h2>
+  </div>
+  <p class="prose">La modalità Ladder permette di costruire un piano di DCA (Dollar Cost Averaging) automatico su 2, 3 o 4 livelli di prezzo. Ogni livello è un ordine Limit indipendente con la propria size calcolata in base al peso percentuale assegnato. Il sistema calcola automaticamente il prezzo medio di ingresso ponderato e distribuisce il rischio totale definito tra tutti i livelli attivi.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Pannello Ladder Orders con 4 livelli</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 400 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <rect width="400" height="310" fill="#0d0d11"/>
+        <!-- header -->
+        <text x="12" y="20" font-family="monospace" font-size="8" fill="#686880" letter-spacing="1.5">LADDER ORDERS</text>
+        <!-- N selector -->
+        <text x="12" y="40" font-family="monospace" font-size="9" fill="#686880">Livelli: </text>
+        <rect x="64" y="28" width="24" height="16" rx="3" fill="#121218" stroke="#1a1a22"/>
+        <text x="76" y="40" text-anchor="middle" font-family="monospace" font-size="9" fill="#686880">2</text>
+        <rect x="92" y="28" width="24" height="16" rx="3" fill="#121218" stroke="#1a1a22"/>
+        <text x="104" y="40" text-anchor="middle" font-family="monospace" font-size="9" fill="#686880">3</text>
+        <rect x="120" y="28" width="24" height="16" rx="3" fill="#a855f720" stroke="#a855f7"/>
+        <text x="132" y="40" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">4</text>
+
+        <!-- column headers -->
+        <!-- cols: LVL@16, PREZZO@48-140, PESO@148-202, SIZE@210-290, SL%@298-388 -->
+        <text x="16" y="60" font-family="monospace" font-size="8" fill="#42425a">#</text>
+        <text x="52" y="60" font-family="monospace" font-size="8" fill="#42425a">PREZZO $</text>
+        <text x="152" y="60" font-family="monospace" font-size="8" fill="#42425a">PESO</text>
+        <text x="214" y="60" font-family="monospace" font-size="8" fill="#42425a">SIZE USDT</text>
+        <text x="306" y="60" font-family="monospace" font-size="8" fill="#42425a">SL dist.</text>
+
+        <!-- row 1 -->
+        <rect x="8" y="66" width="384" height="40" rx="4" fill="#121218" stroke="#ffc94030"/>
+        <circle cx="22" cy="86" r="7" fill="#ffc94015" stroke="#ffc940" stroke-width="1"/>
+        <text x="22" y="90" text-anchor="middle" font-family="monospace" font-size="8" fill="#ffc940">1</text>
+        <rect x="42" y="74" width="96" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="90" y="89" text-anchor="middle" font-family="monospace" font-size="10" fill="#ffc940">2,200</text>
+        <rect x="146" y="74" width="54" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="173" y="89" text-anchor="middle" font-family="monospace" font-size="10" fill="#dddde8">15%</text>
+        <text x="214" y="89" font-family="monospace" font-size="10" fill="#00d17a">$750</text>
+        <text x="306" y="89" font-family="monospace" font-size="9" fill="#ff2d4a">18.2%</text>
+
+        <!-- row 2 -->
+        <rect x="8" y="110" width="384" height="40" rx="4" fill="#121218" stroke="#f59e0b30"/>
+        <circle cx="22" cy="130" r="7" fill="#f59e0b15" stroke="#f59e0b" stroke-width="1"/>
+        <text x="22" y="134" text-anchor="middle" font-family="monospace" font-size="8" fill="#f59e0b">2</text>
+        <rect x="42" y="118" width="96" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="90" y="133" text-anchor="middle" font-family="monospace" font-size="10" fill="#f59e0b">2,100</text>
+        <rect x="146" y="118" width="54" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="173" y="133" text-anchor="middle" font-family="monospace" font-size="10" fill="#dddde8">25%</text>
+        <text x="214" y="133" font-family="monospace" font-size="10" fill="#00d17a">$1,153</text>
+        <text x="306" y="133" font-family="monospace" font-size="9" fill="#ff2d4a">14.3%</text>
+
+        <!-- row 3 -->
+        <rect x="8" y="154" width="384" height="40" rx="4" fill="#121218" stroke="#fb923c30"/>
+        <circle cx="22" cy="174" r="7" fill="#fb923c15" stroke="#fb923c" stroke-width="1"/>
+        <text x="22" y="178" text-anchor="middle" font-family="monospace" font-size="8" fill="#fb923c">3</text>
+        <rect x="42" y="162" width="96" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="90" y="177" text-anchor="middle" font-family="monospace" font-size="10" fill="#fb923c">2,000</text>
+        <rect x="146" y="162" width="54" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="173" y="177" text-anchor="middle" font-family="monospace" font-size="10" fill="#dddde8">30%</text>
+        <text x="214" y="177" font-family="monospace" font-size="10" fill="#00d17a">$1,500</text>
+        <text x="306" y="177" font-family="monospace" font-size="9" fill="#ff2d4a">10.0%</text>
+
+        <!-- row 4 -->
+        <rect x="8" y="198" width="384" height="40" rx="4" fill="#121218" stroke="#ef444430"/>
+        <circle cx="22" cy="218" r="7" fill="#ef444415" stroke="#ef4444" stroke-width="1"/>
+        <text x="22" y="222" text-anchor="middle" font-family="monospace" font-size="8" fill="#ef4444">4</text>
+        <rect x="42" y="206" width="96" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="90" y="221" text-anchor="middle" font-family="monospace" font-size="10" fill="#ef4444">1,920</text>
+        <rect x="146" y="206" width="54" height="22" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="173" y="221" text-anchor="middle" font-family="monospace" font-size="10" fill="#dddde8">30%</text>
+        <text x="214" y="221" font-family="monospace" font-size="10" fill="#00d17a">$1,667</text>
+        <text x="306" y="221" font-family="monospace" font-size="9" fill="#ff2d4a">6.3%</text>
+
+        <!-- totals row -->
+        <line x1="8" y1="246" x2="392" y2="246" stroke="#1a1a26" stroke-width="1"/>
+        <text x="12" y="264" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#a855f7">Totale</text>
+        <text x="155" y="264" font-family="monospace" font-size="10" fill="#dddde8">100%</text>
+        <text x="214" y="264" font-family="'Syne',sans-serif" font-size="10" font-weight="700" fill="#00d17a">$5,070 USDT</text>
+        <text x="12" y="284" font-family="monospace" font-size="8.5" fill="#686880">Entry medio ponderato:</text>
+        <text x="160" y="284" font-family="'Syne',sans-serif" font-size="9" font-weight="600" fill="#dddde8">~$2,020</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Distribuzione pesi — automatica e manuale</div>
+  <div class="two-col">
+    <div class="card green">
+      <span class="card-icon">🤖</span>
+      <div class="card-title">Distribuzione automatica</div>
+      <div class="card-desc">
+        I pesi vengono distribuiti automaticamente in modo crescente verso lo SL: il livello L1 (più lontano dallo SL) ha peso minore, i livelli successivi più vicini allo SL hanno pesi progressivamente maggiori.<br><br>
+        <strong style="color:var(--text)">Logica:</strong> più un livello è vicino allo SL, più è probabile che venga riempito, quindi merita peso maggiore per abbassare il prezzo medio di ingresso.
+      </div>
+    </div>
+    <div class="card yellow">
+      <span class="card-icon">✏️</span>
+      <div class="card-title">Pesi manuali</div>
+      <div class="card-desc">
+        Puoi sovrascrivere il peso di ogni livello digitando direttamente nel campo % accanto al prezzo. Il sistema verifica che la somma di tutti i pesi sia esattamente 100% prima di abilitare il pulsante di invio. Se la somma non è 100%, l'invio è bloccato con un avviso visibile.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Calcolo size per livello ladder</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">rischio livello</span><span class="formula-op"> = </span><span class="formula-val">rischio totale × (peso% / 100)</span></div>
+    <div class="formula-line"><span class="formula-var">distanza SL livello</span><span class="formula-op"> = </span><span class="formula-val">|prezzoLivello − sl| / prezzoLivello × 100</span></div>
+    <div class="formula-line"><span class="formula-var">size livello</span><span class="formula-op"> = </span><span class="formula-val">rischio livello / (distanza SL% / 100)</span></div>
+    <div class="formula-line"><span class="formula-var">entry medio</span><span class="formula-op"> = </span><span class="formula-val">Σ(prezzo × peso) / Σ(pesi)</span><span class="formula-comment">// media ponderata</span></div>
+  </div>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div>La somma dei pesi deve essere esattamente <strong>100%</strong> prima dell'invio. Se un livello ha size inferiore al minimo richiesto dall'exchange, quell'ordine viene saltato con un avviso nella notifica — gli altri livelli vengono comunque inviati.</div>
+  </div>
+</section>
+
+<!-- CONFIRM MODAL -->
+<section class="section" id="confirm-modal">
+  <div class="section-header">
+    <span class="section-num">13</span>
+    <h2 class="section-title">Modal di Conferma Ordine</h2>
+  </div>
+  <p class="prose">Prima di inviare qualsiasi ordine, RiskFlow mostra un riepilogo completo del trade con tutti i dettagli. Cliccando <strong>OPEN LONG</strong> (o OPEN SHORT) nel pannello viene aperto il modal di conferma. L'esecuzione reale avviene solo al click del pulsante finale nel modal, evitando invii accidentali.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Modal di conferma ordine — Market Long</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#07070a">
+        <rect width="500" height="320" fill="#07070a"/>
+        <rect x="130" y="20" width="240" height="280" rx="10" fill="#0e0e14" stroke="#1e1e2e" stroke-width="1.5"/>
+        <text x="250" y="52" text-anchor="middle" font-family="'Syne',sans-serif" font-size="14" font-weight="700" fill="#e8e8f8">Confirm Order</text>
+        <line x1="142" y1="62" x2="358" y2="62" stroke="#1e1e2e" stroke-width="1"/>
+        <text x="145" y="80" font-family="monospace" font-size="10" fill="#686880">Symbol</text>
+        <text x="355" y="80" text-anchor="end" font-family="monospace" font-size="10" fill="#a855f7">BTCUSDT</text>
+        <text x="145" y="98" font-family="monospace" font-size="10" fill="#686880">Direction</text>
+        <text x="355" y="98" text-anchor="end" font-family="monospace" font-size="10" fill="#00d17a">LONG</text>
+        <text x="145" y="116" font-family="monospace" font-size="10" fill="#686880">Order type</text>
+        <text x="355" y="116" text-anchor="end" font-family="monospace" font-size="10" fill="#dddde8">MARKET</text>
+        <text x="145" y="134" font-family="monospace" font-size="10" fill="#686880">Entry</text>
+        <text x="355" y="134" text-anchor="end" font-family="monospace" font-size="10" fill="#ffc940">$84,320 (live)</text>
+        <text x="145" y="152" font-family="monospace" font-size="10" fill="#686880">Size</text>
+        <text x="355" y="152" text-anchor="end" font-family="'Syne',sans-serif" font-size="11" font-weight="700" fill="#a855f7">$6,024 USDT</text>
+        <text x="145" y="170" font-family="monospace" font-size="10" fill="#686880">Contracts</text>
+        <text x="355" y="170" text-anchor="end" font-family="monospace" font-size="10" fill="#dddde8">0.071 BTC</text>
+        <text x="145" y="188" font-family="monospace" font-size="10" fill="#686880">Leverage</text>
+        <text x="355" y="188" text-anchor="end" font-family="monospace" font-size="10" fill="#dddde8">10x</text>
+        <text x="145" y="206" font-family="monospace" font-size="10" fill="#686880">Margin</text>
+        <text x="355" y="206" text-anchor="end" font-family="monospace" font-size="10" fill="#ffc940">$603 USDT</text>
+        <line x1="142" y1="216" x2="358" y2="216" stroke="#1e1e2e" stroke-width="1"/>
+        <text x="145" y="234" font-family="monospace" font-size="10" fill="#686880">Stop Loss</text>
+        <text x="355" y="234" text-anchor="end" font-family="monospace" font-size="10" fill="#ff2d4a">$83,100</text>
+        <text x="145" y="252" font-family="monospace" font-size="10" fill="#686880">Risk $</text>
+        <text x="355" y="252" text-anchor="end" font-family="monospace" font-size="10" fill="#ff2d4a">$100 (1%)</text>
+        <text x="145" y="270" font-family="monospace" font-size="10" fill="#686880">TP1</text>
+        <text x="355" y="270" text-anchor="end" font-family="monospace" font-size="10" fill="#00d17a">$87,000</text>
+        <rect x="142" y="282" width="98" height="26" rx="5" fill="#13131b" stroke="#1a1a26"/>
+        <text x="191" y="299" text-anchor="middle" font-family="monospace" font-size="10" fill="#686880">Cancel</text>
+        <rect x="248" y="282" width="98" height="26" rx="5" fill="#00d17a"/>
+        <text x="297" y="299" text-anchor="middle" font-family="'Syne',sans-serif" font-size="11" font-weight="700" fill="#000">Open Trade</text>
+      </svg>
+    </div>
+  </div>
+
+  <p class="prose">Il modal mostra in modo chiaro tutti i dettagli del trade: simbolo, direzione (Long/Short), tipo di ordine, entry, size in USDT e in contratti, leva, margine richiesto, stop loss, rischio in USDT e percentuale, e i livelli TP attivi. Solo cliccando <strong>Open Trade</strong> l'ordine viene effettivamente inviato all'exchange.</p>
+</section>
+
+<!-- POSIZIONI -->
+<section class="section" id="positions">
+  <div class="section-header">
+    <span class="section-num">14</span>
+    <h2 class="section-title">Dashboard Posizioni</h2>
+  </div>
+  <p class="prose">Il pannello posizioni si trova nella sezione inferiore del pannello laterale e mostra tutte le posizioni aperte sull'exchange attivo. I dati vengono sincronizzati automaticamente e aggiornati dopo ogni operazione. Le posizioni con size zero vengono filtrate e non vengono mostrate.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Pannello posizioni — vista compressa e espansa</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 340 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <rect width="340" height="360" fill="#0d0d11"/>
+        <text x="12" y="20" font-family="monospace" font-size="8" fill="#686880" letter-spacing="1.5">POSIZIONI</text>
+        <rect x="84" y="9" width="18" height="14" rx="3" fill="#a855f720" stroke="#a855f740"/>
+        <text x="93" y="20" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">2</text>
+        <rect x="280" y="8" width="50" height="16" rx="3" fill="#ff2d4a15" stroke="#ff2d4a40"/>
+        <text x="305" y="19" text-anchor="middle" font-family="monospace" font-size="8" fill="#ff2d4a">Close all</text>
+        <!-- pos 1 — BTC LONG — collapsed -->
+        <rect x="8" y="28" width="324" height="42" rx="5" fill="#121218" stroke="#1a1a22" stroke-width="1"/>
+        <rect x="8" y="28" width="2" height="42" rx="1" fill="#00d17a"/>
+        <text x="20" y="44" font-family="monospace" font-size="10" font-weight="500" fill="#dddde8">BTCUSDT</text>
+        <text x="68" y="44" font-family="monospace" font-size="8" fill="#686880">10x</text>
+        <text x="20" y="60" font-family="monospace" font-size="9" fill="#00d17a">LONG</text>
+        <text x="55" y="60" font-family="monospace" font-size="9" fill="#686880">· Entry $84,320</text>
+        <text x="238" y="44" font-family="monospace" font-size="11" font-weight="500" fill="#00d17a">+$124.50</text>
+        <text x="265" y="59" text-anchor="middle" font-family="monospace" font-size="8" fill="#00d17a">(+2.14%)</text>
+        <text x="200" y="59" font-family="monospace" font-size="8" fill="#686880">0.071 cont · $5,987</text>
+        <!-- pos 2 — ETH SHORT — expanded -->
+        <rect x="8" y="76" width="324" height="270" rx="5" fill="#121218" stroke="#1a1a22" stroke-width="1"/>
+        <rect x="8" y="76" width="2" height="270" rx="1" fill="#ff2d4a"/>
+        <text x="20" y="92" font-family="monospace" font-size="10" font-weight="500" fill="#dddde8">ETHUSDT</text>
+        <text x="72" y="92" font-family="monospace" font-size="8" fill="#686880">5x</text>
+        <text x="20" y="108" font-family="monospace" font-size="9" fill="#ff2d4a">SHORT</text>
+        <text x="57" y="108" font-family="monospace" font-size="9" fill="#686880">· Entry $2,840</text>
+        <text x="238" y="92" font-family="monospace" font-size="11" font-weight="500" fill="#ff2d4a">-$45.20</text>
+        <text x="265" y="107" text-anchor="middle" font-family="monospace" font-size="8" fill="#ff2d4a">(-0.89%)</text>
+        <line x1="20" y1="118" x2="322" y2="118" stroke="#1a1a26" stroke-width="1"/>
+        <rect x="16" y="124" width="96" height="32" rx="3" fill="#18181f"/>
+        <text x="20" y="135" font-family="monospace" font-size="7" fill="#686880" letter-spacing=".5">MARK</text>
+        <text x="20" y="148" font-family="monospace" font-size="9" font-weight="500" fill="#dddde8">$2,864.50</text>
+        <rect x="120" y="124" width="96" height="32" rx="3" fill="#18181f"/>
+        <text x="124" y="135" font-family="monospace" font-size="7" fill="#686880" letter-spacing=".5">MARGIN</text>
+        <text x="124" y="148" font-family="monospace" font-size="9" font-weight="500" fill="#dddde8">$568.90</text>
+        <rect x="224" y="124" width="96" height="32" rx="3" fill="#18181f"/>
+        <text x="228" y="135" font-family="monospace" font-size="7" fill="#686880" letter-spacing=".5">LIQ.</text>
+        <text x="228" y="148" font-family="monospace" font-size="9" font-weight="500" fill="#ff2d4a">$3,142.00</text>
+        <rect x="16" y="163" width="148" height="38" rx="4" fill="#ff2d4a10" stroke="#ff2d4a40"/>
+        <text x="20" y="175" font-family="monospace" font-size="7" fill="#686880" letter-spacing=".4">STOP LOSS</text>
+        <text x="20" y="191" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#ff2d4a">$2,920.00</text>
+        <rect x="172" y="163" width="148" height="38" rx="4" fill="#00d17a10" stroke="#00d17a40"/>
+        <text x="176" y="175" font-family="monospace" font-size="7" fill="#686880" letter-spacing=".4">TAKE PROFIT</text>
+        <text x="176" y="191" font-family="'Syne',sans-serif" font-size="13" font-weight="700" fill="#00d17a">$2,700.00</text>
+        <text x="20" y="215" font-family="monospace" font-size="8" fill="#686880">Mod SL</text>
+        <rect x="60" y="205" width="160" height="20" rx="3" fill="#0e0e14" stroke="#1a1a22"/>
+        <text x="70" y="219" font-family="monospace" font-size="8" fill="#42425a">es. 2950.00</text>
+        <text x="225" y="219" font-family="monospace" font-size="8" fill="#42425a">$</text>
+        <rect x="240" y="205" width="40" height="20" rx="3" fill="#ff2d4a20" stroke="#ff2d4a50"/>
+        <text x="260" y="219" text-anchor="middle" font-family="monospace" font-size="8" fill="#ff2d4a">Set SL</text>
+        <rect x="284" y="205" width="24" height="20" rx="3" fill="#ffc94020" stroke="#ffc94050"/>
+        <text x="296" y="219" text-anchor="middle" font-family="monospace" font-size="8" fill="#ffc940">BE</text>
+        <text x="20" y="242" font-family="monospace" font-size="8" fill="#686880">Close</text>
+        <line x1="50" y1="240" x2="272" y2="240" stroke="#1a1a22" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="124" cy="240" r="6" fill="#a855f7"/>
+        <text x="282" y="244" font-family="monospace" font-size="9" fill="#a855f7">25%</text>
+        <rect x="16" y="250" width="68" height="16" rx="3" fill="#18181f" stroke="#1a1a22"/>
+        <text x="50" y="261" text-anchor="middle" font-family="monospace" font-size="8" fill="#686880">25%</text>
+        <rect x="88" y="250" width="68" height="16" rx="3" fill="#18181f" stroke="#1a1a22"/>
+        <text x="122" y="261" text-anchor="middle" font-family="monospace" font-size="8" fill="#686880">50%</text>
+        <rect x="160" y="250" width="68" height="16" rx="3" fill="#18181f" stroke="#1a1a22"/>
+        <text x="194" y="261" text-anchor="middle" font-family="monospace" font-size="8" fill="#686880">75%</text>
+        <rect x="232" y="250" width="68" height="16" rx="3" fill="#a855f720" stroke="#a855f7"/>
+        <text x="266" y="261" text-anchor="middle" font-family="monospace" font-size="8" fill="#a855f7">100%</text>
+        <rect x="16" y="273" width="148" height="22" rx="4" fill="#ffc94015" stroke="#ffc94040"/>
+        <text x="90" y="287" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffc940">⚡ Parziale</text>
+        <rect x="172" y="273" width="148" height="22" rx="4" fill="#ff2d4a15" stroke="#ff2d4a40"/>
+        <text x="246" y="287" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff2d4a">✕ Chiudi tutto</text>
+        <rect x="16" y="300" width="304" height="22" rx="4" fill="#a855f715" stroke="#a855f740"/>
+        <text x="168" y="314" text-anchor="middle" font-family="monospace" font-size="9" fill="#a855f7">📸 Money Shot</text>
+      </svg>
+    </div>
+  </div>
+
+  <p class="prose">Ogni posizione è cliccabile per espanderla e visualizzare tutti i dettagli. Nella vista espansa sono disponibili: dati completi di mark price, margine, prezzo di liquidazione, SL e TP attivi, il campo per modificare SL live, il pulsante Breakeven (BE), lo slider per la chiusura parziale e il pulsante Money Shot.</p>
+
+  <table class="param-table">
+    <thead><tr><th>Campo</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="param-name">Symbol + Leva</span></td><td>Simbolo della posizione e leva applicata</td></tr>
+      <tr><td><span class="param-name">Side (bordo colore)</span></td><td>Bordo sinistro verde = LONG, rosso = SHORT</td></tr>
+      <tr><td><span class="param-name">Entry $</span></td><td>Prezzo medio di ingresso (media ponderata per posizioni DCA)</td></tr>
+      <tr><td><span class="param-name">PnL live</span></td><td>Unrealized P&L aggiornato ogni mezzo secondo in tempo reale</td></tr>
+      <tr><td><span class="param-name">ROE %</span></td><td>Rendimento sul margine allocato (PnL / margine × 100)</td></tr>
+      <tr><td><span class="param-name">Mark Price</span></td><td>Prezzo mark corrente dalla cache prezzi live</td></tr>
+      <tr><td><span class="param-name">Margin</span></td><td>Margine allocato per la posizione</td></tr>
+      <tr><td><span class="param-name">Liq. Price</span></td><td>Prezzo di liquidazione stimato dall'exchange, mostrato in rosso</td></tr>
+      <tr><td><span class="param-name">SL / TP</span></td><td>Stop loss e take profit attivi sulla posizione</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- MODIFY SL/TP -->
+<section class="section" id="modify-sl-tp">
+  <div class="section-header">
+    <span class="section-num">15</span>
+    <h2 class="section-title">Modifica SL/TP su posizioni aperte</h2>
+  </div>
+  <p class="prose">Per ogni posizione aperta espansa, è possibile modificare SL e TP senza chiudere la posizione. Il sistema permette di aggiornare i prezzi sia tramite i campi input nel pannello, sia tramite drag diretto sulla chart overlay. La modifica viene inviata all'exchange solo dopo conferma esplicita.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Inserisci il nuovo prezzo nel campo Mod SL</div>
+        <div class="step-desc">Nella sezione espansa della posizione, digita il nuovo prezzo SL nel campo "Mod SL". La linea SL sulla chart overlay si aggiorna in tempo reale durante la digitazione, permettendoti di visualizzare la nuova posizione prima di confermare.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Oppure trascina la linea SL sulla chart</div>
+        <div class="step-desc">La linea SL della posizione aperta (tratteggiata rossa sulla chart overlay) è draggabile. Durante il drag, il campo input nel pannello si aggiorna in sincronizzazione. Al rilascio compare un invito a premere "Set SL" per confermare la modifica.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Premi "Set SL" per inviare all'exchange</div>
+        <div class="step-desc">Cliccando Set SL la modifica viene inviata all'exchange. Riceverai una notifica di conferma a operazione completata.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">TP su posizioni aperte</div>
+        <div class="step-desc">Allo stesso modo si possono impostare fino a 3 livelli TP per ogni posizione aperta tramite i campi TP1/2/3 nella sezione espansa. I badge R:R vengono mostrati accanto a ogni campo per valutare il reward potenziale in tempo reale.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BREAKEVEN -->
+<section class="section" id="breakeven">
+  <div class="section-header">
+    <span class="section-num">16</span>
+    <h2 class="section-title">Breakeven (BE)</h2>
+  </div>
+  <p class="prose">Il pulsante <strong>BE</strong> (Breakeven) sposta automaticamente lo Stop Loss al prezzo di entry della posizione, portando il rischio residuo a zero. Questa operazione è disponibile sia dal pannello posizioni (pulsante BE accanto al campo Mod SL) sia direttamente dalla chart overlay cliccando il badge BE giallo sulla linea SL della posizione.</p>
+
+  <div class="two-col">
+    <div class="card yellow">
+      <span class="card-icon">🎯</span>
+      <div class="card-title">Come funziona</div>
+      <div class="card-desc">
+        Il pulsante BE legge il prezzo di entry della posizione, lo imposta come nuovo valore nel campo "Mod SL", aggiorna la linea SL sulla chart overlay e invia immediatamente la modifica all'exchange. Nessuna conferma aggiuntiva richiesta: un singolo click esegue tutta la sequenza.
+      </div>
+    </div>
+    <div class="card purple">
+      <span class="card-icon">📊</span>
+      <div class="card-title">Quando usarlo</div>
+      <div class="card-desc">
+        Il Breakeven è utile quando la posizione è in profitto e vuoi eliminare il rischio di perdita: anche se il prezzo torna al livello di entry, la posizione viene chiusa senza perdite. Tipicamente si usa dopo che il prezzo ha raggiunto il TP1 e si vuole proteggere la parte rimanente della posizione.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTIAL CLOSE -->
+<section class="section" id="partial-close">
+  <div class="section-header">
+    <span class="section-num">17</span>
+    <h2 class="section-title">Chiusura Parziale</h2>
+  </div>
+  <p class="prose">La chiusura parziale permette di ridurre la size di una posizione aperta senza chiuderla completamente. Puoi scegliere la percentuale da chiudere tramite lo slider (1%–100%) o i preset rapidi (25%, 50%, 75%, 100%). Il P&L e il numero di contratti corrispondenti alla percentuale scelta vengono mostrati in tempo reale.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Seleziona la percentuale da chiudere</div>
+        <div class="step-desc">Usa lo slider o i preset (25%, 50%, 75%, 100%). Il display aggiorna istantaneamente il P&L proporzionale e il numero di contratti corrispondenti. Ad esempio, con 50% su una posizione di 0.071 BTC chiudi 0.035 BTC.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Clicca "⚡ Parziale"</div>
+        <div class="step-desc">Viene aperto il modal di conferma con i dettagli della chiusura parziale: simbolo, percentuale scelta, P&L stimato e numero contratti. Il pulsante di conferma è giallo per distinguere la chiusura parziale da quella totale.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Conferma l'esecuzione</div>
+        <div class="step-desc">Cliccando Conferma, l'exchange chiude la percentuale richiesta al prezzo corrente di mercato. Il pannello posizioni si aggiorna automaticamente dopo pochi secondi mostrando la size ridotta.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Il pulsante <strong>✕ Chiudi tutto</strong> chiude l'intera posizione con un singolo ordine a mercato. Nell'header del pannello posizioni è disponibile anche il pulsante <strong>Close all</strong> che chiude tutte le posizioni aperte simultaneamente.</div>
+  </div>
+</section>
+
+<!-- PNL REALTIME -->
+<section class="section" id="pnl">
+  <div class="section-header">
+    <span class="section-num">18</span>
+    <h2 class="section-title">PnL Realtime</h2>
+  </div>
+  <p class="prose">Il sistema di PnL realtime si basa su una cache prezzi aggiornata da due fonti indipendenti: il feed live del pair attivo sulla chart (aggiornato ogni pochi secondi) e un fetcher in background per tutti gli altri pair con posizioni aperte. Il loop di aggiornamento PnL gira ogni 500ms e usa la cache per ricalcolare il P&L di ogni posizione senza fare continuamente nuove chiamate di rete.</p>
+
+  <div class="card-grid" style="grid-template-columns:1fr 1fr">
+    <div class="card purple">
+      <span class="card-icon">💹</span>
+      <div class="card-title">Cache prezzi live</div>
+      <div class="card-desc">Per ogni simbolo con posizioni aperte viene mantenuto il prezzo aggiornato in cache. Il pair attivo sulla chart aggiorna la propria voce ogni pochi secondi. Per i pair con posizioni su altri simboli, un processo in background recupera i prezzi ogni 2 secondi in modo asincrono senza bloccare l'interfaccia.</div>
+    </div>
+    <div class="card cyan">
+      <span class="card-icon">🔢</span>
+      <div class="card-title">Formule PnL & ROE</div>
+      <div class="card-desc">
+        <strong style="color:var(--green)">Long:</strong> (mark price − entry) × size<br>
+        <strong style="color:var(--red)">Short:</strong> (entry − mark price) × size<br><br>
+        Il valore nominale della posizione è size × mark price, il margine è il nominale diviso la leva, e il ROE percentuale è PnL diviso il margine.
+      </div>
+    </div>
+  </div>
+
+  <p class="prose" style="margin-top:16px">Il PnL calcolato viene aggiornato in più punti dell'interfaccia simultaneamente: nel pannello di ogni posizione, nella topbar (PnL totale), e nel riepilogo account. La linea di entry sulla chart overlay mostra una pillola con il PnL corrente aggiornata in tempo reale.</p>
+</section>
+
+<!-- MONEY SHOT -->
+<section class="section" id="money-shot">
+  <div class="section-header">
+    <span class="section-num">19</span>
+    <h2 class="section-title">Money Shot 📸</h2>
+  </div>
+  <p class="prose">Il Money Shot genera un'immagine PNG condivisibile della posizione aperta, ottimizzata per la condivisione sui social (Twitter/X, Telegram). È accessibile dal pulsante <strong>📸 Money Shot</strong> nella sezione espansa di ogni posizione. L'immagine viene generata con tutti i dati live: simbolo, side, entry, mark price corrente, PnL in USDT e ROE%.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Money Shot — anteprima immagine generata</div>
+    <div class="mockup-inner" style="display:flex;justify-content:center;padding:32px 24px;background:#0a0a0f">
+      <!-- Realistic Money Shot card matching the actual output -->
+      <div style="width:260px;background:linear-gradient(160deg,#07100a 0%,#0a0d0a 60%,#0a0a12 100%);border-radius:18px;padding:28px 22px 22px;position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(0,209,122,.12),0 20px 60px rgba(0,0,0,.6);font-family:'Syne',sans-serif">
+        <!-- grid bg lines -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,209,122,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,209,122,.04) 1px,transparent 1px);background-size:24px 24px;border-radius:18px;pointer-events:none"></div>
+        <!-- top row -->
+        <div style="position:relative;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#e8e8f8">Risk<span style="color:#a855f7">Flow</span></div>
+          <div style="font-size:9px;color:#42425a;font-family:'IBM Plex Mono',monospace">2026-04-10 11:18 UTC</div>
+        </div>
+        <!-- emoji -->
+        <div style="position:relative;text-align:center;margin-bottom:14px">
+          <div style="font-size:52px;filter:drop-shadow(0 0 18px rgba(0,209,122,.5))">🤑</div>
+        </div>
+        <!-- pair pill -->
+        <div style="position:relative;text-align:center;margin-bottom:10px">
+          <div style="display:inline-block;background:#0e0e14;border:1px solid #2a2a3a;border-radius:8px;padding:6px 22px;font-size:14px;font-weight:700;color:#e8e8f8;letter-spacing:.5px">BTC/USDT</div>
+        </div>
+        <!-- direction badge -->
+        <div style="position:relative;text-align:center;margin-bottom:16px">
+          <div style="display:inline-flex;align-items:center;gap:6px;background:#0d1f14;border:1px solid #00d17a40;border-radius:20px;padding:4px 14px;font-size:10px;font-weight:700;color:#00d17a;letter-spacing:1px">
+            <span>▲ LONG · 10x</span>
+          </div>
+        </div>
+        <!-- PnL -->
+        <div style="position:relative;text-align:center;margin-bottom:6px">
+          <div style="font-size:38px;font-weight:800;color:#00d17a;letter-spacing:-1px;text-shadow:0 0 30px rgba(0,209,122,.6)">+ $2.53</div>
+        </div>
+        <div style="position:relative;text-align:center;margin-bottom:20px">
+          <div style="font-size:11px;color:#00d17a;opacity:.8;letter-spacing:1px">+2.36% <span style="color:#42425a">ROE</span></div>
+        </div>
+        <!-- entry / mark -->
+        <div style="position:relative;display:flex;justify-content:space-between;margin-bottom:20px;padding:0 4px">
+          <div style="text-align:left">
+            <div style="font-size:8px;letter-spacing:1.5px;color:#42425a;text-transform:uppercase;margin-bottom:4px">ENTRY</div>
+            <div style="font-size:13px;font-weight:600;color:#c8c8e0">$71492.8</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:8px;letter-spacing:1.5px;color:#42425a;text-transform:uppercase;margin-bottom:4px">MARK</div>
+            <div style="font-size:13px;font-weight:600;color:#c8c8e0">$71661.7</div>
+          </div>
+        </div>
+        <!-- branding footer -->
+        <div style="position:relative;text-align:center;border-top:1px solid #1a1a26;padding-top:14px">
+          <div style="font-size:20px;font-weight:800;letter-spacing:-1px"><span style="color:#e8e8f8">Risk</span><span style="color:#a855f7">Flow</span></div>
+
+          <div style="font-size:7px;color:#2a2a3a;margin-top:2px;font-style:italic">Not financial advice</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Apri una posizione nel pannello</div><div class="step-desc">Clicca su una posizione aperta per espanderla. In fondo alla sezione espansa compare il pulsante <strong>📸 Money Shot</strong>.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Genera l'immagine</div><div class="step-desc">Un modal si apre con l'anteprima dell'immagine generata in tempo reale con i dati live della posizione: simbolo, direzione, entry, mark price corrente, PnL e ROE%.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Scarica e condividi</div><div class="step-desc">Cliccando <strong>⬇ Salva immagine</strong> il PNG viene scaricato automaticamente sul tuo dispositivo, pronto per essere condiviso su Twitter/X, Telegram o qualsiasi altro canale.</div></div></div>
+  </div>
+</section>
+
+<!-- SL SHIELD -->
+<section class="section" id="sl-shield">
+  <div class="section-header">
+    <span class="section-num">20</span>
+    <h2 class="section-title">SL Shield <span class="badge new">Nuovo</span></h2>
+  </div>
+  <p class="prose">Lo <strong>SL Shield</strong> è un toggle di protezione nella topbar che, una volta attivato, impedisce di <strong>allargare lo stop loss</strong> su posizioni già aperte. Funziona come un vincolo disciplinare: puoi spostare lo SL in favore del trade (avvicinarlo all'entry per ridurre il rischio), ma non puoi mai portarlo più lontano dall'entry rispetto al punto in cui era al momento dell'apertura.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">SL Shield — toggle nella topbar</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 600 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <rect width="600" height="100" fill="#0d0d11"/>
+
+        <!-- ── STATE 1: OFF ── -->
+        <rect x="20" y="18" width="150" height="34" rx="5" fill="#121218" stroke="#252530" stroke-width="1"/>
+        <text x="36" y="39" font-family="monospace" font-size="11" fill="#3a3a48">🛡</text>
+        <text x="52" y="38" font-family="monospace" font-size="8.5" fill="#3a3a48" letter-spacing=".4">SL SHIELD</text>
+        <rect x="112" y="26" width="22" height="11" rx="5.5" fill="#18181f" stroke="#252530" stroke-width="1"/>
+        <circle cx="118" cy="31.5" r="3.5" fill="#3a3a48"/>
+        <text x="138" y="37" font-family="monospace" font-size="8.5" font-weight="600" fill="#3a3a48">OFF</text>
+        <text x="95" y="72" text-anchor="middle" font-family="monospace" font-size="8" fill="#42425a">OFF — inattivo</text>
+
+        <!-- ── STATE 2: ON ── -->
+        <rect x="220" y="18" width="160" height="34" rx="5" fill="rgba(245,158,11,.10)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="236" y="39" font-family="monospace" font-size="11" fill="#f59e0b">🛡</text>
+        <text x="252" y="38" font-family="monospace" font-size="8.5" fill="#f59e0b" letter-spacing=".4">SL SHIELD</text>
+        <rect x="313" y="26" width="22" height="11" rx="5.5" fill="#f59e0b33" stroke="#f59e0b" stroke-width="1"/>
+        <circle cx="326" cy="31.5" r="3.5" fill="#f59e0b"/>
+        <text x="339" y="37" font-family="monospace" font-size="8.5" font-weight="600" fill="#f59e0b">ON</text>
+        <text x="300" y="72" text-anchor="middle" font-family="monospace" font-size="8" fill="#f59e0b">ON — protezione attiva</text>
+
+        <!-- ── STATE 3: LOCKED ── -->
+        <rect x="430" y="18" width="150" height="34" rx="5" fill="rgba(245,158,11,.10)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="446" y="39" font-family="monospace" font-size="11" fill="#f59e0b">🛡</text>
+        <text x="462" y="38" font-family="monospace" font-size="8.5" fill="#f59e0b" letter-spacing=".4">SL SHIELD</text>
+        <rect x="523" y="26" width="22" height="11" rx="5.5" fill="#f59e0b33" stroke="#f59e0b" stroke-width="1"/>
+        <circle cx="536" cy="31.5" r="3.5" fill="#f59e0b"/>
+        <text x="549" y="37" font-family="monospace" font-size="9" font-weight="600" fill="#f59e0b">🔒</text>
+        <text x="505" y="72" text-anchor="middle" font-family="monospace" font-size="8" fill="#f59e0b">LOCKED — posizioni aperte</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Come funziona</div>
+  <p class="prose">Quando SL Shield è attivo, ogni tentativo di spostare lo stop loss viene validato contro il valore di riferimento (<em>refSL</em>) — il prezzo SL al momento dell'ultima conferma sull'exchange. La logica è asimmetrica per direzione:</p>
+
+  <table class="param-table" style="margin:16px 0">
+    <thead><tr><th>Direzione</th><th>Spostamento consentito</th><th>Spostamento bloccato</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="color:var(--green);font-weight:600">LONG</td>
+        <td style="color:var(--muted2)">SL può salire (avvicinarsi all'entry) — riduce il rischio</td>
+        <td style="color:var(--red)">SL non può scendere sotto il refSL — allargherebbe il rischio</td>
+      </tr>
+      <tr>
+        <td style="color:var(--red);font-weight:600">SHORT</td>
+        <td style="color:var(--muted2)">SL può scendere (avvicinarsi all'entry) — riduce il rischio</td>
+        <td style="color:var(--red)">SL non può salire sopra il refSL — allargherebbe il rischio</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="prose">Il <em>refSL</em> si aggiorna automaticamente ogni volta che un Set SL viene confermato con successo sull'exchange — permettendo di fare <strong>trailing stop</strong> progressivo senza mai allargare il rischio originale.</p>
+
+  <div class="two-col">
+    <div class="card yellow">
+      <span class="card-icon">🔒</span>
+      <div class="card-title">Blocco automatico con posizioni aperte</div>
+      <div class="card-desc">Se hai posizioni aperte e SL Shield è ON, il toggle si <strong>blocca</strong> e non può essere disattivato. Questo impedisce di aggirare la protezione mentre un trade è attivo. Il cursore diventa <code>not-allowed</code> e un'icona 🔒 sostituisce "ON".</div>
+    </div>
+    <div class="card green">
+      <span class="card-icon">📈</span>
+      <div class="card-title">Trailing stop compatibile</div>
+      <div class="card-desc">SL Shield non impedisce il trailing stop. Puoi spostare lo SL in direzione favorevole (verso l'entry e oltre, in zona profitto) quante volte vuoi. Il refSL avanza con ogni conferma sull'exchange, creando un "pavimento" mobile ma sempre in direzione sicura.</div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div>Lo stato ON/OFF dello SL Shield viene salvato in <strong>localStorage</strong> e persiste tra le sessioni. Se chiudi e riapri il browser con posizioni aperte, lo Shield torna nello stato precedente. Verifica sempre il toggle prima di operare.</div>
+  </div>
+</section>
+
+<!-- DAILY LOSS LIMIT -->
+<section class="section" id="dll">
+  <div class="section-header">
+    <span class="section-num">21</span>
+    <h2 class="section-title">Daily Loss Limit <span class="badge new">Nuovo</span></h2>
+  </div>
+  <p class="prose">Il <strong>Daily Loss Limit</strong> è un circuit breaker giornaliero che blocca automaticamente l'apertura di nuove posizioni se il wallet scende di una percentuale configurabile in 24 ore. Progettato per proteggere il conto nelle giornate negative, una volta scattato non può essere disattivato manualmente fino alla scadenza del blocco.</p>
+
+  <div class="mockup-wrap">
+    <div class="mockup-caption">Daily Loss Limit — pannello laterale</div>
+    <div class="mockup-inner">
+      <svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#0d0d11">
+        <rect width="400" height="250" fill="#0d0d11"/>
+        <!-- panel card -->
+        <rect x="14" y="12" width="372" height="226" rx="6" fill="#0d0d11" stroke="#1a1a22" stroke-width="1"/>
+
+        <!-- ── ROW: OFF ── -->
+        <text x="28" y="34" font-family="monospace" font-size="8" fill="#3a3a48" letter-spacing="1.5">DAILY LOSS LIMIT  ⓘ</text>
+        <!-- toggle OFF -->
+        <rect x="298" y="22" width="74" height="22" rx="4" fill="#121218" stroke="#252530"/>
+        <rect x="302" y="28" width="20" height="10" rx="5" fill="#18181f" stroke="#252530"/>
+        <circle cx="308" cy="33" r="3" fill="#3a3a48"/>
+        <text x="327" y="37" font-family="monospace" font-size="9" fill="#3a3a48">OFF</text>
+
+        <!-- divider -->
+        <line x1="28" y1="52" x2="372" y2="52" stroke="#1a1a22" stroke-width="1"/>
+
+        <!-- ── ROW: ON + SETTINGS ── -->
+        <text x="28" y="72" font-family="monospace" font-size="8" fill="#686878" letter-spacing="1.2">DAILY LOSS LIMIT  ⓘ</text>
+        <!-- toggle ON -->
+        <rect x="298" y="60" width="74" height="22" rx="4" fill="#a855f720" stroke="#a855f7"/>
+        <rect x="302" y="66" width="20" height="10" rx="5" fill="#a855f733" stroke="#a855f7"/>
+        <circle cx="314" cy="71" r="3" fill="#a855f7"/>
+        <text x="327" y="75" font-family="monospace" font-size="9" fill="#a855f7">ON</text>
+        <!-- settings: soglia input -->
+        <text x="28" y="98" font-family="monospace" font-size="8.5" fill="#686878">Soglia perdita</text>
+        <rect x="138" y="86" width="60" height="20" rx="3" fill="#121218" stroke="#252530"/>
+        <text x="168" y="100" text-anchor="middle" font-family="monospace" font-size="10" fill="#dddde8">2</text>
+        <text x="204" y="100" font-family="monospace" font-size="9" fill="#3a3a48">%</text>
+        <!-- hint box -->
+        <rect x="222" y="86" width="150" height="20" rx="3" fill="#18181f" stroke="#1a1a22"/>
+        <text x="297" y="99" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#3a3a48">Blocco se wallet scende</text>
+
+        <!-- divider -->
+        <line x1="28" y1="118" x2="372" y2="118" stroke="#1a1a22" stroke-width="1"/>
+
+        <!-- ── BANNER: TRIGGERED ── -->
+        <rect x="28" y="128" width="344" height="96" rx="7" fill="#ff2d4a15" stroke="#ff2d4a" stroke-width="1"/>
+        <!-- icon -->
+        <text x="46" y="162" font-family="monospace" font-size="22">🛑</text>
+        <!-- text block -->
+        <text x="80" y="150" font-family="'Syne',sans-serif" font-size="12" font-weight="700" fill="#ff2d4a">Trading bloccato</text>
+        <text x="80" y="166" font-family="monospace" font-size="8.5" fill="#686878">Hai superato il limite di perdita giornaliero</text>
+        <!-- countdown pill -->
+        <rect x="80" y="176" width="138" height="18" rx="3" fill="rgba(255,45,74,.12)" stroke="rgba(255,45,74,.3)"/>
+        <text x="149" y="189" text-anchor="middle" font-family="monospace" font-size="9" fill="#ff2d4a">Sblocco tra: 18:23:41</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Ciclo di vita del Daily Loss Limit</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Attivazione — snapshot del balance</div>
+        <div class="step-desc">Quando attivi il DLL, RiskFlow scatta uno <strong>snapshot del wallet balance</strong> in quel momento (saldo realizzato, senza unrealized PnL). Se il balance non è ancora disponibile, l'attivazione viene bloccata con una notifica: <em>"Sincronizza il conto prima di attivare il Daily Loss Limit"</em>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Monitoraggio continuo</div>
+        <div class="step-desc">Ad ogni aggiornamento del balance dall'exchange, RiskFlow calcola la perdita percentuale rispetto allo snapshot: <code>(snapshot − balance) / snapshot × 100</code>. Se questa percentuale supera la soglia configurata, il circuit breaker scatta.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Blocco attivo — conto alla rovescia 24h</div>
+        <div class="step-desc">Il blocco parte immediatamente con un conto alla rovescia visibile nel pannello (<em>"Sblocco tra: HH:MM:SS"</em>). Il toggle DLL diventa <strong>grigio e non cliccabile</strong>. Qualsiasi tentativo di aprire un ordine mostra la notifica di blocco con il tempo rimanente.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Reset automatico dopo 24h</div>
+        <div class="step-desc">Allo scadere del blocco, il sistema si resetta automaticamente: lo snapshot viene aggiornato al balance corrente e il trading viene ripristinato con una notifica verde. Il DLL rimane attivo per il giorno successivo con il nuovo snapshot.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Parametri</div>
+  <table class="param-table">
+    <thead><tr><th>Parametro</th><th>Tipo</th><th>Default</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="param-name">Soglia perdita</td>
+        <td><span class="param-type number">number</span></td>
+        <td style="color:var(--text)">2%</td>
+        <td>Percentuale di perdita sul wallet balance che scatena il blocco. Range consigliato: 1%–5%.</td>
+      </tr>
+      <tr>
+        <td class="param-name">Durata blocco</td>
+        <td><span class="param-type number">fixed</span></td>
+        <td style="color:var(--text)">24 ore</td>
+        <td>La durata del blocco è fissa a 24 ore dal momento del trigger. Non è modificabile.</td>
+      </tr>
+      <tr>
+        <td class="param-name">Snapshot</td>
+        <td><span class="param-type">auto</span></td>
+        <td style="color:var(--text)">—</td>
+        <td>Preso al momento dell'attivazione del DLL o al reset automatico. Usa il wallet balance (saldo realizzato), mai l'unrealized PnL.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <span class="callout-icon">🛑</span>
+    <div><strong>Una volta scattato, il blocco non può essere annullato manualmente.</strong> Questo è intenzionale: il DLL è uno strumento di disciplina, non un avviso ignorabile. L'unico modo per sbloccare prima delle 24 ore è disabilitare il DLL — ma questo non è possibile mentre il blocco è attivo.</div>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Lo stato del DLL (enabled, soglia, timestamp trigger, snapshot) viene salvato in <strong>localStorage</strong> con le chiavi <code>dll_enabled</code>, <code>dll_pct</code>, <code>dll_triggered_at</code>, <code>dll_balance_snapshot</code>. Il blocco persiste anche dopo il refresh della pagina.</div>
+  </div>
+</section>
+
+<!-- FEE EXCHANGE -->
+<section class="section" id="fee-settings">
+  <div class="section-header">
+    <span class="section-num">22</span>
+    <h2 class="section-title">Fee Exchange <span class="badge new">Nuovo</span></h2>
+  </div>
+  <p class="prose">RiskFlow include un sistema di calcolo fee integrato nel calcolo della size. Le fee vengono sottratte dal rischio accettabile <em>prima</em> di calcolare la posizione, così il rischio netto che arrivi al tuo stop loss corrisponde esattamente a quello che hai impostato — senza sorprese.</p>
+  <p class="prose">La sezione <strong>Fee Exchange</strong> nel pannello laterale permette di personalizzare i tassi di taker e maker fee per ciascun exchange. I valori vengono salvati separatamente per exchange e persistono tra le sessioni.</p>
+
+  <div class="section-subtitle">Default fee per exchange</div>
+  <table class="param-table">
+    <thead><tr><th>Exchange</th><th>Taker fee default</th><th>Maker fee default</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--bright)">Bitget</td><td style="color:var(--text)">0.060%</td><td style="color:var(--text)">0.020%</td></tr>
+      <tr><td style="color:var(--bright)">Bybit</td><td style="color:var(--text)">0.055%</td><td style="color:var(--text)">0.020%</td></tr>
+      <tr><td style="color:var(--bright)">Bybit Demo</td><td style="color:var(--text)">0.055%</td><td style="color:var(--text)">0.020%</td></tr>
+      <tr><td style="color:var(--bright)">Weex</td><td style="color:var(--text)">0.060%</td><td style="color:var(--text)">0.020%</td></tr>
+      <tr><td style="color:var(--bright)">BingX</td><td style="color:var(--text)">0.050%</td><td style="color:var(--text)">0.020%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-subtitle">Come viene applicata la fee</div>
+  <p class="prose">Il tipo di ordine determina quale combinazione di fee viene usata per il calcolo del round-trip (apertura + chiusura):</p>
+
+  <div class="two-col">
+    <div class="card red">
+      <span class="card-icon">⚡</span>
+      <div class="card-title">Market / Stop / Ladder</div>
+      <div class="card-desc">Entrambe le gambe del trade usano la taker fee (esecuzione immediata a market).<br><br><strong>Fee round-trip = taker × 2</strong></div>
+    </div>
+    <div class="card blue">
+      <span class="card-icon">📋</span>
+      <div class="card-title">Limit</div>
+      <div class="card-desc">L'apertura usa la maker fee (ordine limit in book), la chiusura (SL) è sempre market e usa la taker fee.<br><br><strong>Fee round-trip = maker + taker</strong></div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Formula con fee integrata</div>
+  <div class="formula-box">
+    <div class="formula-line">
+      <span class="formula-var">size</span>
+      <span class="formula-op">=</span>
+      <span class="formula-val">riskUsd</span>
+      <span class="formula-op">÷</span>
+      <span class="formula-val">( slDist% + feeRoundTrip )</span>
+      <span class="formula-comment">// fee riduce direttamente la size</span>
+    </div>
+    <div class="formula-line">
+      <span class="formula-var">feeRoundTrip</span>
+      <span class="formula-op">=</span>
+      <span class="formula-val">taker × 2</span>
+      <span class="formula-comment">// per market/stop/ladder</span>
+    </div>
+    <div class="formula-line">
+      <span class="formula-var">feeRoundTrip</span>
+      <span class="formula-op">=</span>
+      <span class="formula-val">maker + taker</span>
+      <span class="formula-comment">// per limit</span>
+    </div>
+  </div>
+
+  <p class="prose">La fee stimata viene mostrata in tempo reale nel box di calcolo del pannello (<em>Fee est.</em>), calcolata come <code>size USDT × feeRoundTrip</code>. Questo valore è un'<strong>approssimazione</strong>: le fee effettive dipendono dall'esecuzione reale sull'exchange (slippage, partial fill, rebate VIP).</p>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Se hai un account VIP con fee ridotte, inserisci i tuoi tassi personalizzati nella sezione Fee Exchange. Le modifiche si applicano immediatamente al calcolo size senza necessità di refresh. I valori sono salvati in localStorage separatamente per exchange (chiavi: <code>rf_fee_taker_&lt;exchange&gt;</code>, <code>rf_fee_maker_&lt;exchange&gt;</code>).</div>
+  </div>
+</section>
+
+<!-- FORMULE REFERENCE -->
+<section class="section" id="formulas">
+  <div class="section-header">
+    <span class="section-num">23</span>
+    <h2 class="section-title">Formule & Calcoli — Reference</h2>
+  </div>
+
+  <div class="section-subtitle">Calcolo size con fee integrata</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">size USDT</span><span class="formula-op"> = </span><span class="formula-val">rischio / (distanza SL% / 100 + feeRoundTrip)</span><span class="formula-comment">// fee sottratta prima del calcolo</span></div>
+    <div class="formula-line"><span class="formula-var">feeRoundTrip</span><span class="formula-op"> = </span><span class="formula-val">taker × 2</span><span class="formula-comment">// market / stop / ladder</span></div>
+    <div class="formula-line"><span class="formula-var">feeRoundTrip</span><span class="formula-op"> = </span><span class="formula-val">maker + taker</span><span class="formula-comment">// limit</span></div>
+    <div class="formula-line"><span class="formula-var">fee stimata</span><span class="formula-op"> = </span><span class="formula-val">size USDT × feeRoundTrip</span></div>
+  </div>
+
+  <div class="section-subtitle">Calcolo size standard (senza fee)</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">rischio USDT</span><span class="formula-op"> = </span><span class="formula-val">balance × (risk% / 100)</span><span class="formula-comment">// oppure importo fisso</span></div>
+    <div class="formula-line"><span class="formula-var">distanza SL%</span><span class="formula-op"> = </span><span class="formula-val">|entry − sl| / entry × 100</span></div>
+    <div class="formula-line"><span class="formula-var">size USDT</span><span class="formula-op"> = </span><span class="formula-val">rischio / (distanza SL% / 100)</span></div>
+    <div class="formula-line"><span class="formula-var">contratti</span><span class="formula-op"> = </span><span class="formula-val">floor(size / entryPrice / step) × step</span></div>
+    <div class="formula-line"><span class="formula-var">margine</span><span class="formula-op"> = </span><span class="formula-val">size USDT / leverage</span></div>
+  </div>
+
+  <div class="section-subtitle">PnL realtime posizioni</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">nominale</span><span class="formula-op"> = </span><span class="formula-val">size × mark price</span></div>
+    <div class="formula-line"><span class="formula-var">margine</span><span class="formula-op"> = </span><span class="formula-val">nominale / leverage</span></div>
+    <div class="formula-line"><span class="formula-var">PnL Long</span><span class="formula-op"> = </span><span class="formula-val">(mark price − entry) × size</span></div>
+    <div class="formula-line"><span class="formula-var">PnL Short</span><span class="formula-op"> = </span><span class="formula-val">(entry − mark price) × size</span></div>
+    <div class="formula-line"><span class="formula-var">ROE %</span><span class="formula-op"> = </span><span class="formula-val">PnL / margine × 100</span></div>
+  </div>
+
+  <div class="section-subtitle">R:R su take profit</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">distanza SL</span><span class="formula-op"> = </span><span class="formula-val">|entry − sl|</span></div>
+    <div class="formula-line"><span class="formula-var">distanza TP</span><span class="formula-op"> = </span><span class="formula-val">|tpPrice − entry|</span></div>
+    <div class="formula-line"><span class="formula-var">R:R</span><span class="formula-op"> = </span><span class="formula-val">distanza TP / distanza SL</span></div>
+    <div class="formula-line"><span class="formula-var">guadagno stimato</span><span class="formula-op"> = </span><span class="formula-val">rischio × R:R × (tp% position / 100)</span></div>
+  </div>
+
+  <div class="section-subtitle">Entry medio ponderato Ladder</div>
+  <div class="formula-box">
+    <div class="formula-line"><span class="formula-var">rischio livello</span><span class="formula-op"> = </span><span class="formula-val">rischio totale × (peso% / 100)</span></div>
+    <div class="formula-line"><span class="formula-var">size livello</span><span class="formula-op"> = </span><span class="formula-val">rischio livello / (distanza SL livello% / 100)</span></div>
+    <div class="formula-line"><span class="formula-var">entry medio</span><span class="formula-op"> = </span><span class="formula-val">Σ(prezzoLivello × peso) / Σ(pesi)</span><span class="formula-comment">// media ponderata</span></div>
+  </div>
+</section>
+
+<!-- TROUBLESHOOTING -->
+<section class="section" id="troubleshooting">
+  <div class="section-header">
+    <span class="section-num">24</span>
+    <h2 class="section-title">Troubleshooting</h2>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+
+    <div class="card yellow" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">⚠️ PnL mostra 0 o non si aggiorna</div>
+      <div class="card-desc">
+        Il PnL viene calcolato localmente usando la cache prezzi. Possibili cause:<br><br>
+        • <strong>Pair attivo diverso dalla posizione:</strong> il background fetcher per gli altri pair impiega fino a 2 secondi per aggiornarsi<br>
+        • <strong>Nessuna posizione caricata:</strong> il sistema di PnL realtime si avvia automaticamente quando le posizioni sono caricate — forza un Refresh dal pannello API<br>
+        • <strong>API Key senza permesso Read:</strong> le posizioni non vengono caricate e la cache rimane vuota<br>
+        • <strong>Soluzione rapida:</strong> premi ⟳ Sync nel modal API per forzare il reload completo
+      </div>
+    </div>
+
+    <div class="card blue" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">ℹ️ Il calcolo della size mostra "—"</div>
+      <div class="card-desc">
+        Il calcolo richiede tutti e tre i valori: <strong>Risk</strong>, <strong>Entry</strong> e <strong>SL</strong>.<br><br>
+        • In modalità <strong>Market</strong>: assicurati che il feed live sia attivo (puntino verde lampeggiante nella topbar). Se offline, il prezzo live è null e il calcolo non può avvenire<br>
+        • In modalità <strong>Limit</strong>: devi inserire il prezzo di entry manualmente nel campo o trascinare la linea Entry sulla chart<br>
+        • Verifica che il campo <strong>Risk</strong> non sia 0 o vuoto<br>
+        • Verifica che lo <strong>SL</strong> sia nella direzione corretta (sotto entry per Long, sopra per Short)
+      </div>
+    </div>
+
+    <div class="card purple" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">🔐 Errore autenticazione API</div>
+      <div class="card-desc">
+        • Verifica i permessi: le chiavi devono avere almeno <strong>Read + Trade</strong><br>
+        • Bitget e Weex: la <strong>Passphrase</strong> è obbligatoria — deve corrispondere esattamente a quella impostata alla creazione della key<br>
+        • Se hai impostato un whitelist IP sull'exchange, assicurati che l'IP del proxy RiskFlow sia incluso<br>
+        • Errore <strong>40037</strong>: Passphrase Bitget/Weex errata o mancante<br>
+        • Errore <strong>401</strong>: API Key non valida o revocata — ricrea la key<br>
+        • I campi mascherati (••••) nel form indicano che le credenziali sono già salvate — non sovrascriverle se non vuoi cambiarle
+      </div>
+    </div>
+
+    <div class="card red" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">❌ Ordine rifiutato dall'exchange</div>
+      <div class="card-desc">
+        Cause comuni:<br><br>
+        • <strong>Insufficient margin:</strong> il balance disponibile è inferiore al margine richiesto — riduci la leva o la size (avvicina lo SL)<br>
+        • <strong>Price too far from mark:</strong> su Bybit il prezzo limite deve essere entro una certa percentuale dal mark price — avvicina l'entry<br>
+        • <strong>Invalid qty / min size:</strong> la size calcolata è inferiore al minimo dell'exchange — aumenta il Risk%, avvicina lo SL, oppure usa un simbolo con contratti più piccoli<br>
+        • <strong>Position mode mismatch:</strong> Bybit richiede che la modalità One-Way vs Hedge sia configurata correttamente nelle impostazioni dell'exchange prima di piazzare ordini<br>
+        • <strong>Step size error:</strong> RiskFlow arrotonda automaticamente allo step size del simbolo — se ricevi questo errore, prova a fare un Refresh delle informazioni contratto
+      </div>
+    </div>
+
+    <div class="card green" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">✓ La chart non mostra dati (modalità demo)</div>
+      <div class="card-desc">
+        Se la fonte dei dati di mercato non è disponibile, RiskFlow cade automaticamente in <strong>modalità demo</strong> generando dati sintetici casuali per il pair selezionato. Una notifica mostrerà "dati offline — demo data".<br><br>
+        In questa modalità: la chart funziona normalmente e il calcolo size funziona, ma <strong>non è possibile inviare ordini reali</strong>. Il feed live rimane disabilitato finché la fonte dati non torna disponibile.
+      </div>
+    </div>
+
+    <div class="card yellow" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">⚠️ Bybit Demo — errore connessione</div>
+      <div class="card-desc">
+        L'ambiente Demo di Bybit usa endpoint separati dal live:<br><br>
+        • Verifica di aver creato le chiavi dalla sezione <strong>Demo Trading → API Management</strong> (non dal live account)<br>
+        • Le chiavi Demo Bybit <strong>scadono ogni 3 mesi</strong> se non associate a un IP fisso — rinnova dalla pagina API Management dell'account Demo<br>
+        • Se il balance mostra "—" anche dopo il salvataggio, premi <strong>⟳ Sync</strong> per forzare il refetch<br>
+        • Le chiavi Live di Bybit NON funzionano sull'ambiente Demo — devi creare set separati
+      </div>
+    </div>
+
+    <div class="card blue" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">ℹ️ Le linee sulla chart scompaiono al cambio TF</div>
+      <div class="card-desc">
+        Le linee Entry, SL e TP <strong>non vengono resettate</strong> al cambio timeframe — i prezzi impostati rimangono identici. Se le linee sembrano sparite è perché il range visibile della chart (asse Y) è cambiato e le linee sono fuori dal viewport.<br><br>
+        Usa il pulsante <kbd>⊙ live</kbd> in alto a destra sulla chart per tornare alla vista del prezzo attuale — le linee torneranno visibili se i prezzi impostati sono vicini al prezzo corrente.
+      </div>
+    </div>
+
+    <div class="card yellow" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">🛡 SL Shield blocca uno spostamento SL valido</div>
+      <div class="card-desc">
+        Lo SL Shield confronta il nuovo SL con il <em>refSL</em> — il valore SL confermato sull'exchange al momento dell'attivazione della posizione. Se sposti lo SL via trascinamento sulla chart ma l'exchange non ha ancora confermato il valore precedente, il refSL potrebbe non essere aggiornato.<br><br>
+        • <strong>Soluzione:</strong> dopo ogni Set SL confermato con successo, il refSL si aggiorna automaticamente. Attendi la notifica di conferma prima di spostare di nuovo<br>
+        • Se hai disabilitato e riabilitato SL Shield mentre avevi posizioni aperte, il refSL potrebbe non corrispondere — usa <strong>⟳ Sync</strong> per ricaricare le posizioni e il loro SL attuale<br>
+        • Puoi sempre disabilitare temporaneamente SL Shield dalla topbar <em>se non hai posizioni aperte</em>
+      </div>
+    </div>
+
+    <div class="card red" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">🛑 Daily Loss Limit — non riesco ad attivarlo</div>
+      <div class="card-desc">
+        Il DLL richiede che il wallet balance sia disponibile prima di poter essere attivato:<br><br>
+        • <strong>"Sincronizza il conto prima di attivare":</strong> le API key non sono configurate o non è ancora stato fatto un sync. Premi ⟳ Sync nel pannello account e aspetta che il balance appaia prima di attivare il DLL<br>
+        • <strong>DLL già scattato e locked:</strong> non puoi disattivarlo finché il conto alla rovescia non scade. Il blocco è intenzionale e non aggirabile — attendi le 24h<br>
+        • <strong>Il blocco persiste dopo refresh:</strong> è corretto — lo stato è salvato in localStorage. Il blocco rimane attivo indipendentemente da refresh, chiusura del browser o cambio di tab
+      </div>
+    </div>
+
+    <div class="card cyan" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">🌐 Weex / BingX — connessione o ordini non funzionano</div>
+      <div class="card-desc">
+        Problemi comuni per i nuovi exchange:<br><br>
+        • <strong>Weex — Passphrase mancante:</strong> Weex richiede la Passphrase esattamente come Bitget. Il campo compare nel tab Weex del pannello API — assicurati di averla inserita<br>
+        • <strong>BingX — simboli non trovati:</strong> BingX usa il formato <code>BTC-USDT</code> internamente. RiskFlow gestisce la conversione automaticamente. Se un pair non compare nella lista, prova a cercarlo nel pair modal con la sigla base (es. "BTC")<br>
+        • <strong>Balance mostra "—" su entrambi:</strong> dopo aver salvato le key, premi <strong>⟳ Sync</strong> nel modal API per forzare il primo caricamento del balance<br>
+        • <strong>Proxy lento al primo accesso:</strong> i proxy su Render.com possono impiegare fino a 30 secondi per "svegliarsi" dopo un periodo di inattività. Se la prima richiesta è lenta, riprova dopo qualche secondo
+      </div>
+    </div>
+
+    <div class="card blue" style="padding:20px 24px">
+      <div class="card-title" style="margin-bottom:8px">💸 La fee stimata sembra troppo alta o troppo bassa</div>
+      <div class="card-desc">
+        Le fee mostrate nel pannello sono stime basate sui valori configurati nella sezione <strong>Fee Exchange</strong>:<br><br>
+        • Se hai un account VIP con fee ridotte, aggiorna i campi Taker/Maker nella sezione Fee Exchange — le modifiche si applicano immediatamente al calcolo size<br>
+        • La fee stimata usa il <strong>round-trip</strong> (apertura + chiusura): Market/Ladder → taker×2, Limit → maker+taker<br>
+        • Il valore mostrato come "Fee est." nel box di calcolo è <em>approssimativo</em> — le fee reali dipendono dall'esecuzione effettiva sull'exchange (slippage, partial fill, rebate VIP)<br>
+        • Per azzerare le fee dal calcolo (ad es. per test), puoi impostare entrambi i valori a 0 nella sezione Fee Exchange
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div style="height:60px"></div>
+
+</div><!-- /content -->
+</main>
+
+<script>
+  const sections = document.querySelectorAll('.section, .hero');
+  const navItems = document.querySelectorAll('.nav-item');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const id = entry.target.id;
+        const active = document.querySelector(`.nav-item[href="#${id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
