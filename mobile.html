@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RiskFlow Mobile</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%233dffa0' stroke-width='1.2' stroke-linecap='round'/%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+
+<style>
+/* ─── MOBILE CSS RESET & BASE ─── */
+:root {
+  --bg:#07070a;--surface:#0d0d11;--surface2:#121218;--surface3:#18181f;
+  --border:#1a1a22;--border2:#252530;--text:#dddde8;--muted:#3a3a48;--muted2:#686878;
+  --accent:#a855f7;--accent-dim:#a855f715;--accent2:#9333ea;
+  --red:#ff2d4a;--red-dim:#ff2d4a15;--green:#00d17a;--green-dim:#00d17a15;
+  --yellow:#ffc940;--yellow-dim:#ffc94015;--blue:#5ab4ff;--blue-dim:#5ab4ff15;
+  --topbar-h: 52px;
+  --bottomnav-h: 60px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);touch-action:manipulation}
+body{color:var(--text);font-family:'DM Mono',monospace;font-size:12px;display:flex;flex-direction:column}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+
+/* ─── TOPBAR MOBILE ─── */
+.m-topbar{
+  height:var(--topbar-h);flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:10px;
+  padding-top:env(safe-area-inset-top,0);
+}
+.m-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.5px;flex-shrink:0}
+.m-sym-btn{
+  flex:1;display:flex;align-items:center;gap:6px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  padding:6px 10px;cursor:pointer;min-width:0;
+}
+.m-sym-label{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-sym-caret{font-size:9px;color:var(--muted2);flex-shrink:0}
+.m-price-wrap{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
+.m-price{font-size:14px;font-weight:600;font-family:'Syne',sans-serif;color:var(--text)}
+.m-chg{font-size:10px;padding:1px 5px;border-radius:3px;white-space:nowrap}
+.m-chg.pos{background:var(--green-dim);color:var(--green)}
+.m-chg.neg{background:var(--red-dim);color:var(--red)}
+.m-menu-btn{
+  width:36px;height:36px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+
+/* TF row under topbar */
+.m-tf-row{
+  height:34px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:4px;overflow-x:auto;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.m-tf-row::-webkit-scrollbar{display:none}
+.m-tf-btn{
+  padding:4px 10px;border-radius:4px;border:1px solid transparent;
+  background:none;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  min-height:26px;min-width:36px;
+}
+.m-tf-btn.active{background:var(--surface3);border-color:var(--border2);color:var(--accent)}
+
+/* ─── CHART AREA ─── */
+.m-chart-wrap{
+  flex:1;position:relative;overflow:hidden;min-height:80px;
+  transition:flex .3s cubic-bezier(.25,.46,.45,.94);
+}
+/* When a panel is open, chart shrinks to ~35% */
+body.panel-open .m-chart-wrap{
+  flex:0 0 35vh;
+}
+#chart{width:100%;height:100%}
+#dragCanvas{position:absolute;inset:0;z-index:10;pointer-events:none;touch-action:none}
+#dragCanvas.active{pointer-events:all}
+
+.chart-watermark{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  pointer-events:none;user-select:none;z-index:5;opacity:0.07;
+}
+.wm-main{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;letter-spacing:-1px;color:#fff;line-height:1}
+.wm-beta{font-family:'Syne',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;align-self:flex-end;margin-top:-3px}
+
+.chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#09090966;z-index:50;flex-direction:column;gap:8px;pointer-events:none}
+.chart-loading.hidden{display:none}
+.spin{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chart-loading span{font-size:10px;color:var(--muted2)}
+
+.goto-price-btn{position:absolute;top:8px;right:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:5px 9px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);cursor:pointer;z-index:20}
+
+/* Floating OPEN button */
+.chart-calc-btn{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#fff;border:none;border-radius:8px;
+  padding:10px 22px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;z-index:20;display:none;gap:7px;align-items:center;
+  box-shadow:0 4px 20px #a855f740;white-space:nowrap;min-height:44px;
+}
+.chart-calc-btn.visible{display:flex}
+
+/* Long press menu (replaces right-click) */
+.m-ctx-menu{
+  position:fixed;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:6px;z-index:800;min-width:180px;
+  box-shadow:0 12px 36px #00000090;display:none;
+}
+.m-ctx-menu.open{display:block}
+.ctx-item{padding:10px 12px;border-radius:6px;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:10px;transition:background .1s;min-height:44px}
+.ctx-item:hover,.ctx-item:active{background:var(--surface3)}
+.ctx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ─── BOTTOM NAV ─── */
+.m-bottom-nav{
+  height:calc(var(--bottomnav-h) + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;flex-shrink:0;
+}
+.m-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;border:none;background:none;color:var(--muted2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.3px;text-transform:uppercase;
+  padding:0;min-height:44px;
+}
+.m-nav-btn.active{color:var(--accent)}
+.m-nav-icon{font-size:18px;line-height:1}
+
+/* ─── INLINE PANEL (replaces bottom sheet) ─── */
+.m-panel{
+  flex:0 0 0;overflow:hidden;
+  background:var(--surface);border-top:1px solid var(--border2);
+  display:flex;flex-direction:column;
+  transition:flex .3s cubic-bezier(.25,.46,.45,.94);
+}
+.m-panel.open{
+  flex:1 1 0;min-height:0;
+}
+.m-panel-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  padding:10px 16px 8px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.m-panel-body{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom,0)}
+.m-panel-body::-webkit-scrollbar{display:none}
+
+/* keep old aliases so riskflow.js sheet refs still work visually */
+.m-sheet-handle{display:none}
+.m-sheet-close{background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;padding:0 4px;line-height:1;min-height:32px;min-width:32px;display:flex;align-items:center;justify-content:center}
+
+/* ─── DRAWER (hamburger menu) ─── */
+.m-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:80%;max-width:300px;z-index:900;
+  background:var(--surface);border-left:1px solid var(--border2);
+  transform:translateX(100%);transition:transform .25s;
+  display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0);overflow-y:auto;
+}
+.m-drawer.open{transform:translateX(0)}
+.m-drawer-bg{position:fixed;inset:0;background:#00000060;z-index:899;display:none}
+.m-drawer-bg.open{display:block}
+.m-drawer-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.m-drawer-close{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+
+/* ─── SECTION STYLES ─── */
+.m-sec{padding:12px 14px;border-bottom:1px solid var(--border)}
+.m-sec-title{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.m-sec-title button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;min-height:32px;min-width:32px}
+
+/* Account grid */
+.acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.acc-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.acc-card .al{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.acc-card .av{font-size:14px;font-weight:500}
+.av.acc{color:var(--accent)}.av.pos{color:var(--green)}.av.neg{color:var(--red)}
+
+/* Positions */
+.pos-item{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:6px;cursor:pointer}
+.pos-item:last-child{margin-bottom:0}
+.pos-item.long{border-left:3px solid var(--green)}
+.pos-item.short{border-left:3px solid var(--red)}
+.pos-top{display:flex;justify-content:space-between;align-items:center}
+.pos-l .pp{font-size:12px;font-weight:500}
+.pos-l .pd{font-size:10px;color:var(--muted2);margin-top:2px}
+.pos-r{text-align:right}
+.pos-r .pnl{font-size:12px;font-weight:500}
+.pos-r .pnl.pos{color:var(--green)}.pos-r .pnl.neg{color:var(--red)}
+.pos-r .psz{font-size:10px;color:var(--muted2)}
+.no-pos{color:var(--muted);font-size:11px;text-align:center;padding:8px 0}
+
+/* Position expand */
+.pos-expand{display:none;padding-top:10px;border-top:1px solid var(--border);margin-top:8px}
+.pos-expand.open{display:block}
+.pos-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px}
+.ps-cell{background:var(--surface3);border-radius:4px;padding:5px 7px}
+.ps-cell .psl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.ps-cell .psv{font-size:11px;font-weight:500;margin-top:2px}
+.pct-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pct-label{font-size:10px;color:var(--muted2);width:26px;flex-shrink:0}
+.pct-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer}
+.pct-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.pct-val{font-size:11px;font-weight:500;color:var(--accent);width:34px;text-align:right;flex-shrink:0}
+.pct-usd{font-size:10px;color:var(--muted2);text-align:right;margin-bottom:8px}
+.pct-presets{display:flex;gap:4px;margin-bottom:10px}
+.pct-preset{flex:1;padding:5px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:"DM Mono",monospace;font-size:10px;cursor:pointer;text-align:center;min-height:36px}
+.pct-preset.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.pos-btns{display:flex;gap:5px}
+.pos-btn-partial{flex:1;padding:10px;border-radius:6px;border:1px solid var(--yellow);background:var(--yellow-dim);color:var(--yellow);font-family:"DM Mono",monospace;font-size:11px;font-weight:500;cursor:pointer;text-align:center;min-height:44px}
+.pos-btn-close{flex:1;padding:10px;border-radius:6px;border:1px solid var(--red);background:var(--red-dim);color:var(--red);font-family:"DM Mono",monospace;font-size:11px;font-weight:500;cursor:pointer;text-align:center;min-height:44px}
+.pos-btn-shot{width:100%;margin-top:6px;padding:10px;border-radius:6px;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);font-family:"DM Mono",monospace;font-size:11px;font-weight:500;cursor:pointer;text-align:center;min-height:44px}
+.pos-modify-sl{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.pos-modify-sl .pml{font-size:9px;color:var(--muted2);white-space:nowrap}
+.pos-sl-wrap{flex:1;display:flex;align-items:center;background:var(--surface3);border:1px solid var(--red);border-radius:5px;overflow:hidden}
+.pos-sl-wrap input{flex:1;background:none;border:none;outline:none;color:var(--red);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:8px 8px;width:0}
+.pos-sl-wrap .unit{font-size:9px;color:var(--muted);padding-right:6px}
+.pos-sl-btn{padding:8px 12px;border-radius:4px;border:none;background:var(--red);color:#fff;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:40px}
+.pos-be-btn{padding:8px 10px;border-radius:4px;border:1px solid var(--yellow);background:var(--yellow-dim);color:var(--yellow);font-family:'DM Mono',monospace;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:40px}
+.pos-sl-current{display:flex;align-items:center;justify-content:space-between;background:var(--red-dim);border:1px solid var(--red);border-radius:5px;padding:6px 10px;margin-top:8px;margin-bottom:5px}
+.pos-sl-current .psl-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px}
+.pos-sl-current .psl-val{font-size:13px;font-weight:700;color:var(--red);font-family:'Syne',sans-serif}
+.pos-modify-tp{margin-top:6px;display:flex;flex-direction:column;gap:5px}
+.pos-tp-row{display:flex;align-items:center;gap:5px}
+.pos-tp-row .pml{font-size:9px;color:var(--muted2);white-space:nowrap;width:28px;flex-shrink:0}
+.pos-tp-wrap{flex:1;display:flex;align-items:center;background:var(--surface3);border:1px solid var(--green);border-radius:5px;overflow:hidden}
+.pos-tp-wrap input{flex:1;background:none;border:none;outline:none;color:var(--green);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:8px 8px;width:0}
+.pos-tp-wrap .unit{font-size:9px;color:var(--muted);padding-right:6px}
+.pos-tp-btn{padding:8px 12px;border-radius:4px;border:none;background:var(--green);color:#000;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:40px}
+.pos-tp-badge{font-size:8px;background:var(--green-dim);border:1px solid var(--green);color:var(--green);border-radius:3px;padding:2px 5px;white-space:nowrap;flex-shrink:0}
+.pos-tp-badge.empty{border-color:var(--border2);background:none;color:var(--muted)}
+
+/* Orders */
+.ord-item{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:5px}
+.ord-item.long{border-left:3px solid var(--green)}
+.ord-item.short{border-left:3px solid var(--red)}
+.ord-top{display:flex;justify-content:space-between;align-items:center}
+.ord-l .op{font-size:12px;font-weight:500}
+.ord-l .od{font-size:10px;color:var(--muted2);margin-top:2px}
+.ord-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.ord-price{font-size:12px;font-weight:500}
+.ord-cancel{background:none;border:1px solid var(--border2);border-radius:4px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);cursor:pointer;min-height:32px}
+.no-ord{color:var(--muted);font-size:11px;text-align:center;padding:8px 0}
+
+/* Trade section inputs */
+.otype-row{display:flex;gap:4px;margin-bottom:10px}
+.otype-btn{flex:1;padding:9px 4px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;text-align:center;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.otype-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.otype-btn .ob-label{font-weight:500;font-size:11px}
+.otype-btn .ob-sub{font-size:8px;color:var(--muted);margin-top:1px}
+.otype-btn.active .ob-sub{color:var(--accent);opacity:.7}
+
+.dir-row{display:flex;gap:5px;margin-bottom:10px}
+.dir-btn{flex:1;padding:10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;text-align:center;min-height:44px}
+.dir-btn.long.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.dir-btn.short.active{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+.risk-tabs{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px;margin-bottom:10px}
+.risk-tab{flex:1;text-align:center;padding:7px;border-radius:4px;cursor:pointer;font-size:11px;color:var(--muted2);min-height:36px;display:flex;align-items:center;justify-content:center}
+.risk-tab.active{background:var(--accent);color:#fff;font-weight:500}
+
+.irow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ilabel{font-size:11px;color:var(--muted2);width:40px;flex-shrink:0}
+.iwrap{flex:1;display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;transition:border-color .15s;position:relative;min-height:40px}
+.iwrap:focus-within{border-color:var(--accent)}
+.iwrap.hl-entry{border-color:var(--yellow)!important;background:var(--yellow-dim)!important}
+.iwrap.hl-sl{border-color:var(--red)!important}
+.iwrap.hl-mkt{border-color:var(--yellow)!important;background:var(--yellow-dim)!important}
+.iwrap input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:8px 9px;width:0}
+.iwrap input.mkt-val{color:var(--yellow);font-weight:500;cursor:default}
+.iwrap .unit{font-size:10px;color:var(--muted);padding-right:8px;flex-shrink:0}
+.iwrap .stpr{display:flex;flex-direction:column;border-left:1px solid var(--border)}
+.stpr-btn{background:none;border:none;color:var(--muted2);cursor:pointer;padding:2px 8px;font-size:10px;line-height:14px;min-height:20px;min-width:28px}
+.set-line-btn{width:36px;height:36px;border-radius:4px;border:1px solid var(--border);background:var(--surface3);color:var(--muted2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.set-line-btn.hl-y{border-color:var(--yellow);color:var(--yellow)}
+.set-line-btn.hl-r{border-color:var(--red);color:var(--red)}
+.set-line-btn.hl-g{border-color:var(--green);color:var(--green)}
+
+.market-banner{background:var(--yellow-dim);border:1px solid var(--yellow);border-radius:6px;padding:8px 10px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.market-banner.hidden{display:none}
+.mb-dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);animation:blink 1.5s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.mb-txt{font-size:10px;color:var(--yellow);line-height:1.4}
+
+.lev-presets{display:flex;gap:4px;margin-left:48px;margin-bottom:8px;flex-wrap:wrap}
+.lev-p{padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;min-height:32px}
+.lev-p.active,.lev-p:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* Calc box */
+.calc-box{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin:8px 0}
+.calc-main{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px}
+.calc-size-label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.calc-size{font-size:22px;font-weight:700;color:var(--accent);font-family:'Syne',sans-serif}
+.calc-size-unit{font-size:11px;color:var(--muted2)}
+.calc-margin-label{font-size:8px;color:var(--muted);text-align:right}
+.calc-margin-val{font-size:13px;color:var(--text);text-align:right}
+.calc-details{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-top:1px solid var(--border);padding-top:8px}
+.cd{display:flex;flex-direction:column}
+.cd-l{font-size:8px;color:var(--muted)}
+.cd-v{font-size:11px}
+.cd-v.r{color:var(--red)}.cd-v.y{color:var(--yellow)}.cd-v.g{color:var(--green)}
+
+/* TP */
+.tp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.toggle{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;min-height:32px}
+.tgl-sw{width:32px;height:17px;background:var(--border2);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
+.tgl-sw.on{background:var(--accent)}
+.tgl-sw::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s}
+.tgl-sw.on::after{left:17px}
+.tgl-lbl{font-size:10px;color:var(--muted2)}
+
+.tp-row-grid{display:grid;grid-template-columns:28px 1fr 40px 50px 24px;gap:4px;align-items:center;margin-bottom:6px;opacity:.35;transition:opacity .2s}
+.tp-row-grid.on{opacity:1}
+.tp-lbl{font-size:11px;color:var(--muted2)}
+.tp-rr{font-size:10px;color:var(--yellow);text-align:right}
+.tp-pct-wrap{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:4px;min-height:36px}
+.tp-pct-wrap input{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:6px 5px;text-align:right}
+.tp-pct-wrap .unit{font-size:9px;color:var(--muted);padding-right:4px;flex-shrink:0}
+.tp-chk{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+
+/* Open button */
+.btn-open{width:100%;padding:14px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;margin-bottom:6px;min-height:52px}
+.btn-open.long{background:var(--green);color:#000}
+.btn-open.short{background:var(--red);color:#fff}
+.btn-row{display:flex;gap:6px}
+.btn-sec{flex:1;padding:10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;text-align:center;min-height:40px}
+
+/* Ladder */
+.ladd-order{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:grid;grid-template-columns:22px 1fr 56px 44px;gap:6px;align-items:center;margin-bottom:5px}
+.ladd-order.active{border-color:var(--accent)}
+.ladd-order.inactive{opacity:.45}
+.ladd-num{font-size:11px;font-weight:600;color:var(--muted2)}
+.ladd-price-wrap{display:flex;align-items:center;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;min-height:34px}
+.ladd-price-wrap input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:0 7px;width:0}
+.ladd-pct-wrap{display:flex;align-items:center;background:var(--surface3);border:1px solid var(--accent)44;border-radius:4px;min-height:34px}
+.ladd-pct-wrap input{flex:1;background:none;border:none;outline:none;color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;font-weight:600;padding:0 4px;width:0;text-align:right}
+.ladd-pct-wrap .unit{font-size:8px;color:var(--muted2);padding-right:4px;flex-shrink:0}
+.ladd-toggle{width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;min-height:32px;min-width:32px}
+.ladd-toggle.on{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.ladd-toggle.off{color:var(--muted)}
+
+/* DLL / Fee / SL Shield */
+.dll-info-tip{font-size:9px;color:var(--muted);cursor:help;margin-left:4px;border:1px solid var(--border2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;font-style:normal;user-select:none}
+.dll-hint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:6px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px}
+.dll-triggered-box{display:flex;align-items:flex-start;gap:10px;background:var(--red-dim);border:1px solid var(--red);border-radius:8px;padding:12px;animation:dll-pulse 2.5s ease-in-out infinite}
+@keyframes dll-pulse{0%,100%{box-shadow:0 0 0 0 #ff2d4a22}50%{box-shadow:0 0 0 6px #ff2d4a00}}
+.dll-triggered-icon{font-size:20px;line-height:1;flex-shrink:0;margin-top:2px}
+.dll-triggered-body{display:flex;flex-direction:column;gap:3px}
+.dll-triggered-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--red)}
+.dll-triggered-sub{font-size:10px;color:var(--muted2);line-height:1.4}
+.dll-countdown{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--red);margin-top:5px;letter-spacing:.5px;background:rgba(255,45,74,.12);border:1px solid rgba(255,45,74,.3);border-radius:4px;padding:4px 8px;display:inline-block}
+#dllToggle.locked{opacity:.4;pointer-events:none;cursor:not-allowed}
+
+/* SL Shield in drawer */
+.slp-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;min-height:48px}
+.slp-left{display:flex;align-items:center;gap:8px}
+.slp-icon{font-size:14px}
+.slp-label{font-size:12px}
+.slp-sw{width:32px;height:17px;border-radius:9px;background:var(--surface3);border:1px solid var(--border2);position:relative;flex-shrink:0;transition:background .15s}
+.slp-sw::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:50%;background:var(--muted);transition:all .15s}
+.slp-row.on .slp-sw{background:#f59e0b33;border-color:#f59e0b}
+.slp-row.on .slp-sw::after{left:17px;background:#f59e0b}
+.slp-row.on .slp-label,.slp-row.on .slp-icon{color:#f59e0b}
+
+/* Auth overlay */
+#auth-overlay{position:fixed;inset:0;background:#090909;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem}
+#auth-overlay.hidden{display:none}
+.auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:2rem;width:100%;max-width:400px}
+.auth-logo-rf{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:.3rem}
+.auth-sub-rf{font-size:10px;color:var(--muted2);margin-bottom:1.5rem}
+.auth-tabs{display:flex;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.auth-tab{flex:1;background:transparent;border:none;padding:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;min-height:40px}
+.auth-tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.auth-form-rf{display:flex;flex-direction:column;gap:12px}
+.auth-form-rf.hidden{display:none}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-group label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+.field-group input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 13px;font-family:'DM Mono',monospace;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;min-height:48px}
+.field-group input:focus{border-color:var(--accent)}
+.auth-btn-rf{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:13px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:50px;margin-top:2px}
+.auth-btn-rf:disabled{opacity:.4;cursor:not-allowed}
+.auth-err-rf{font-size:11px;color:var(--red);min-height:16px}
+.auth-ok-rf{font-size:11px;color:var(--green);min-height:16px}
+.forgot-link{font-size:11px;color:var(--muted2);cursor:pointer;text-align:right;text-decoration:underline;padding:4px 0;min-height:32px;display:flex;align-items:center;justify-content:flex-end}
+.gdpr-row{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--muted2);line-height:1.5}
+.gdpr-row input{margin-top:3px;accent-color:var(--accent);flex-shrink:0;width:18px;height:18px}
+
+#userBadge{display:none;align-items:center;gap:8px;font-size:10px;color:var(--muted2)}
+#userBadge.visible{display:flex}
+.user-dot-rf{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+#rfUsername{font-size:11px}
+
+/* API Modal */
+#apiModal{display:none;position:fixed;inset:0;background:#00000088;z-index:500;align-items:flex-end;justify-content:center;padding-bottom:var(--safe-bottom)}
+#apiModal.open{display:flex}
+.api-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.api-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:1.2rem}
+.api-exchange-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.api-ex-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px 10px;border-radius:8px;cursor:pointer;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;outline:none;appearance:none;-webkit-appearance:none;min-height:60px}
+.api-ex-btn.active{border-color:var(--accent);background:var(--accent-dim)}
+.api-ex-name{font-size:11px;font-weight:600}
+.api-ex-badge{font-size:8px;background:#00b96b22;color:#00b96b;border:1px solid #00b96b44;border-radius:3px;padding:2px 6px;letter-spacing:.5px;text-transform:uppercase}
+.api-ex-badge--demo{background:#f7a60022;color:#f7a600;border-color:#f7a60044}
+.api-status{font-size:11px;padding:7px 10px;border-radius:5px;margin-bottom:1rem;display:none}
+.api-status.ok{display:block;background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.api-status.err{display:block;background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.api-btns{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.api-save-btn{flex:1;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;min-height:44px}
+.api-del-btn{background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;min-height:44px}
+.api-cancel-btn{background:none;border:1px solid var(--border);color:var(--muted2);border-radius:6px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;min-height:44px}
+
+/* Position Modal */
+#posModal{display:none;position:fixed;inset:0;background:#00000088;z-index:600;align-items:flex-end;justify-content:center}
+#posModal.open{display:flex}
+.pos-modal-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:18px;width:100%;max-width:500px;padding-bottom:calc(18px + var(--safe-bottom))}
+.pos-modal-title{font-family:"Syne",sans-serif;font-size:14px;font-weight:700;margin-bottom:5px}
+.pos-modal-sub{font-size:11px;color:var(--muted2);margin-bottom:14px}
+.pos-modal-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.pos-modal-row{display:flex;justify-content:space-between;align-items:center}
+.pos-modal-row .pml{font-size:11px;color:var(--muted2)}
+.pos-modal-row .pmv{font-size:12px;font-weight:500}
+.pmv.acc{color:var(--accent)}.pmv.red{color:var(--red)}.pmv.grn{color:var(--green)}.pmv.yel{color:var(--yellow)}
+.pos-modal-divider{height:1px;background:var(--border);margin:5px 0}
+.pos-modal-btns{display:flex;gap:8px}
+.pmb-cancel{flex:1;padding:12px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:"DM Mono",monospace;font-size:12px;cursor:pointer;min-height:48px}
+.pmb-confirm{flex:1;padding:12px;border-radius:7px;border:none;font-family:"Syne",sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:48px}
+.pmb-confirm.partial{background:var(--yellow);color:#000}
+.pmb-confirm.full{background:var(--red);color:#fff}
+
+/* Confirm trade modal */
+.modal-bg{display:none;position:fixed;inset:0;background:#00000080;z-index:200;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:18px;width:100%;max-width:500px;padding-bottom:calc(18px + var(--safe-bottom))}
+.modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px}
+.modal-rows{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.mrow{display:flex;justify-content:space-between}
+.mrow .ml{font-size:11px;color:var(--muted2)}
+.mrow .mv{font-size:12px;font-weight:500}
+.mv.acc{color:var(--accent)}.mv.red{color:var(--red)}.mv.grn{color:var(--green)}
+.mdiv{height:1px;background:var(--border);margin:3px 0}
+.modal-btns{display:flex;gap:8px}
+.modal-btn{flex:1;padding:12px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--muted2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;min-height:48px}
+.modal-btn.confirm{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+
+/* MoneyShot modal */
+#moneyShotModal{display:none;position:fixed;inset:0;background:#000000cc;z-index:700;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+#moneyShotModal.open{display:flex}
+.ms-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;width:100%}
+.ms-card-outer{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px #000000cc;max-width:100%}
+#msSaveBtn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 28px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:48px}
+#msCloseBtn{background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:7px;padding:8px 20px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;min-height:44px}
+
+/* Pair modal */
+#pairModal{position:fixed;inset:0;z-index:900;display:none;align-items:flex-end;justify-content:center;background:#00000088;backdrop-filter:blur(4px)}
+#pairModal.open{display:flex}
+.pm-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:var(--safe-bottom)}
+.pm-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.pm-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);flex:1}
+.pm-close{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:20px;line-height:1;padding:4px;min-height:36px;min-width:36px}
+.pm-search-wrap{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.pm-search{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:border-color .15s;min-height:44px}
+.pm-search:focus{border-color:var(--accent)}
+.pm-cats{display:flex;gap:5px;padding:10px 14px;flex-shrink:0;flex-wrap:nowrap;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pm-cats::-webkit-scrollbar{display:none}
+.pm-cat-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;white-space:nowrap;min-height:34px}
+.pm-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pm-body{overflow-y:auto;flex:1;padding:8px;-webkit-overflow-scrolling:touch}
+.pm-section-title{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;padding:10px 8px 5px}
+.pm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:5px}
+.pm-item{padding:10px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .1s;display:flex;flex-direction:column;gap:3px;min-height:52px}
+.pm-item:active{background:var(--surface2);border-color:var(--border2)}
+.pm-item.active{background:var(--accent-dim);border-color:var(--accent)}
+.pm-item-sym{font-family:'DM Mono',monospace;font-weight:500;font-size:12px;color:var(--text)}
+.pm-item-base{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2)}
+.pm-empty{padding:32px;text-align:center;color:var(--muted2);font-size:11px}
+
+/* Notif */
+.notif{position:fixed;bottom:calc(var(--bottomnav-h) + var(--safe-bottom) + 12px);left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:10px 18px;font-size:12px;z-index:990;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 24px #00000080;max-width:calc(100vw - 24px);text-align:center}
+.notif.show{transform:translateX(-50%) translateY(0)}
+.notif.ok{border-color:var(--green);color:var(--green)}
+.notif.err{border-color:var(--red);color:var(--red)}
+
+/* Beta popup */
+#betaPopupOverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:betaFadeIn .2s ease}
+@keyframes betaFadeIn{from{opacity:0}to{opacity:1}}
+.beta-popup{background:var(--surface);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:24px 20px;width:100%;max-width:500px;box-shadow:0 24px 60px rgba(0,0,0,.7);padding-bottom:calc(24px + var(--safe-bottom));animation:betaSlideUp .22s ease}
+@keyframes betaSlideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.beta-popup-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.beta-badge{background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.5px}
+.beta-popup-close{background:none;border:none;color:var(--muted2);font-size:18px;cursor:pointer;padding:4px;min-height:36px;min-width:36px;display:flex;align-items:center;justify-content:center;border-radius:4px}
+.beta-popup-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);margin-bottom:4px}
+.beta-popup-sub{font-size:11px;color:var(--muted2);margin-bottom:14px}
+.beta-popup-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.beta-popup-list li{font-size:11.5px;color:var(--text);line-height:1.5;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+.beta-popup-list li strong{color:var(--accent)}
+.beta-popup-thanks{font-size:11px;color:var(--muted2);text-align:center;margin-bottom:14px}
+.beta-popup-btn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:50px}
+
+/* Drawer items */
+.drawer-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px;color:var(--text);min-height:50px}
+.drawer-item:active{background:var(--surface2)}
+.drawer-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.drawer-badge{margin-left:auto;font-size:9px;background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:2px 6px;color:var(--muted2)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0}
+
+/* Sec badge */
+.sec-badge{background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 6px;font-size:10px;color:var(--muted2)}
+
+/* Close all positions btn */
+.close-all-btn{background:var(--red-dim);border:1px solid var(--red);color:var(--red);border-radius:4px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;min-height:32px}
+</style>
+</head>
+<body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo-rf"><span style="color:#fff">Risk</span><span style="color:#a855f7">Flow</span></div>
+    <div class="auth-sub-rf">Position sizing &amp; risk management</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="rfSwitchTab('login')">Accedi</button>
+      <button class="auth-tab" onclick="rfSwitchTab('register')">Registrati</button>
+      <button class="auth-tab" onclick="rfSwitchTab('forgot')">Password</button>
+    </div>
+    <div class="auth-form-rf" id="rf-form-login">
+      <div class="field-group"><label>Username</label><input type="text" id="rf-login-user" placeholder="il tuo username" autocomplete="username" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="field-group"><label>Password</label><input type="password" id="rf-login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="auth-err-rf" id="rf-login-err"></div>
+      <button class="auth-btn-rf" id="rf-login-btn" onclick="rfDoLogin()">Accedi</button>
+      <div class="forgot-link" onclick="rfSwitchTab('forgot')">Password dimenticata?</div>
+    </div>
+    <div class="auth-form-rf hidden" id="rf-form-register">
+      <div class="field-group"><label>Username</label><input type="text" id="rf-reg-user" placeholder="scegli un username" maxlength="24"/></div>
+      <div class="field-group"><label>Email</label><input type="email" id="rf-reg-email" placeholder="tua@email.com"/></div>
+      <div class="field-group"><label>Password</label><input type="password" id="rf-reg-pass" placeholder="min 6 caratteri"/></div>
+      <div class="auth-err-rf" id="rf-reg-err"></div>
+      <div class="gdpr-row"><input type="checkbox" id="rf-reg-gdpr"/><label for="rf-reg-gdpr">Ho letto e accetto la Privacy Policy. <span style="color:var(--red)">*richiesto</span></label></div>
+      <button class="auth-btn-rf" id="rf-reg-btn" onclick="rfDoRegister()">Crea account</button>
+    </div>
+    <div class="auth-form-rf hidden" id="rf-form-forgot">
+      <div class="field-group"><label>Email</label><input type="email" id="rf-forgot-email" placeholder="tua@email.com"/></div>
+      <div class="auth-err-rf" id="rf-forgot-err"></div>
+      <div class="auth-ok-rf" id="rf-forgot-ok"></div>
+      <button class="auth-btn-rf" id="rf-forgot-btn" onclick="rfDoForgot()">Invia link di recupero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── API MODAL ── -->
+<div id="apiModal">
+  <div class="api-card">
+    <div class="api-title">🔑 Connetti Exchange</div>
+    <div class="api-exchange-tabs">
+      <button class="api-ex-btn active" id="exBtnBitget" onclick="rfSelectExchange('bitget')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACoklEQVR42r1VXUuUURB+5ny853XDMKKotnULUqLUoKsSLexDLyws6bqIKIjoqi77Fd30H4IgqEgvgoSIIlwySFGTIrIMand1N3f3fc850419retiEg3n5nBmhmeemXkOIc/4Fybwj0zVe/Qe3oMABoSAEGtK5DwaBBp+BFeAEkB/m8g6bJDq5aS8dZNDg2yWunuic2e5wqCVcOW5+nyxsKzHJsPmtAEMELbtU1PvUHDI+Rr+eUaeRQ0sTVKPT8kTvfzpIwRRz/H4yTObTiMmEK2ua86jSeqJaXmil+dmEcfo6olv33HSYMGC6g/KT3hZhwqr1zNheqdRwgDhoSPyaxGWscgoM8qMnEeudmm0NJDMUJC5rO7cz3OzEJI6u+P7Q46UnH6LqIzAwDvf2sKO4bG8xt9K88wJw20dsA5K4vMcvZlBAnLufdDXpQ/s1Qfbg2tXaR2BPJjrlOZRZFGMTf+AAYwUYTKlMhNgDh4+DhvXB4E2gLl4hSwjb6s7+Mcl61HwohiZ/lMGMFqGqbQaHQdzMDQSNjaaQBsgvHCZLGPB/5GrmrasQ8GLQmROng4FGSDcuk09zYBZD4+Y7SmzLmEAc/4SLVSQd8vIrlqxQFDk5MsMa02Li7xxk9uzSzL0scM8+hw2pmRz9OKVTzTC/SS+5qTmPOYZMSNiVBiWZfZbePioIRglw9QO/WoKZUb2F6IVdo0InlFgOAcjZbyozwzyyCNoRVuS7sFwvKcF8x5S1N2137mvsMyXwqN9hmACHW5vVmOTsIwvcZXzyjLCDM3yw6weHOCxDADavMXeG7Z7W5G3UGr1wsYkSd2565NJtHcgitz1G7ZjN3I1sgCgeprNIANuADwggBJQquJllVJL4Aqj5H91QIo1afZSsPyvv8h3EP+qljDdOGgAAAAASUVORK5CYII=" width="22" height="22" style="border-radius:4px" alt="Bitget"/>
+        <span class="api-ex-name">Bitget</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBybit" onclick="rfSelectExchange('bybit')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px" alt="Bybit"/>
+        <span class="api-ex-name">Bybit</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBybitDemo" onclick="rfSelectExchange('bybit_demo')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px;opacity:.5" alt="Bybit Demo"/>
+        <span class="api-ex-name">Bybit</span>
+        <span class="api-ex-badge api-ex-badge--demo">Demo</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnWeex" onclick="rfSelectExchange('weex')">
+        <span style="font-size:16px;font-weight:800;color:#00c2cb;font-family:'Syne',sans-serif">W</span>
+        <span class="api-ex-name">Weex</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBingx" onclick="rfSelectExchange('bingx')">
+        <span style="font-size:12px;font-weight:800;color:#1da2ff;font-family:'Syne',sans-serif">BX</span>
+        <span class="api-ex-name">BingX</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+    </div>
+    <div class="api-status" id="apiStatus"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 11px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Balance</div>
+        <div style="font-size:15px;font-weight:700;color:var(--accent)" id="apiBitgetBalance">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 11px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Unrealized PnL</div>
+        <div style="font-size:15px;font-weight:700" id="apiBitgetUpnl">—</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--muted2);margin-bottom:12px;display:flex;justify-content:space-between">
+      <span>Posizioni: <span id="apiBitgetPositions">—</span></span>
+      <span id="apiSyncTime" style="color:var(--muted)"></span>
+    </div>
+    <div class="field-group" style="margin-bottom:10px"><label>API Key</label><input type="text" id="apiKeyInput" placeholder="la tua API key" autocomplete="off"/></div>
+    <div class="field-group" style="margin-bottom:10px"><label>Secret Key</label><input type="password" id="apiSecretInput" placeholder="secret key" autocomplete="off"/></div>
+    <div class="field-group" id="apiPassRow" style="margin-bottom:12px"><label>Passphrase</label><input type="password" id="apiPassInput" placeholder="passphrase (solo Bitget)" autocomplete="off"/></div>
+    <div class="api-btns">
+      <button class="api-save-btn" onclick="rfSaveApiKeys()">Salva &amp; Connetti</button>
+      <button class="api-save-btn" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text)" onclick="mobileSync(this)">⟳ Sync</button>
+      <button class="api-del-btn" onclick="rfDeleteApiKeys()">Elimina</button>
+      <button class="api-cancel-btn" onclick="document.getElementById('apiModal').classList.remove('open')">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOPBAR ── -->
+<div class="m-topbar">
+  <div class="m-logo"><span style="color:#fff">Risk</span><span style="color:#a855f7">Flow</span></div>
+  <div class="m-sym-btn" id="symWrap" onclick="openPairModal()" style="cursor:pointer">
+    <span class="m-sym-caret">▼</span>
+    <span class="m-sym-label" id="symInput">BTCUSDT</span>
+  </div>
+  <div class="m-price-wrap">
+    <div class="m-price" id="topPrice">—</div>
+    <div class="m-chg" id="topChg"></div>
+  </div>
+  <button class="m-menu-btn" onclick="openDrawer()">☰</button>
+</div>
+
+<!-- TF row -->
+<div class="m-tf-row">
+  <button class="m-tf-btn" onclick="setTF('1m')">1m</button>
+  <button class="m-tf-btn" onclick="setTF('5m')">5m</button>
+  <button class="m-tf-btn active" onclick="setTF('15m')">15m</button>
+  <button class="m-tf-btn" onclick="setTF('1H')">1h</button>
+  <button class="m-tf-btn" onclick="setTF('4H')">4h</button>
+  <button class="m-tf-btn" onclick="setTF('1D')">1D</button>
+  <div style="flex:1"></div>
+  <div class="live-dot" style="flex-shrink:0;margin-right:4px"></div>
+  <span id="tbBalance" style="font-size:10px;color:var(--accent);font-family:'DM Mono',monospace;white-space:nowrap">—</span>
+</div>
+
+<!-- ── CHART ── -->
+<div class="m-chart-wrap" id="chartWrap">
+  <div id="chart"></div>
+  <div class="chart-watermark" aria-hidden="true">
+    <span class="wm-main">RiskFlow</span>
+    <span class="wm-beta">BETA</span>
+  </div>
+  <div class="chart-loading" id="chartLoading"><div class="spin"></div><span>Loading...</span></div>
+  <canvas id="dragCanvas"></canvas>
+  <button class="chart-calc-btn" id="chartCalcBtn" onclick="openModal()">
+    ⚡ OPEN — <span id="chartCalcSize">—</span> USDT
+  </button>
+  <button class="goto-price-btn" onclick="gotoPrice()">⊙ live</button>
+</div>
+
+<!-- ── INLINE PANELS ── -->
+
+<!-- TRADE PANEL -->
+<div class="m-panel" id="sheet-trade">
+  <div class="m-panel-title">
+    <span>📊 Trade Setup</span>
+    <button class="m-sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="m-panel-body">
+    <div class="m-sec">
+      <div class="otype-row">
+        <div class="otype-btn active" id="otMarket" onclick="setOType('market')">
+          <span class="ob-label">Market</span>
+          <span class="ob-sub">entry = live</span>
+        </div>
+        <div class="otype-btn" id="otLimit" onclick="setOType('limit')">
+          <span class="ob-label">Limit</span>
+          <span class="ob-sub">imposta prezzo</span>
+        </div>
+        <div class="otype-btn" id="otLadder" onclick="setOType('ladder')">
+          <span class="ob-label">Ladder</span>
+          <span class="ob-sub">ladder strategy</span>
+        </div>
+      </div>
+
+      <!-- LADDER PANEL -->
+      <div id="ladderPanel" style="display:none;margin-bottom:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <div>
+            <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Top</div>
+            <div class="iwrap" style="border-color:var(--yellow)">
+              <input type="number" id="ladderTop" placeholder="0.00" step="0.01" oninput="onLadderInput()"/>
+              <span class="unit">$</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Bottom</div>
+            <div class="iwrap" style="border-color:var(--yellow)">
+              <input type="number" id="ladderBottom" placeholder="0.00" step="0.01" oninput="onLadderInput()"/>
+              <span class="unit">$</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:8px;align-items:center">
+          <span style="font-size:10px;color:var(--muted2)">Livelli:</span>
+          <span class="lev-p ladder-n active" onclick="setLadderN(2)" style="cursor:pointer">2</span>
+          <span class="lev-p ladder-n" onclick="setLadderN(3)" style="cursor:pointer">3</span>
+          <span class="lev-p ladder-n" onclick="setLadderN(4)" style="cursor:pointer">4</span>
+        </div>
+        <div id="ladderOrders"></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-top:6px;font-size:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="color:var(--muted)">Size totale</span>
+            <span id="laddTotalSize" style="color:var(--accent);font-weight:600">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <span style="color:var(--muted)">Entry avg</span>
+            <span id="laddAvgEntry">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--muted)">Risk tot.</span>
+            <span id="laddTotalRisk" style="color:var(--red)">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dir-row">
+        <button class="dir-btn long active" id="btnLong" onclick="setDir('long')">▲ LONG</button>
+        <button class="dir-btn short" id="btnShort" onclick="setDir('short')">▼ SHORT</button>
+      </div>
+
+      <div class="market-banner" id="mktBanner">
+        <div class="mb-dot"></div>
+        <div class="mb-txt">Ordine market — entri al prezzo corrente. Entry line = live price.</div>
+      </div>
+
+      <div class="irow" id="entryRow" style="display:none">
+        <div class="ilabel">Entry</div>
+        <div class="iwrap hl-entry">
+          <input type="number" id="entryVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('entry')"/>
+          <span class="unit">$</span>
+          <div class="stpr">
+            <button class="stpr-btn" onclick="stepP('entryVal',1)">▲</button>
+            <button class="stpr-btn" onclick="stepP('entryVal',-1)">▼</button>
+          </div>
+        </div>
+        <button class="set-line-btn hl-y" onclick="activateTouch('entry')">⊕</button>
+      </div>
+
+      <div class="irow" id="entryMktRow">
+        <div class="ilabel">Entry</div>
+        <div class="iwrap hl-mkt">
+          <input type="text" id="entryMktVal" readonly class="mkt-val" placeholder="—"/>
+          <span class="unit" style="color:var(--yellow);font-size:8px">LIVE</span>
+        </div>
+      </div>
+
+      <div class="irow">
+        <div class="ilabel">SL</div>
+        <div class="iwrap hl-sl">
+          <input type="number" id="slVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('sl')"/>
+          <span class="unit">$</span>
+          <div class="stpr">
+            <button class="stpr-btn" onclick="stepP('slVal',1)">▲</button>
+            <button class="stpr-btn" onclick="stepP('slVal',-1)">▼</button>
+          </div>
+        </div>
+        <button class="set-line-btn hl-r" onclick="activateTouch('sl')">⊕</button>
+      </div>
+
+      <div class="calc-box">
+        <div class="calc-main">
+          <div>
+            <div class="calc-size-label">Position Size</div>
+            <div><span class="calc-size" id="calcSize">—</span> <span class="calc-size-unit">USDT</span></div>
+          </div>
+          <div>
+            <div class="calc-margin-label">Margin req.</div>
+            <div class="calc-margin-val" id="calcMargin">—</div>
+          </div>
+        </div>
+        <div class="calc-details">
+          <div class="cd"><span class="cd-l">SL dist.</span><span class="cd-v r" id="cdSlDist">—</span></div>
+          <div class="cd"><span class="cd-l">Risk $</span><span class="cd-v r" id="cdRiskUsd">—</span></div>
+          <div class="cd"><span class="cd-l">Fee est.</span><span class="cd-v" style="color:var(--muted2)" id="cdFee">—</span></div>
+          <div class="cd"><span class="cd-l">R:R</span><span class="cd-v y" id="cdRR">—</span></div>
+        </div>
+      </div>
+
+      <div class="risk-tabs" style="margin-bottom:8px">
+        <div class="risk-tab" id="tabCross" onclick="setMarginMode('cross')">Cross</div>
+        <div class="risk-tab active" id="tabIso" onclick="setMarginMode('isolated')">Isolated</div>
+      </div>
+      <div class="risk-tabs">
+        <div class="risk-tab active" id="tabPct" onclick="setRiskMode('pct')">% Balance</div>
+        <div class="risk-tab" id="tabUsd" onclick="setRiskMode('usd')">USDT fisso</div>
+      </div>
+      <div class="irow">
+        <div class="ilabel">Risk</div>
+        <div class="iwrap">
+          <input type="number" id="riskVal" value="1" step=".5" min="0.1" oninput="calc()"/>
+          <span class="unit" id="riskUnit">%</span>
+          <div class="stpr">
+            <button class="stpr-btn" onclick="step('riskVal',.5)">▲</button>
+            <button class="stpr-btn" onclick="step('riskVal',-.5)">▼</button>
+          </div>
+        </div>
+      </div>
+      <div class="irow">
+        <div class="ilabel">Leva</div>
+        <div class="iwrap">
+          <input type="number" id="levVal" value="10" min="1" max="125" step="1" oninput="updateLevPresets();calc()"/>
+          <span class="unit">x</span>
+          <div class="stpr">
+            <button class="stpr-btn" onclick="step('levVal',1)">▲</button>
+            <button class="stpr-btn" onclick="step('levVal',-1)">▼</button>
+          </div>
+        </div>
+      </div>
+      <div class="lev-presets">
+        <span class="lev-p" onclick="setLev(3)">3x</span>
+        <span class="lev-p" onclick="setLev(5)">5x</span>
+        <span class="lev-p active" onclick="setLev(10)">10x</span>
+        <span class="lev-p" onclick="setLev(20)">20x</span>
+        <span class="lev-p" onclick="setLev(50)">50x</span>
+        <span class="lev-p" onclick="setLev(100)">100x</span>
+      </div>
+    </div>
+
+    <!-- TAKE PROFITS -->
+    <div class="m-sec">
+      <div class="tp-hdr">
+        <div class="m-sec-title" style="margin-bottom:0">Take Profits</div>
+        <div class="toggle" onclick="toggleTP()">
+          <div class="tgl-sw" id="tpSw"></div>
+          <span class="tgl-lbl" id="tpLbl">OFF</span>
+        </div>
+      </div>
+      <div id="tpRows" style="margin-top:8px">
+        <div style="display:grid;grid-template-columns:28px 1fr 40px 50px 24px;gap:4px;margin-bottom:3px;padding:0 1px">
+          <span></span><span></span>
+          <span style="font-size:8px;color:var(--muted);text-align:right;text-transform:uppercase;letter-spacing:.5px">R:R</span>
+          <span style="font-size:8px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.5px">% pos.</span>
+          <span></span>
+        </div>
+        <div class="tp-row-grid" id="tpRow1">
+          <span class="tp-lbl">TP1</span>
+          <div class="iwrap"><input type="number" id="tp1" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp1')"/></div>
+          <span class="tp-rr" id="rr1">—</span>
+          <div class="tp-pct-wrap"><input type="number" id="tpPct1" value="25" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+          <input type="checkbox" class="tp-chk" id="tp1en" checked onchange="calc()"/>
+        </div>
+        <div class="tp-row-grid" id="tpRow2">
+          <span class="tp-lbl">TP2</span>
+          <div class="iwrap"><input type="number" id="tp2" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp2')"/></div>
+          <span class="tp-rr" id="rr2">—</span>
+          <div class="tp-pct-wrap"><input type="number" id="tpPct2" value="50" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+          <input type="checkbox" class="tp-chk" id="tp2en" onchange="calc()"/>
+        </div>
+        <div class="tp-row-grid" id="tpRow3">
+          <span class="tp-lbl">TP3</span>
+          <div class="iwrap"><input type="number" id="tp3" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp3')"/></div>
+          <span class="tp-rr" id="rr3">—</span>
+          <div class="tp-pct-wrap"><input type="number" id="tpPct3" value="50" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+          <input type="checkbox" class="tp-chk" id="tp3en" onchange="calc()"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- DLL -->
+    <div class="m-sec" id="dllSec">
+      <div class="tp-hdr">
+        <div class="m-sec-title" style="margin-bottom:0">Daily Loss Limit <span class="dll-info-tip" title="Se perdi più della soglia % in un giorno, blocca le nuove posizioni per 24h.">ⓘ</span></div>
+        <div class="toggle" id="dllToggle" onclick="dllToggleSwitch()">
+          <div class="tgl-sw" id="dllSw"></div>
+          <span class="tgl-lbl" id="dllLbl">OFF</span>
+        </div>
+      </div>
+      <div id="dllSettings" style="display:none;margin-top:10px">
+        <div class="irow">
+          <div class="ilabel" style="width:90px;color:var(--muted2)">Soglia</div>
+          <div class="iwrap" style="max-width:100px">
+            <input type="number" id="dllPct" value="2" min="0.1" max="50" step="0.5" oninput="dllSaveSettings()"/>
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="dll-hint">Se il wallet scende di questa % in 24h, nessuna nuova posizione.</div>
+      </div>
+      <div id="dllBanner" style="display:none;margin-top:10px">
+        <div class="dll-triggered-box">
+          <div class="dll-triggered-icon">🛑</div>
+          <div class="dll-triggered-body">
+            <div class="dll-triggered-title">Trading bloccato</div>
+            <div class="dll-triggered-sub">Hai superato il limite di perdita giornaliero</div>
+            <div class="dll-countdown" id="dllCountdown">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEE -->
+    <div class="m-sec" id="feeSec">
+      <div class="m-sec-title" style="margin-bottom:8px">Fee Exchange <span class="dll-info-tip" title="Taker: ordini market/stop. Maker: ordini limit.">ⓘ</span></div>
+      <div class="irow" style="margin-bottom:6px">
+        <div class="ilabel" style="width:90px;color:var(--muted2)">Taker fee</div>
+        <div class="iwrap" style="max-width:120px">
+          <input type="number" id="feeTakerInput" value="0.055" min="0" max="1" step="0.001" oninput="saveTakerFee()"/>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="irow" style="margin-bottom:6px">
+        <div class="ilabel" style="width:90px;color:var(--muted2)">Maker fee</div>
+        <div class="iwrap" style="max-width:120px">
+          <input type="number" id="feeMakerInput" value="0.02" min="0" max="1" step="0.001" oninput="saveMakerFee()"/>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="dll-hint">Market/Stop → taker×2 · Limit → maker+taker</div>
+    </div>
+
+    <!-- OPEN BUTTON -->
+    <div class="m-sec">
+      <button class="btn-open long" id="btnOpen" onclick="openModal()">OPEN LONG</button>
+      <div class="btn-row">
+        <button class="btn-sec" onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POSITIONS PANEL -->
+<div class="m-panel" id="sheet-positions">
+  <div class="m-panel-title">
+    <span>💼 Posizioni <span class="sec-badge" id="posCount">0</span></span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="close-all-btn" onclick="closeAllPositions()">✕ Chiudi tutto</button>
+      <button class="m-sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+  </div>
+  <div class="m-panel-body">
+    <div style="padding:12px 14px">
+      <div id="posList"><div class="no-pos">No open positions</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDERS PANEL -->
+<div class="m-panel" id="sheet-orders">
+  <div class="m-panel-title">
+    <span>📋 Ordini Pending <span class="sec-badge" id="ordCount">0</span></span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;min-height:36px;min-width:36px" onclick="fetchBitgetOrders()">⟳</button>
+      <button class="m-sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+  </div>
+  <div class="m-panel-body">
+    <div style="padding:12px 14px">
+      <div id="ordList"><div class="no-ord">Nessun ordine pending</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BALANCE PANEL -->
+<div class="m-panel" id="sheet-account">
+  <div class="m-panel-title">
+    <span>💰 Balance</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;min-height:36px;min-width:36px" onclick="refreshAccount()">⟳</button>
+      <button class="m-sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+  </div>
+  <div class="m-panel-body">
+    <div style="padding:12px 14px">
+      <div class="acc-grid" style="margin-bottom:10px">
+        <div class="acc-card"><div class="al">Balance</div><div class="av acc" id="accBalance">—</div></div>
+        <div class="acc-card"><div class="al">Available</div><div class="av" id="accAvail">—</div></div>
+        <div class="acc-card"><div class="al">Unreal. PnL</div><div class="av" id="accPnl">—</div></div>
+        <div class="acc-card"><div class="al">Margin</div><div class="av" id="accMargin">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<div class="m-bottom-nav">
+  <button class="m-nav-btn" id="navTrade" onclick="openSheet('trade')">
+    <div class="m-nav-icon">📊</div>Trade
+  </button>
+  <button class="m-nav-btn" id="navPositions" onclick="openSheet('positions')">
+    <div class="m-nav-icon">💼</div>Posizioni
+  </button>
+  <button class="m-nav-btn" id="navOrders" onclick="openSheet('orders')">
+    <div class="m-nav-icon">📋</div>Ordini
+  </button>
+  <button class="m-nav-btn" id="navAccount" onclick="openSheet('account')">
+    <div class="m-nav-icon">💰</div>Balance
+  </button>
+</div>
+
+<!-- ── HAMBURGER DRAWER ── -->
+<div class="m-drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<div class="m-drawer" id="drawer">
+  <div class="m-drawer-head">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px"><span style="color:#fff">Risk</span><span style="color:#a855f7">Flow</span></div>
+      <div id="userBadge" style="margin-top:4px">
+        <div class="user-dot-rf"></div>
+        <span id="rfUsername" style="font-size:11px;color:var(--muted2)">—</span>
+      </div>
+    </div>
+    <button class="m-drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <!-- SL Shield -->
+  <div class="slp-row" id="slpWrap" onclick="slpToggle()">
+    <div class="slp-left">
+      <span class="slp-icon">🛡</span>
+      <div>
+        <div class="slp-label">SL Shield</div>
+        <div style="font-size:9px;color:var(--muted2)">Impedisce di allargare lo SL</div>
+      </div>
+    </div>
+    <div class="slp-sw" id="slpSw"></div>
+  </div>
+  <div class="drawer-item" style="display:none"><span class="slp-state" id="slpState"></span></div>
+
+  <div class="drawer-item" onclick="document.getElementById('apiModal').classList.add('open');rfLoadApiKeysUI();closeDrawer()">
+    <span class="drawer-icon">🔑</span>
+    <span>Connetti Exchange</span>
+    <span class="drawer-badge" id="drawerExBadge">—</span>
+  </div>
+
+  <div class="drawer-item" onclick="closeDrawer()">
+    <span class="drawer-icon">📱</span>
+    <span>PnL <span style="color:var(--muted2);font-size:10px">realtime</span></span>
+    <span class="drawer-badge tv" id="tbPnl">—</span>
+  </div>
+
+  <div class="drawer-item" style="cursor:default">
+    <span class="drawer-icon"><div class="live-dot" style="display:inline-block"></div></span>
+    <span style="font-size:11px;color:var(--muted2)">Balance</span>
+    <span class="drawer-badge acc" id="drawerBalance">—</span>
+  </div>
+
+  <div class="drawer-item" onclick="rfDoLogout()">
+    <span class="drawer-icon" style="color:var(--red)">⎋</span>
+    <span style="color:var(--red)">Logout</span>
+  </div>
+</div>
+
+<!-- ── MODALS ── -->
+<div class="m-ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxSet('entry')"><div class="ctx-dot" style="background:var(--yellow)"></div>Set Entry</div>
+  <div class="ctx-item" onclick="ctxSet('sl')"><div class="ctx-dot" style="background:var(--red)"></div>Set Stop Loss</div>
+  <div class="ctx-item" onclick="ctxSet('tp1')"><div class="ctx-dot" style="background:var(--green)"></div>Set TP1</div>
+  <div class="ctx-item" onclick="ctxSet('tp2')"><div class="ctx-dot" style="background:#3dffcc"></div>Set TP2</div>
+  <div class="ctx-item" onclick="ctxSet('tp3')"><div class="ctx-dot" style="background:#3dddff"></div>Set TP3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(0)"><div class="ctx-dot" style="background:#ffc940"></div>Set L1</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(1)"><div class="ctx-dot" style="background:#f59e0b"></div>Set L2</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(2)"><div class="ctx-dot" style="background:#fb923c"></div>Set L3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(3)"><div class="ctx-dot" style="background:#ef4444"></div>Set L4</div>
+  <div class="ctx-item" onclick="closeCtxMenu()" style="border-top:1px solid var(--border);margin-top:4px"><span style="color:var(--muted2)">✕ Annulla</span></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">Confirm Order</div>
+    <div class="modal-rows" id="modalRows"></div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" onclick="executeOrder()">Open Trade</button>
+    </div>
+  </div>
+</div>
+
+<div id="posModal">
+  <div class="pos-modal-card">
+    <div class="pos-modal-title" id="pmTitle">Chiudi posizione</div>
+    <div class="pos-modal-sub" id="pmSub"></div>
+    <div class="pos-modal-rows" id="pmRows"></div>
+    <div class="pos-modal-btns">
+      <button class="pmb-cancel" onclick="closePosModal()">Annulla</button>
+      <button class="pmb-confirm" id="pmConfirmBtn" onclick="executePosAction()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<div id="moneyShotModal">
+  <div class="ms-wrap">
+    <div class="ms-card-outer">
+      <canvas id="msShotCanvas"></canvas>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button id="msSaveBtn" onclick="msSave()">⬇ Salva immagine</button>
+      <button id="msCloseBtn" onclick="closeMoneyShotModal()">✕ Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div id="pairModal" onclick="if(event.target===this)closePairModal()">
+  <div class="pm-box">
+    <div class="pm-head">
+      <span class="pm-title">Seleziona Pair</span>
+      <button class="pm-close" onclick="closePairModal()">✕</button>
+    </div>
+    <div class="pm-search-wrap">
+      <input class="pm-search" id="pmSearch" placeholder="Cerca pair… es. BTC, SOL, PEPE"
+        oninput="renderPairModal(this.value)" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="pm-cats" id="pmCats"></div>
+    <div class="pm-body" id="pmBody"></div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<!-- ── MOBILE JS ── -->
+<script>
+// ─── INLINE PANEL MANAGEMENT ───
+let _activeSheet = null;
+
+function openSheet(name) {
+  const isSame = _activeSheet === name;
+
+  // Close current panel
+  if (_activeSheet) {
+    const prev = document.getElementById('sheet-' + _activeSheet);
+    if (prev) prev.classList.remove('open');
+    document.querySelectorAll('.m-nav-btn').forEach(b => b.classList.remove('active'));
+  }
+
+  if (isSame) {
+    _activeSheet = null;
+    document.body.classList.remove('panel-open');
+    _triggerChartResize();
+    return;
+  }
+
+  const panel = document.getElementById('sheet-' + name);
+  if (!panel) return;
+  panel.classList.add('open');
+  _activeSheet = name;
+  document.body.classList.add('panel-open');
+  const navBtn = document.getElementById('nav' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (navBtn) navBtn.classList.add('active');
+  _triggerChartResize();
+}
+
+// ─── SYNC BUTTON (closes modal after sync) ───
+function mobileSync(btn) {
+  const orig = btn.textContent;
+  btn.textContent = '⟳ Syncing...';
+  btn.disabled = true;
+  const done = () => {
+    btn.textContent = orig;
+    btn.disabled = false;
+    document.getElementById('apiModal').classList.remove('open');
+  };
+  if (typeof rfBitgetSync === 'function') {
+    rfBitgetSync();
+    // Rileva completamento tramite polling su apiStatus (cambia testo quando finisce)
+    // Non tocchiamo MAI window.notify così la notifica scompare normalmente
+    let polls = 0;
+    const poll = setInterval(() => {
+      polls++;
+      const statusEl = document.getElementById('apiStatus');
+      const txt = statusEl ? statusEl.textContent : '';
+      // fetchBitgetDashboard scrive '✓ Connesso' o '✗ ...' quando finisce
+      if (txt.startsWith('✓') || txt.startsWith('✗') || polls > 40) {
+        clearInterval(poll);
+        setTimeout(done, 600);
+      }
+    }, 200);
+  } else {
+    done();
+  }
+}
+
+function closeSheet() {
+  if (_activeSheet) {
+    const panel = document.getElementById('sheet-' + _activeSheet);
+    if (panel) panel.classList.remove('open');
+    _activeSheet = null;
+  }
+  document.body.classList.remove('panel-open');
+  document.querySelectorAll('.m-nav-btn').forEach(b => b.classList.remove('active'));
+  _triggerChartResize();
+}
+
+function _triggerChartResize() {
+  setTimeout(() => {
+    const cw = document.getElementById('chartWrap');
+    if (!cw) return;
+    if (typeof chart !== 'undefined' && chart && chart.resize) {
+      chart.resize(cw.offsetWidth, cw.offsetHeight);
+    }
+    if (typeof drawCanvas === 'function') drawCanvas();
+  }, 320);
+}
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerBg').classList.add('open');
+  // Aggiorna badge exchange
+  const ex = window._activeExchange || 'bitget';
+  const badge = document.getElementById('drawerExBadge');
+  if (badge) badge.textContent = ex.charAt(0).toUpperCase() + ex.slice(1);
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerBg').classList.remove('open');
+}
+
+function closeCtxMenu() {
+  document.getElementById('ctxMenu').classList.remove('open');
+  document.getElementById('ctxMenu').style.display = 'none';
+}
+
+// ─── LONG PRESS CONTEXT MENU (replaces right-click) ───
+let _longPressTimer = null;
+let _longPressTriggered = false;
+let _longPressX = 0, _longPressY = 0;
+let _touchStartX = 0, _touchStartY = 0;
+
+function setupLongPress() {
+  const chartEl = document.getElementById('chart');
+  const dc = document.getElementById('dragCanvas');
+
+  function startPress(cx, cy) {
+    _longPressX = cx; _longPressY = cy;
+    _touchStartX = cx; _touchStartY = cy;
+    _longPressTriggered = false;
+    _longPressTimer = setTimeout(() => {
+      _longPressTriggered = true;
+      openCtxMenuAt(cx, cy);
+    }, 600);
+  }
+
+  function cancelPress() {
+    if (_longPressTimer) { clearTimeout(_longPressTimer); _longPressTimer = null; }
+  }
+
+  // Esponi cancelPress globalmente così setupTouchDrag può cancellare il timer
+  // quando rileva un drag su una linea (evita apertura menu durante drag)
+  window._cancelLongPress = cancelPress;
+
+  function moveCancel(cx, cy) {
+    const dx = Math.abs(cx - _touchStartX);
+    const dy = Math.abs(cy - _touchStartY);
+    if (dx > 8 || dy > 8) cancelPress();
+  }
+
+  [chartEl, dc].forEach(el => {
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      startPress(t.clientX, t.clientY);
+    }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      if (e.touches.length !== 1) return;
+      moveCancel(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    el.addEventListener('touchend', cancelPress, { passive: true });
+    el.addEventListener('touchcancel', cancelPress, { passive: true });
+  });
+}
+
+function openCtxMenuAt(clientX, clientY) {
+  const chartWrap = document.getElementById('chartWrap');
+  const dc = document.getElementById('dragCanvas');
+  const rect = chartWrap.getBoundingClientRect();
+  // Use coordinateToPrice via candleSeries
+  if (typeof candleSeries === 'undefined') return;
+  const y = clientY - rect.top;
+  const price = candleSeries.coordinateToPrice(y);
+  if (!price) return;
+  // Imposta window.ctxPrice (usato dal mobile) E la variabile ctxPrice
+  // nella closure di riskflow.js tramite l'override di ctxSet/ctxSetLadder
+  window.ctxPrice = price;
+  window._mobileCtxPrice = price;
+
+  const m = document.getElementById('ctxMenu');
+  // Show/hide items based on mode
+  const isLadder = window.S && window.S.orderType === 'ladder';
+  m.children[0].style.display = (!isLadder && window.S && window.S.orderType !== 'market') ? 'flex' : 'none';
+  for (let i = 5; i <= 8; i++) {
+    const el = m.children[i]; if (!el) continue;
+    el.style.display = isLadder ? 'flex' : 'none';
+  }
+  m.style.display = 'block';
+  m.classList.add('open');
+
+  // Position menu: avoid going off screen
+  const menuW = 200, menuH = 300;
+  let left = clientX + 10;
+  let top = clientY - 30;
+  if (left + menuW > window.innerWidth) left = clientX - menuW - 10;
+  if (top + menuH > window.innerHeight) top = window.innerHeight - menuH - 10;
+  if (top < 0) top = 10;
+  m.style.left = left + 'px';
+  m.style.top = top + 'px';
+
+  // Haptic feedback if supported
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
+// Close ctx menu on outside tap
+document.addEventListener('touchstart', e => {
+  const m = document.getElementById('ctxMenu');
+  if (m.classList.contains('open') && !m.contains(e.target)) {
+    closeCtxMenu();
+  }
+}, { passive: true });
+
+document.addEventListener('click', e => {
+  const m = document.getElementById('ctxMenu');
+  if (!m.contains(e.target)) closeCtxMenu();
+});
+
+// ─── TOUCH-TO-SET MODE (⊕ buttons) ───
+// On mobile, ⊕ buttons show an instruction and then the next tap on the chart sets the line
+function activateTouch(type) {
+  if (typeof activateClick === 'function') {
+    activateClick(type);
+    notify('Tocca la chart → ' + type.toUpperCase(), '');
+    // Close the sheet so chart is visible
+    closeSheet();
+  }
+}
+
+// Override ctxSet on mobile: after setting a line, close sheet so chart is visible
+// Deferred because riskflow.js loads after this script
+window.addEventListener('load', function() {
+  // Override ctxSet: riskflow.js usa una variabile ctxPrice nella closure interna.
+  // Sul mobile il prezzo viene salvato in window._mobileCtxPrice da openCtxMenuAt.
+  // Sovrascriviamo ctxSet per chiamare direttamente setField con il prezzo corretto.
+  window.ctxSet = function(type) {
+    const price = window._mobileCtxPrice || window.ctxPrice;
+    if (!price) { closeCtxMenu(); return; }
+    if (typeof setField === 'function') {
+      setField(type, price);
+    }
+    closeCtxMenu();
+    setTimeout(closeSheet, 50);
+  };
+
+  window.ctxSetLadder = function(i) {
+    const price = window._mobileCtxPrice || window.ctxPrice;
+    if (!price || !window.S || window.S.orderType !== 'ladder') { closeCtxMenu(); return; }
+    if (window.LADDER && window.LADDER.orders[i] !== undefined) {
+      window.LADDER.orders[i].price = price;
+      const el = document.getElementById('ladd-price-' + i);
+      if (el && typeof fmtPrice === 'function') el.value = fmtPrice(price);
+      if (typeof calcLadder === 'function') calcLadder();
+      if (typeof setChartLine === 'function') {
+        const k = 'ld' + (i+1);
+        if (window.DRAG_PRICES) window.DRAG_PRICES[k] = price;
+        setChartLine(k, price);
+      }
+      if (typeof notify === 'function' && typeof fmtPrice === 'function') notify('Set L'+(i+1)+' → $'+fmtPrice(price), 'ok');
+    }
+    closeCtxMenu();
+    setTimeout(closeSheet, 50);
+  };
+
+  // Sostituisci lineAtY e posLineAtY con versioni mobile-friendly (grab zone 28px invece di 14px)
+  window.lineAtY = function(clientY) {
+    if (typeof candleSeries === 'undefined' || !window.DRAG_PRICES || !window.S) return null;
+    const rect = document.getElementById('chartWrap').getBoundingClientRect();
+    const y = clientY - rect.top;
+    let types;
+    if (window.S.orderType === 'market') {
+      types = ['sl','tp1','tp2','tp3'];
+    } else if (window.S.orderType === 'ladder') {
+      types = ['ld1','ld2','ld3','ld4','sl','tp1','tp2','tp3'];
+    } else {
+      types = ['entry','sl','tp1','tp2','tp3'];
+    }
+    let best = null, bestD = 28; // grab zone più larga per touch
+    types.forEach(t => {
+      const p = window.DRAG_PRICES[t]; if (!p) return;
+      const ly = candleSeries.priceToCoordinate(p);
+      if (ly === null) return;
+      const d = Math.abs(y - ly);
+      if (d < bestD) { bestD = d; best = t; }
+    });
+    return best;
+  };
+
+  window.posLineAtY = function(clientY) {
+    if (typeof candleSeries === 'undefined' || !window.S) return null;
+    const rect = document.getElementById('chartWrap').getBoundingClientRect();
+    const y = clientY - rect.top;
+    let best = null, bestD = 28; // grab zone più larga per touch
+
+    if (window._posSLLines) {
+      Object.entries(window._posSLLines).forEach(([idxStr, entry]) => {
+        if (!entry || !entry.price) return;
+        const posSym = (entry.symbol || '').replace(/_?(UMCBL|DMCBL)/gi,'').replace(/USDT$/,'');
+        const curSym = (window.S.symbol || '').replace(/USDT$/,'');
+        if (posSym !== curSym) return;
+        const ly = candleSeries.priceToCoordinate(entry.price);
+        if (ly === null) return;
+        const d = Math.abs(y - ly);
+        if (d < bestD) { bestD = d; best = { type: 'sl', idx: parseInt(idxStr) }; }
+      });
+    }
+
+    if (window._posTPLines) {
+      Object.entries(window._posTPLines).forEach(([key, entry]) => {
+        if (!entry || !entry.price) return;
+        const posSym = (entry.symbol || '').replace(/_?(UMCBL|DMCBL)/gi,'').replace(/USDT$/,'');
+        const curSym = (window.S.symbol || '').replace(/USDT$/,'');
+        if (posSym !== curSym) return;
+        const ly = candleSeries.priceToCoordinate(entry.price);
+        if (ly === null) return;
+        const d = Math.abs(y - ly);
+        if (d < bestD) { bestD = d; best = { type: 'tp', idx: entry.posIdx, tpN: entry.tpN, key }; }
+      });
+    }
+
+    return best;
+  };
+
+  // ── NOTIFY QUEUE: sostituisce notify con versione che non si cancella da sola ──
+  // riskflow.js usa clearTimeout(el._t) che con chiamate rapide in sequenza
+  // può lasciare una notifica bloccata per sempre. Usiamo una coda FIFO.
+  (function patchNotify() {
+    const el = document.getElementById('notif');
+    if (!el) return;
+    let _queue = [];
+    let _running = false;
+
+    function showNext() {
+      if (_queue.length === 0) { _running = false; return; }
+      _running = true;
+      const { msg, type } = _queue.shift();
+      el.textContent = msg;
+      el.className = 'notif show' + (type ? ' ' + type : '');
+      clearTimeout(el._t);
+      el._t = setTimeout(() => {
+        el.className = 'notif'; // nasconde con transizione CSS
+        setTimeout(showNext, 350); // aspetta la transizione prima del prossimo
+      }, 2200);
+    }
+
+    // Sovrascrive la funzione notify globale
+    window.notify = function(msg, type) {
+      // Se è la stessa notifica già in coda, non duplicare
+      const last = _queue[_queue.length - 1];
+      if (last && last.msg === msg) return;
+      _queue.push({ msg, type: type || '' });
+      // Svuota la coda se è troppo piena (evita backlog)
+      if (_queue.length > 3) _queue = _queue.slice(-2);
+      if (!_running) showNext();
+    };
+  })();
+});
+
+// ─── TOUCH DRAG FOR LINES ───
+// Mirrors the mouse drag logic but uses touch events
+function setupTouchDrag() {
+  const chartWrap = document.getElementById('chartWrap');
+  let touchDragState = null;
+  let touchPosDragState = null;
+
+  function getTouchY(e) {
+    return e.touches.length > 0 ? e.touches[0].clientY : e.changedTouches[0].clientY;
+  }
+  function getTouchX(e) {
+    return e.touches.length > 0 ? e.touches[0].clientX : e.changedTouches[0].clientX;
+  }
+
+  chartWrap.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    if (_longPressTriggered) return; // Long press handled elsewhere
+    const clientY = getTouchY(e);
+    const clientX = getTouchX(e);
+    const rect = chartWrap.getBoundingClientRect();
+    const cx = clientX - rect.left;
+    const cy = clientY - rect.top;
+    const priceAxisWidth = 55;
+    if (cx > rect.width - priceAxisWidth) return;
+
+    // Check click zones (pos line buttons)
+    if (window._posLineZones) {
+      for (const [key, z] of Object.entries(window._posLineZones)) {
+        if (cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + z.h) {
+          const { idx, action } = z;
+          if (action === 'tp') {
+            const el = document.getElementById('pos-tp1-input-' + idx);
+            if (el) { el.focus(); el.select(); }
+          } else if (action === 'sl') {
+            const el = document.getElementById('pos-sl-input-' + idx);
+            if (el) { el.focus(); el.select(); }
+          } else if (action === 'be') {
+            if (window.moveToBreakeven) window.moveToBreakeven(idx);
+          } else if (action === 'remove_sl') {
+            const slLine = window._posSLLines && window._posSLLines[idx];
+            if (slLine && slLine.priceLine) {
+              try { candleSeries.removePriceLine(slLine.priceLine); } catch(_) {}
+              slLine.priceLine = null; slLine.price = null;
+            }
+            drawCanvas();
+          } else if (action === 'remove_tp') {
+            const tpLine = window._posTPLines && window._posTPLines[idx + '_1'];
+            if (tpLine && tpLine.priceLine) {
+              try { candleSeries.removePriceLine(tpLine.priceLine); } catch(_) {}
+              tpLine.priceLine = null; tpLine.price = null;
+            }
+            drawCanvas();
+          }
+          return;
+        }
+      }
+    }
+
+    // Check close zones (✕)
+    if (window._closeZones) {
+      for (const [t, z] of Object.entries(window._closeZones)) {
+        if (Math.hypot(cx - z.x, cy - z.y) <= z.r + 8) {
+          const idMap = { entry:'entryVal', sl:'slVal', tp1:'tp1', tp2:'tp2', tp3:'tp3' };
+          if (t.startsWith('ld')) {
+            const lIdx = parseInt(t[2]) - 1;
+            if (window.LADDER) {
+              window.LADDER.orders[lIdx].price = null;
+              if (window.LADDER.orders[lIdx].priceLine) {
+                try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_) {}
+                window.LADDER.orders[lIdx].priceLine = null;
+              }
+              window.DRAG_PRICES[t] = null;
+              const el2 = document.getElementById('ladd-price-' + lIdx); if (el2) el2.value = '';
+              calcLadder();
+            }
+          } else {
+            if (idMap[t]) document.getElementById(idMap[t]).value = '';
+            removeChartLine(t);
+            if (t === 'entry') window.DRAG_PRICES.entry = null;
+          }
+          drawCanvas(); calc();
+          return;
+        }
+      }
+    }
+
+    // Pos line drag
+    if (typeof posLineAtY === 'function') {
+      const posLine = posLineAtY(clientY);
+      if (posLine) {
+        // Cancella il long press timer — non vogliamo il menu durante il drag
+        if (window._cancelLongPress) window._cancelLongPress();
+        _longPressTriggered = false;
+        let refSL = null;
+        if (posLine.type === 'sl' && window._posSLLines) {
+          const slEntry = window._posSLLines[posLine.idx];
+          if (slEntry) refSL = slEntry._refSL || slEntry.price;
+        }
+        touchPosDragState = { ...posLine, startY: clientY, pending: true, refSL };
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Setup line drag
+    if (typeof lineAtY === 'function') {
+      const type = lineAtY(clientY);
+      if (type) {
+        // Cancella il long press timer — non vogliamo il menu durante il drag
+        if (window._cancelLongPress) window._cancelLongPress();
+        _longPressTriggered = false;
+        touchDragState = { type, startY: clientY, pending: true };
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Click-to-set mode
+    if (window.S && window.S.clickMode && !_longPressTriggered) {
+      if (typeof candleSeries !== 'undefined') {
+        const price = candleSeries.coordinateToPrice(cy);
+        if (price) {
+          setField(window.S.clickMode, price);
+          window.S.clickMode = null;
+          document.getElementById('chart').style.cursor = 'default';
+          e.preventDefault();
+        }
+      }
+    }
+  }, { passive: false });
+
+  chartWrap.addEventListener('touchmove', e => {
+    if (!touchDragState && !touchPosDragState) return;
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+
+    const clientY = getTouchY(e);
+    const rect = chartWrap.getBoundingClientRect();
+    const y = clientY - rect.top;
+    const price = candleSeries.coordinateToPrice(y);
+    if (!price || price <= 0) return;
+
+    // Confirm drag if moved enough
+    if (touchDragState?.pending || touchPosDragState?.pending) {
+      const startY = touchDragState?.startY ?? touchPosDragState?.startY;
+      if (Math.abs(clientY - startY) < 6) return;
+      if (touchDragState) touchDragState.pending = false;
+      if (touchPosDragState) touchPosDragState.pending = false;
+    }
+
+    // Pos SL/TP drag
+    if (touchPosDragState) {
+      const pd = touchPosDragState;
+      if (pd.type === 'sl') {
+        const entry = window._posSLLines && window._posSLLines[pd.idx];
+        if (!entry) return;
+        const side = entry.side || 'long';
+        const posEntry = window._positions && window._positions[pd.idx]
+          ? parseFloat(window._positions[pd.idx].openPriceAvg || 0) : 0;
+        if (posEntry > 0) {
+          if (side === 'long' && price >= posEntry) { drawCanvas(); return; }
+          if (side === 'short' && price <= posEntry) { drawCanvas(); return; }
+        }
+        if (typeof slpCheck === 'function' && !slpCheck(price, pd.refSL || entry.price, side, true)) {
+          drawCanvas(); return;
+        }
+        entry.price = price;
+        if (entry.priceLine) { try { candleSeries.removePriceLine(entry.priceLine); } catch(_){} }
+        entry.priceLine = candleSeries.createPriceLine({ price, color:'#ff2d4a', lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dashed, axisLabelVisible:true, title:` SL#${pd.idx+1}` });
+        const inp = document.getElementById('pos-sl-input-' + pd.idx);
+        if (inp && typeof fmtPrice === 'function') inp.value = fmtPrice(price);
+        if (window._positions && window._positions[pd.idx]) window._positions[pd.idx].stopLoss = price;
+      } else if (pd.type === 'tp') {
+        const key = pd.key || `${pd.idx}_${pd.tpN || 1}`;
+        const entry = window._posTPLines && window._posTPLines[key];
+        if (!entry) return;
+        entry.price = price;
+        if (entry.priceLine) { try { candleSeries.removePriceLine(entry.priceLine); } catch(_){} }
+        entry.priceLine = candleSeries.createPriceLine({ price, color: entry.color || '#00d17a', lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dashed, axisLabelVisible:true, title:` TP${entry.tpN}#${entry.posIdx+1}` });
+        const inp = document.getElementById(`pos-tp${entry.tpN}-input-${entry.posIdx}`);
+        if (inp && typeof fmtPrice === 'function') inp.value = fmtPrice(price);
+      }
+      drawCanvas();
+      return;
+    }
+
+    // Setup line drag
+    if (touchDragState) {
+      window.DRAG_PRICES[touchDragState.type] = price;
+      const idMap = { entry:'entryVal', sl:'slVal', tp1:'tp1', tp2:'tp2', tp3:'tp3' };
+      if (touchDragState.type.startsWith('ld')) {
+        const lIdx = parseInt(touchDragState.type[2]) - 1;
+        if (window.LADDER) {
+          window.LADDER.orders[lIdx].price = price;
+          const el2 = document.getElementById('ladd-price-' + lIdx);
+          if (el2 && typeof fmtPrice === 'function') el2.value = fmtPrice(price);
+          if (window.LADDER.orders[lIdx].priceLine) {
+            try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_) {}
+          }
+          const colors = ['#ffc940','#f59e0b','#fb923c','#ef4444'];
+          window.LADDER.orders[lIdx].priceLine = candleSeries.createPriceLine({ price, color: colors[lIdx], title:'', lineWidth:1, lineStyle:0, axisLabelVisible:false });
+          if (typeof calcLadder === 'function') calcLadder();
+        }
+      } else {
+        const el = document.getElementById(idMap[touchDragState.type]);
+        if (el && typeof fmtPrice === 'function') el.value = fmtPrice(price);
+        if (typeof setChartLine === 'function') setChartLine(touchDragState.type, price);
+      }
+      drawCanvas();
+    }
+  }, { passive: false });
+
+  chartWrap.addEventListener('touchend', e => {
+    if (touchPosDragState) {
+      const pd = touchPosDragState;
+      touchPosDragState = null;
+      if (pd.type === 'sl') {
+        const entry = window._posSLLines && window._posSLLines[pd.idx];
+        if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ SL#${pd.idx+1} → $${fmtPrice(entry.price)} — premi Set SL per confermare`, '');
+      } else if (pd.type === 'tp') {
+        const key = pd.key || `${pd.idx}_${pd.tpN||1}`;
+        const entry = window._posTPLines && window._posTPLines[key];
+        if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ TP${entry.tpN}#${entry.posIdx+1} → $${fmtPrice(entry.price)} — premi Set per confermare`, '');
+      }
+      drawCanvas();
+      return;
+    }
+    if (touchDragState) {
+      const t = touchDragState.type;
+      touchDragState = null;
+      if (t.startsWith('ld')) {
+        if (typeof calcLadder === 'function') calcLadder();
+        if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
+      } else {
+        if (typeof calc === 'function') calc();
+        if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
+      }
+    }
+  }, { passive: true });
+}
+
+// ─── SYNC DRAWER BALANCE ───
+function syncDrawerBalance() {
+  const tbPnl = document.getElementById('tbPnl');
+  const drawerBal = document.getElementById('drawerBalance');
+  const accBal = document.getElementById('accBalance');
+  if (drawerBal && accBal) drawerBal.textContent = accBal.textContent;
+  // Sync tbPnl classes too
+  const drawerPnl = document.getElementById('tbPnl');
+  if (drawerPnl) {
+    // Already shared via same ID
+  }
+}
+setInterval(syncDrawerBalance, 1000);
+
+// Observe exchange badge in drawer
+function updateDrawerExBadge() {
+  const ex = window._activeExchange || 'bitget';
+  const badge = document.getElementById('drawerExBadge');
+  if (badge) badge.textContent = ex.charAt(0).toUpperCase() + ex.slice(1);
+}
+setInterval(updateDrawerExBadge, 2000);
+
+// ─── INIT ───
+window.addEventListener('DOMContentLoaded', () => {
+  setupLongPress();
+  // Touch drag setup deferred until chart is ready
+  const waitChart = setInterval(() => {
+    if (typeof candleSeries !== 'undefined') {
+      clearInterval(waitChart);
+      setupTouchDrag();
+    }
+  }, 200);
+});
+</script>
+
+<!-- ── SHARED JS (same file, same logic) ── -->
+<script src="JS/riskflow.js"></script>
+</body>
+</html>
