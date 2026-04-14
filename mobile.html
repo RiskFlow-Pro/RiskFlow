@@ -945,21 +945,40 @@ body {
   </div>
 </div>
 
+<!-- STUB SICURI auth — definiti subito nell'HTML così onclick non crasha mai -->
+<script>
+  // Queste funzioni vengono subito definite come no-op.
+  // Il blocco async Firebase le sovrascriverà su window non appena caricato.
+  // Così onclick="rfDoLogin()" non crasha mai, neanche se Firebase è lento.
+  window.rfDoLogin    = function() {};
+  window.rfDoRegister = function() {};
+  window.rfDoForgot   = function() {};
+  window.rfDoLogout   = function() {};
+  window.rfSwitchTab  = function(tab) {
+    ['login','register','forgot'].forEach(function(t,i){
+      var f = document.getElementById('rf-form-'+t);
+      if(f) f.classList.toggle('hidden', t!==tab);
+      var tabs = document.querySelectorAll('.auth-tab');
+      if(tabs[i]) tabs[i].classList.toggle('active', t===tab);
+    });
+  };
+</script>
+
 <!-- API KEYS MODAL -->
 <div id="apiModal">
   <div class="api-card">
     <div class="api-title">🔑 Connetti Exchange</div>
     <div class="api-exchange-tabs">
       <button class="api-ex-btn active" id="exBtnBitget" onclick="rfSelectExchange('bitget')">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACoklEQVR42r1VXUuUURB+5ny853XDMKKotnULUqLUoKsSLexDLyws6bqIKIjoqi77Fd30H4IgqEgvgoSIIlwySFGTIrIMandt1N3f3fc850419retiEg3n5nBmhmeemXkOIc/4Fybwj0zVe/Qe3oMABoSAEGtK5DwaBBp+BFeAEkB/m8g6bJDq5aS8dZNDg2yWunuic2e5wqCVcOW5+nyxsKzHJsPmtAEMELbtU1PvUHDI+Rr+eUaeRQ0sTVKPT8kTvfzpIwRRz/H4yTObTiMmEK2ua86jSeqJaXmil+dmEcfo6olv33HSYMGC6g/KT3hZhwqr1zNheqdRwgDhoSPyaxGWscgoM8qMnEeudmm0NJDMUJC5rO7cz3OzEJI6u+P7Q46UnH6LqIzAwDvf2sKO4bG8xt9K88wJw20dsA5K4vMcvZlBAnLufdDXpQ/s1Qfbg2tXaR2BPJjrlOZRZFGMTf+AAYwUYTKlMhNgDh4+DhvXB4E2gLl4hSwjb6s7+Mcl61HwohiZ/lMGMFqGqbQaHQdzMDQSNjaaQBsgvHCZLGPB/5GrmrasQ8GLQmROng4FGSDcuk09zYBZD4+Y7SmzLmEAc/4SLVSQd8vIrlqxQFDk5MsMa02Li7xxk9uzSzL0scM8+hw2pmRz9OKVTzTC/SS+5qTmPOYZMSNiVBiWZfZbePioIRglw9QO/WoKZUb2F6IVdo0InlFgOAcjZbyozwzyyCNoRVuS7sFwvKcF8x5S1N2137mvsMyXwqN9hmACHW5vVmOTsIwvcZXzyjLCDM3yw6weHOCxDADavMXeG7Z7W5G3UGr1wsYkSd2565NJtHcgitz1G7ZjN3I1sgCgeprNIANuADwggBJQquJllVJL4Aqj5H91QIo1afZSsPyvv8h3EP+qljDdOGgAAAAASUVORK5CYII=" width="22" height="22" style="border-radius:4px" alt="Bitget"/>
+        <svg width="22" height="22" viewBox="0 0 22 22" style="border-radius:4px;flex-shrink:0" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" rx="4" fill="#00f0ff"/><text x="11" y="15" text-anchor="middle" font-size="9" font-weight="800" font-family="sans-serif" fill="#000">BG</text></svg>
         <span class="api-ex-name">Bitget</span><span class="api-ex-badge">Live</span>
       </button>
       <button class="api-ex-btn" id="exBtnBybit" onclick="rfSelectExchange('bybit')">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px" alt="Bybit"/>
+        <svg width="22" height="22" viewBox="0 0 22 22" style="border-radius:4px;flex-shrink:0" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" rx="4" fill="#f7a600"/><text x="11" y="15" text-anchor="middle" font-size="9" font-weight="800" font-family="sans-serif" fill="#000">BB</text></svg>
         <span class="api-ex-name">Bybit</span><span class="api-ex-badge">Live</span>
       </button>
       <button class="api-ex-btn" id="exBtnBybitDemo" onclick="rfSelectExchange('bybit_demo')">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px;opacity:.5" alt="Bybit Demo"/>
+        <svg width="22" height="22" viewBox="0 0 22 22" style="border-radius:4px;flex-shrink:0;opacity:.5" xmlns="http://www.w3.org/2000/svg"><rect width="22" height="22" rx="4" fill="#f7a600"/><text x="11" y="15" text-anchor="middle" font-size="9" font-weight="800" font-family="sans-serif" fill="#000">BB</text></svg>
         <span class="api-ex-name">Bybit</span><span class="api-ex-badge api-ex-badge--demo">Demo</span>
       </button>
       <button class="api-ex-btn" id="exBtnWeex" onclick="rfSelectExchange('weex')">
@@ -5068,14 +5087,19 @@ window.syncPosTpLine = function(posIdx, tpN) {
 // ─── ACCOUNT (reale via Bitget, chiamato dopo login) ───
 function loadAccount(){
   // mostra dash vuota — verrà popolata da fetchBitgetDashboard dopo login
-  document.getElementById('accBalance').textContent='—';
-  document.getElementById('accAvail').textContent='—';
-  document.getElementById('accPnl').textContent='—';
-  document.getElementById('accMargin').textContent='—';
-  document.getElementById('tbBalance').textContent='—';
-  document.getElementById('tbPnl').textContent='—';
-  document.getElementById('posCount').textContent='0';
-  document.getElementById('posList').innerHTML='<div class="no-pos">Connetti Bitget per vedere le posizioni</div>';
+  function safeSet(id, val, isHTML){
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (isHTML) el.innerHTML = val; else el.textContent = val;
+  }
+  safeSet('accBalance','—');
+  safeSet('accAvail','—');
+  safeSet('accPnl','—');
+  safeSet('accMargin','—');
+  safeSet('tbBalance','—');
+  safeSet('tbPnl','—');
+  safeSet('posCount','0');
+  safeSet('posList','<div class="no-pos">Connetti Bitget per vedere le posizioni</div>', true);
 }
 // refreshAccount è ridefinita nel blocco Firebase dopo login
 
@@ -5514,19 +5538,9 @@ function roundRect(cx,x,y,w,h,r){
 
 // ─── FIREBASE + BITGET SYSTEM ───
 
-// Stub sicuri — evitano ReferenceError se Firebase non ha ancora caricato
-window.rfDoLogin    = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
-window.rfDoRegister = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
-window.rfDoForgot   = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
-window.rfDoLogout   = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
-window.rfSwitchTab  = function(tab) {
-  ['login','register','forgot'].forEach((t,i)=>{
-    const f = document.getElementById('rf-form-'+t);
-    if(f) f.classList.toggle('hidden',t!==tab);
-    const tabs = document.querySelectorAll('.auth-tab');
-    if(tabs[i]) tabs[i].classList.toggle('active',t===tab);
-  });
-};
+// Gli stub globali rfDoLogin/Register/Forgot/Logout/SwitchTab sono già definiti
+// nell'<script> inline subito dopo l'auth overlay nell'HTML.
+// Qui le funzioni reali verranno assegnate dopo che Firebase carica.
 
 // Mostra spinner nel form auth durante il caricamento di Firebase
 (function() {
@@ -6179,16 +6193,15 @@ window.rfSwitchTab  = function(tab) {
       if (balEl) balEl.textContent = '$'+equity.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
       if (upnlEl) { upnlEl.textContent=(upnl>=0?'+':'-')+'$'+Math.abs(upnl).toFixed(2); upnlEl.style.color=upnl>=0?'var(--green)':'var(--red)'; }
 
-      document.getElementById('accBalance').textContent='$'+fmt(equity);
-      document.getElementById('accAvail').textContent='$'+fmt(available);
+      var _el; 
+      _el=document.getElementById('accBalance'); if(_el) _el.textContent='$'+fmt(equity);
+      _el=document.getElementById('accAvail');   if(_el) _el.textContent='$'+fmt(available);
       const pEl=document.getElementById('accPnl');
-      pEl.textContent=(upnl>=0?'+':'-')+'$'+fmt(Math.abs(upnl));
-      pEl.className='av '+(upnl>=0?'pos':'neg');
-      document.getElementById('accMargin').textContent='$'+fmt(Math.abs(margin));
-      document.getElementById('tbBalance').textContent='$'+fmt(equity);
+      if(pEl){pEl.textContent=(upnl>=0?'+':'-')+'$'+fmt(Math.abs(upnl));pEl.className='av '+(upnl>=0?'pos':'neg');}
+      _el=document.getElementById('accMargin'); if(_el) _el.textContent='$'+fmt(Math.abs(margin));
+      _el=document.getElementById('tbBalance'); if(_el) _el.textContent='$'+fmt(equity);
       const tEl=document.getElementById('tbPnl');
-      tEl.textContent=(upnl>=0?'+':'-')+'$'+fmt(Math.abs(upnl));
-      tEl.className='tv '+(upnl>=0?'pos':'neg');
+      if(tEl){tEl.textContent=(upnl>=0?'+':'-')+'$'+fmt(Math.abs(upnl));tEl.className='tv '+(upnl>=0?'pos':'neg');}
       S.balance = equity;
       // DLL: controlla solo se NON ci sono posizioni aperte (perdita realizzata)
       // Con posizioni aperte il balance non è affidabile — aspettiamo che si chiudano
