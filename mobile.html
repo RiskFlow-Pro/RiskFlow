@@ -1350,54 +1350,21 @@ window.addEventListener('load', function() {
     setTimeout(closeSheet, 50);
   };
 
-  // ── notify queue: evita notifiche bloccate quando arrivano in sequenza rapida ──
-  // (ridefinito a fine pagina dopo riskflow.js carico - questo è solo placeholder)
-  if (!window._notifyPatched) {
-    (function patchNotify() {
-      const el = document.getElementById('notif');
-      if (!el) return;
-      let _queue = [];
-      let _running = false;
-      let _dismissTimer = null;
-      function dismiss() {
-        clearTimeout(el._t);
-        clearTimeout(_dismissTimer);
-        el.classList.remove('show');
-        _dismissTimer = setTimeout(function() { el.className = 'notif'; _running = false; showNext(); }, 350);
-      }
-      function showNext() {
-        if (_queue.length === 0) { _running = false; return; }
-        _running = true;
-        const { msg, type } = _queue.shift();
-        el.textContent = msg;
-        el.className = 'notif' + (type ? ' ' + type : '');
-        void el.offsetWidth;
-        el.classList.add('show');
-        clearTimeout(el._t);
-        el._t = setTimeout(dismiss, 3000);
-      }
-      el.addEventListener('touchstart', e => { e.stopPropagation(); dismiss(); }, { passive: true });
-      el.addEventListener('click', e => { e.stopPropagation(); dismiss(); });
-      window.notify = function(msg, type) {
-        if (_running && el.textContent === msg) return;
-        const last = _queue[_queue.length - 1];
-        if (last && last.msg === msg) return;
-        _queue.push({ msg, type: type || '' });
-        if (_queue.length > 3) _queue = _queue.slice(-2);
-        if (!_running) showNext();
-      };
-    })();
-  }
-
 });
 
 // ─── TOUCH DRAG FOR LINES ───
 function setupTouchDrag() {
   const chartWrap = document.getElementById('chartWrap');
+  // dragCanvas sta sopra il canvas di LightweightCharts (z-index:10).
+  // Rendiamolo SEMPRE intercettabile — così catturiamo i touch prima di LW.
+  const dc = document.getElementById('dragCanvas');
+  dc.style.pointerEvents = 'all';
+  dc.style.touchAction = 'none';
+
   let touchDragState = null;
   let touchPosDragState = null;
 
-  // Versioni mobile-friendly con grab zone 28px (originale 14px per mouse)
+  // Grab zone 36px su mobile (vs 14px desktop)
   function lineAtY(clientY) {
     if (typeof candleSeries === 'undefined' || !window.DRAG_PRICES || !window.S) return null;
     const rect = chartWrap.getBoundingClientRect();
@@ -1410,7 +1377,7 @@ function setupTouchDrag() {
     } else {
       types = ['entry', 'sl', 'tp1', 'tp2', 'tp3'];
     }
-    let best = null, bestD = 28;
+    let best = null, bestD = 36;
     types.forEach(t => {
       const p = window.DRAG_PRICES[t]; if (!p) return;
       const ly = candleSeries.priceToCoordinate(p);
@@ -1425,7 +1392,7 @@ function setupTouchDrag() {
     if (typeof candleSeries === 'undefined' || !window.S) return null;
     const rect = chartWrap.getBoundingClientRect();
     const y = clientY - rect.top;
-    let best = null, bestD = 28;
+    let best = null, bestD = 36;
     if (window._posSLLines) {
       Object.entries(window._posSLLines).forEach(([idxStr, entry]) => {
         if (!entry || !entry.price) return;
@@ -1453,50 +1420,51 @@ function setupTouchDrag() {
     return best;
   }
 
-  function getTouchY(e) {
-    return e.touches.length > 0 ? e.touches[0].clientY : e.changedTouches[0].clientY;
-  }
-  function getTouchX(e) {
-    return e.touches.length > 0 ? e.touches[0].clientX : e.changedTouches[0].clientX;
+  function getTouchY(e) { return (e.touches[0] || e.changedTouches[0]).clientY; }
+  function getTouchX(e) { return (e.touches[0] || e.changedTouches[0]).clientX; }
+
+  // Ri-dispatcha il touch al canvas interno di LW quando non dobbiamo gestirlo noi
+  function passToLW(e) {
+    const lwCanvas = chartWrap.querySelector('canvas');
+    if (!lwCanvas) return;
+    try {
+      lwCanvas.dispatchEvent(new TouchEvent(e.type, {
+        touches: e.touches, targetTouches: e.targetTouches,
+        changedTouches: e.changedTouches, bubbles: true, cancelable: true,
+        view: window
+      }));
+    } catch(_) {}
   }
 
-  chartWrap.addEventListener('touchstart', e => {
-    if (e.touches.length !== 1) return;
-    if (_longPressTriggered) return; // Long press handled elsewhere
+  dc.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { passToLW(e); return; }
+    if (_longPressTriggered) { passToLW(e); return; }
+
     const clientY = getTouchY(e);
     const clientX = getTouchX(e);
     const rect = chartWrap.getBoundingClientRect();
     const cx = clientX - rect.left;
     const cy = clientY - rect.top;
-    const priceAxisWidth = 55;
-    if (cx > rect.width - priceAxisWidth) return;
 
-    // Check click zones (pos line buttons)
+    // Asse prezzi (destra) → lascia a LW
+    if (cx > rect.width - 55) { passToLW(e); return; }
+
+    // Zone bottoni sulle linee posizione
     if (window._posLineZones) {
-      for (const [key, z] of Object.entries(window._posLineZones)) {
+      for (const [, z] of Object.entries(window._posLineZones)) {
         if (cx >= z.x && cx <= z.x + z.w && cy >= z.y && cy <= z.y + z.h) {
+          e.preventDefault();
           const { idx, action } = z;
-          if (action === 'tp') {
-            const el = document.getElementById('pos-tp1-input-' + idx);
-            if (el) { el.focus(); el.select(); }
-          } else if (action === 'sl') {
-            const el = document.getElementById('pos-sl-input-' + idx);
-            if (el) { el.focus(); el.select(); }
-          } else if (action === 'be') {
-            if (window.moveToBreakeven) window.moveToBreakeven(idx);
-          } else if (action === 'remove_sl') {
-            const slLine = window._posSLLines && window._posSLLines[idx];
-            if (slLine && slLine.priceLine) {
-              try { candleSeries.removePriceLine(slLine.priceLine); } catch(_) {}
-              slLine.priceLine = null; slLine.price = null;
-            }
+          if (action === 'tp') { const el = document.getElementById('pos-tp1-input-' + idx); if (el) { el.focus(); el.select(); } }
+          else if (action === 'sl') { const el = document.getElementById('pos-sl-input-' + idx); if (el) { el.focus(); el.select(); } }
+          else if (action === 'be') { if (window.moveToBreakeven) window.moveToBreakeven(idx); }
+          else if (action === 'remove_sl') {
+            const s = window._posSLLines && window._posSLLines[idx];
+            if (s && s.priceLine) { try { candleSeries.removePriceLine(s.priceLine); } catch(_){} s.priceLine = null; s.price = null; }
             drawCanvas();
           } else if (action === 'remove_tp') {
-            const tpLine = window._posTPLines && window._posTPLines[idx + '_1'];
-            if (tpLine && tpLine.priceLine) {
-              try { candleSeries.removePriceLine(tpLine.priceLine); } catch(_) {}
-              tpLine.priceLine = null; tpLine.price = null;
-            }
+            const s = window._posTPLines && window._posTPLines[idx + '_1'];
+            if (s && s.priceLine) { try { candleSeries.removePriceLine(s.priceLine); } catch(_){} s.priceLine = null; s.price = null; }
             drawCanvas();
           }
           return;
@@ -1504,19 +1472,17 @@ function setupTouchDrag() {
       }
     }
 
-    // Check close zones (✕)
+    // Zone ✕ rimozione linee setup
     if (window._closeZones) {
       for (const [t, z] of Object.entries(window._closeZones)) {
-        if (Math.hypot(cx - z.x, cy - z.y) <= z.r + 8) {
+        if (Math.hypot(cx - z.x, cy - z.y) <= z.r + 10) {
+          e.preventDefault();
           const idMap = { entry:'entryVal', sl:'slVal', tp1:'tp1', tp2:'tp2', tp3:'tp3' };
           if (t.startsWith('ld')) {
             const lIdx = parseInt(t[2]) - 1;
             if (window.LADDER) {
               window.LADDER.orders[lIdx].price = null;
-              if (window.LADDER.orders[lIdx].priceLine) {
-                try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_) {}
-                window.LADDER.orders[lIdx].priceLine = null;
-              }
+              if (window.LADDER.orders[lIdx].priceLine) { try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_){} window.LADDER.orders[lIdx].priceLine = null; }
               window.DRAG_PRICES[t] = null;
               const el2 = document.getElementById('ladd-price-' + lIdx); if (el2) el2.value = '';
               calcLadder();
@@ -1532,65 +1498,62 @@ function setupTouchDrag() {
       }
     }
 
-    // Pos line drag
-    if (typeof posLineAtY === 'function') {
-      const posLine = posLineAtY(clientY);
-      if (posLine) {
-        if (window._cancelLongPress) window._cancelLongPress();
-        _longPressTriggered = false;
-        let refSL = null;
-        if (posLine.type === 'sl' && window._posSLLines) {
-          const slEntry = window._posSLLines[posLine.idx];
-          if (slEntry) refSL = slEntry._refSL || slEntry.price;
-        }
-        touchPosDragState = { ...posLine, startY: clientY, startX: clientX, pending: true, refSL };
-        // Non chiamare preventDefault qui: aspettiamo la soglia di movimento
-        return;
+    // Linee posizione SL/TP drag
+    const posLine = posLineAtY(clientY);
+    if (posLine) {
+      if (window._cancelLongPress) window._cancelLongPress();
+      _longPressTriggered = false;
+      let refSL = null;
+      if (posLine.type === 'sl' && window._posSLLines) {
+        const slEntry = window._posSLLines[posLine.idx];
+        if (slEntry) refSL = slEntry._refSL || slEntry.price;
       }
+      touchPosDragState = { ...posLine, startY: clientY, pending: true, refSL };
+      e.preventDefault();
+      return;
     }
 
-    // Setup line drag
-    if (typeof lineAtY === 'function') {
-      const type = lineAtY(clientY);
-      if (type) {
-        if (window._cancelLongPress) window._cancelLongPress();
-        _longPressTriggered = false;
-        touchDragState = { type, startY: clientY, startX: clientX, pending: true };
-        // Non chiamare preventDefault qui: aspettiamo la soglia di movimento
-        return;
-      }
+    // Linee setup entry/sl/tp drag
+    const type = lineAtY(clientY);
+    if (type) {
+      if (window._cancelLongPress) window._cancelLongPress();
+      _longPressTriggered = false;
+      touchDragState = { type, startY: clientY, pending: true };
+      e.preventDefault();
+      return;
     }
 
     // Click-to-set mode
     if (window.S && window.S.clickMode && !_longPressTriggered) {
-      if (typeof candleSeries !== 'undefined') {
-        const price = candleSeries.coordinateToPrice(cy);
-        if (price) {
-          setField(window.S.clickMode, price);
-          window.S.clickMode = null;
-          document.getElementById('chart').style.cursor = 'default';
-          e.preventDefault();
-        }
+      const price = candleSeries.coordinateToPrice(cy);
+      if (price) {
+        if (typeof setField === 'function') setField(window.S.clickMode, price);
+        window.S.clickMode = null;
+        document.getElementById('chart').style.cursor = 'default';
+        e.preventDefault();
+        return;
       }
     }
-  }, { passive: false, capture: true });
 
-  chartWrap.addEventListener('touchmove', e => {
-    if (!touchDragState && !touchPosDragState) return;
+    // Nient'altro — passa a LightweightCharts (scroll/zoom)
+    passToLW(e);
+  }, { passive: false });
+
+  dc.addEventListener('touchmove', e => {
+    if (!touchDragState && !touchPosDragState) { passToLW(e); return; }
     if (e.touches.length !== 1) return;
 
     const clientY = getTouchY(e);
-    const DRAG_THRESHOLD = 5; // px minimi di movimento per attivare il drag
+    const THRESH = 6;
 
-    // Se in stato pending, controlla se abbiamo superato la soglia
+    // Soglia minima prima di considerare drag attivo
     if (touchPosDragState && touchPosDragState.pending) {
-      if (Math.abs(clientY - touchPosDragState.startY) < DRAG_THRESHOLD) return;
+      if (Math.abs(clientY - touchPosDragState.startY) < THRESH) { passToLW(e); return; }
       touchPosDragState.pending = false;
-      // Cancella il long press se ancora attivo
       if (window._cancelLongPress) window._cancelLongPress();
     }
     if (touchDragState && touchDragState.pending) {
-      if (Math.abs(clientY - touchDragState.startY) < DRAG_THRESHOLD) return;
+      if (Math.abs(clientY - touchDragState.startY) < THRESH) { passToLW(e); return; }
       touchDragState.pending = false;
       if (window._cancelLongPress) window._cancelLongPress();
     }
@@ -1598,17 +1561,8 @@ function setupTouchDrag() {
     e.preventDefault();
 
     const rect = chartWrap.getBoundingClientRect();
-    const y = clientY - rect.top;
-    const price = candleSeries.coordinateToPrice(y);
+    const price = candleSeries.coordinateToPrice(clientY - rect.top);
     if (!price || price <= 0) return;
-
-    // Confirm drag if moved enough
-    if (touchDragState?.pending || touchPosDragState?.pending) {
-      const startY = touchDragState?.startY ?? touchPosDragState?.startY;
-      if (Math.abs(clientY - startY) < 6) return;
-      if (touchDragState) touchDragState.pending = false;
-      if (touchPosDragState) touchPosDragState.pending = false;
-    }
 
     // Pos SL/TP drag
     if (touchPosDragState) {
@@ -1617,15 +1571,12 @@ function setupTouchDrag() {
         const entry = window._posSLLines && window._posSLLines[pd.idx];
         if (!entry) return;
         const side = entry.side || 'long';
-        const posEntry = window._positions && window._positions[pd.idx]
-          ? parseFloat(window._positions[pd.idx].openPriceAvg || 0) : 0;
+        const posEntry = window._positions && window._positions[pd.idx] ? parseFloat(window._positions[pd.idx].openPriceAvg || 0) : 0;
         if (posEntry > 0) {
           if (side === 'long' && price >= posEntry) { drawCanvas(); return; }
           if (side === 'short' && price <= posEntry) { drawCanvas(); return; }
         }
-        if (typeof slpCheck === 'function' && !slpCheck(price, pd.refSL || entry.price, side, true)) {
-          drawCanvas(); return;
-        }
+        if (typeof slpCheck === 'function' && !slpCheck(price, pd.refSL || entry.price, side, true)) { drawCanvas(); return; }
         entry.price = price;
         if (entry.priceLine) { try { candleSeries.removePriceLine(entry.priceLine); } catch(_){} }
         entry.priceLine = candleSeries.createPriceLine({ price, color:'#ff2d4a', lineWidth:1, lineStyle:LightweightCharts.LineStyle.Dashed, axisLabelVisible:true, title:` SL#${pd.idx+1}` });
@@ -1649,58 +1600,66 @@ function setupTouchDrag() {
     // Setup line drag
     if (touchDragState) {
       window.DRAG_PRICES[touchDragState.type] = price;
-      const idMap = { entry:'entryVal', sl:'slVal', tp1:'tp1', tp2:'tp2', tp3:'tp3' };
       if (touchDragState.type.startsWith('ld')) {
         const lIdx = parseInt(touchDragState.type[2]) - 1;
         if (window.LADDER) {
           window.LADDER.orders[lIdx].price = price;
           const el2 = document.getElementById('ladd-price-' + lIdx);
           if (el2 && typeof fmtPrice === 'function') el2.value = fmtPrice(price);
-          if (window.LADDER.orders[lIdx].priceLine) {
-            try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_) {}
-          }
+          if (window.LADDER.orders[lIdx].priceLine) { try { candleSeries.removePriceLine(window.LADDER.orders[lIdx].priceLine); } catch(_){} }
           const colors = ['#ffc940','#f59e0b','#fb923c','#ef4444'];
           window.LADDER.orders[lIdx].priceLine = candleSeries.createPriceLine({ price, color: colors[lIdx], title:'', lineWidth:1, lineStyle:0, axisLabelVisible:false });
           if (typeof calcLadder === 'function') calcLadder();
         }
       } else {
+        const idMap = { entry:'entryVal', sl:'slVal', tp1:'tp1', tp2:'tp2', tp3:'tp3' };
         const el = document.getElementById(idMap[touchDragState.type]);
         if (el && typeof fmtPrice === 'function') el.value = fmtPrice(price);
         if (typeof setChartLine === 'function') setChartLine(touchDragState.type, price);
       }
       drawCanvas();
     }
-  }, { passive: false, capture: true });
+  }, { passive: false });
 
-  chartWrap.addEventListener('touchend', e => {
+  dc.addEventListener('touchend', e => {
+    const wasDraggingPos = touchPosDragState && !touchPosDragState.pending;
+    const wasDraggingSetup = touchDragState && !touchDragState.pending;
+
     if (touchPosDragState) {
       const pd = touchPosDragState;
       touchPosDragState = null;
-      if (pd.pending) { drawCanvas(); return; } // era un tap, non un drag
-      if (pd.type === 'sl') {
-        const entry = window._posSLLines && window._posSLLines[pd.idx];
-        if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ SL#${pd.idx+1} → $${fmtPrice(entry.price)} — premi Set SL per confermare`, '');
-      } else if (pd.type === 'tp') {
-        const key = pd.key || `${pd.idx}_${pd.tpN||1}`;
-        const entry = window._posTPLines && window._posTPLines[key];
-        if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ TP${entry.tpN}#${entry.posIdx+1} → $${fmtPrice(entry.price)} — premi Set per confermare`, '');
+      if (!pd.pending) {
+        if (pd.type === 'sl') {
+          const entry = window._posSLLines && window._posSLLines[pd.idx];
+          if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ SL#${pd.idx+1} → $${fmtPrice(entry.price)} — premi Set SL per confermare`, '');
+        } else if (pd.type === 'tp') {
+          const key = pd.key || `${pd.idx}_${pd.tpN||1}`;
+          const entry = window._posTPLines && window._posTPLines[key];
+          if (entry && entry.price && typeof fmtPrice === 'function') notify(`⇅ TP${entry.tpN}#${entry.posIdx+1} → $${fmtPrice(entry.price)} — premi Set per confermare`, '');
+        }
+        drawCanvas();
+        return;
       }
-      drawCanvas();
-      return;
     }
+
     if (touchDragState) {
       const t = touchDragState.type;
       const wasPending = touchDragState.pending;
       touchDragState = null;
-      if (wasPending) { drawCanvas(); return; } // era un tap, non un drag
-      if (t.startsWith('ld')) {
-        if (typeof calcLadder === 'function') calcLadder();
-        if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
-      } else {
-        if (typeof calc === 'function') calc();
-        if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
+      if (!wasPending) {
+        if (t.startsWith('ld')) {
+          if (typeof calcLadder === 'function') calcLadder();
+          if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
+        } else {
+          if (typeof calc === 'function') calc();
+          if (typeof fmtPrice === 'function' && window.DRAG_PRICES) notify('Set ' + t.toUpperCase() + ' → $' + fmtPrice(window.DRAG_PRICES[t]), 'ok');
+        }
+        return;
       }
     }
+
+    // Era un tap (pending non scattato) → passa a LW per click/tap normale
+    passToLW(e);
   }, { passive: true });
 }
 
@@ -1731,8 +1690,12 @@ window.addEventListener('DOMContentLoaded', () => {
   setupLongPress();
   // Touch drag setup deferred until chart is ready
   const waitChart = setInterval(() => {
-    if (typeof candleSeries !== 'undefined') {
+    if (typeof candleSeries !== 'undefined' && typeof chart !== 'undefined') {
       clearInterval(waitChart);
+      // Disabilita crosshair su mobile (inutile e disturba il touch)
+      chart.applyOptions({
+        crosshair: { mode: LightweightCharts.CrosshairMode.Hidden }
+      });
       setupTouchDrag();
     }
   }, 200);
@@ -1742,55 +1705,41 @@ window.addEventListener('DOMContentLoaded', () => {
 <!-- ── SHARED JS (same file, same logic) ── -->
 <script src="JS/riskflow.js"></script>
 
-<!-- ── NOTIFY PATCH: sovrascrive riskflow.js DOPO che ha caricato ── -->
+<!-- ── NOTIFY AUTO-DISMISS: MutationObserver, funziona con la notify di riskflow.js ── -->
 <script>
-window.addEventListener('load', function() {
-  const el = document.getElementById('notif');
-  if (!el) return;
-  window._notifyPatched = true;
-  let _queue = [];
-  let _running = false;
-  let _dismissTimer = null;
-
-  function dismiss() {
-    clearTimeout(el._t);
-    clearTimeout(_dismissTimer);
-    // Rimuovi solo la classe show per triggerare la transizione CSS (slide up)
-    el.classList.remove('show');
-    // Dopo la transizione, rimuovi anche le classi colore e procedi con la coda
-    _dismissTimer = setTimeout(function() {
-      el.className = 'notif';
-      _running = false;
-      showNext();
-    }, 350);
+(function() {
+  function initNotifPatch() {
+    const el = document.getElementById('notif');
+    if (!el) return;
+    let _timer = null;
+    function dismissNotif() {
+      clearTimeout(_timer);
+      _timer = null;
+      // Rimuovi show per triggerare slide-up CSS
+      el.classList.remove('show');
+    }
+    el.addEventListener('touchstart', function(e) { e.stopPropagation(); dismissNotif(); }, { passive: true });
+    el.addEventListener('click', function(e) { e.stopPropagation(); dismissNotif(); });
+    // Osserva quando riskflow.js aggiunge la classe 'show' e imposta il timer
+    const obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.attributeName === 'class') {
+          if (el.classList.contains('show')) {
+            // Resetta sempre il timer quando appare
+            clearTimeout(_timer);
+            _timer = setTimeout(dismissNotif, 2500);
+          }
+        }
+      });
+    });
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] });
   }
-
-  function showNext() {
-    if (_queue.length === 0) { _running = false; return; }
-    _running = true;
-    const { msg, type } = _queue.shift();
-    el.textContent = msg;
-    el.className = 'notif' + (type ? ' ' + type : '');
-    // Forza reflow per triggerare la transizione da hidden → show
-    void el.offsetWidth;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(dismiss, 3000);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNotifPatch);
+  } else {
+    initNotifPatch();
   }
-
-  el.addEventListener('touchstart', function(e) { e.stopPropagation(); dismiss(); }, { passive: true });
-  el.addEventListener('click', function(e) { e.stopPropagation(); dismiss(); });
-
-  window.notify = function(msg, type) {
-    // Ignora duplicati consecutivi
-    if (_running && el.textContent === msg) return;
-    const last = _queue[_queue.length - 1];
-    if (last && last.msg === msg) return;
-    _queue.push({ msg: msg, type: type || '' });
-    if (_queue.length > 3) _queue = _queue.slice(-2);
-    if (!_running) showNext();
-  };
-});
+})();
 </script>
 </body>
 </html>
