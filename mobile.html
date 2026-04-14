@@ -5513,7 +5513,31 @@ function roundRect(cx,x,y,w,h,r){
 }
 
 // ─── FIREBASE + BITGET SYSTEM ───
+
+// Stub sicuri — evitano ReferenceError se Firebase non ha ancora caricato
+window.rfDoLogin    = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
+window.rfDoRegister = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
+window.rfDoForgot   = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
+window.rfDoLogout   = function() { /* verrà sovrascritta dopo il caricamento di Firebase */ };
+window.rfSwitchTab  = function(tab) {
+  ['login','register','forgot'].forEach((t,i)=>{
+    const f = document.getElementById('rf-form-'+t);
+    if(f) f.classList.toggle('hidden',t!==tab);
+    const tabs = document.querySelectorAll('.auth-tab');
+    if(tabs[i]) tabs[i].classList.toggle('active',t===tab);
+  });
+};
+
+// Mostra spinner nel form auth durante il caricamento di Firebase
+(function() {
+  const btn = document.getElementById('rf-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Caricamento…'; }
+  const errEl = document.getElementById('rf-login-err');
+  if (errEl) errEl.style.color = 'var(--muted2)';
+})();
+
 (async () => {
+  try {
   const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
   const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
   const { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
@@ -5529,6 +5553,14 @@ function roundRect(cx,x,y,w,h,r){
   const auth  = getAuth(fbApp);
   const db    = getFirestore(fbApp);
   let currentUser = null;
+
+  // Firebase caricato — ripristina il tasto Accedi
+  (function() {
+    const btn = document.getElementById('rf-login-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
+    const errEl = document.getElementById('rf-login-err');
+    if (errEl) { errEl.textContent = ''; errEl.style.color = ''; }
+  })();
 
   // ── BITGET PROXY ──
   const BITGET_PROXY = 'https://bitget-proxy-mze2.onrender.com';
@@ -7396,6 +7428,18 @@ function roundRect(cx,x,y,w,h,r){
     if (apiKey) fetchBitgetDashboard();
     else notify('API non configurate per ' + (_activeExchange||'bitget'), 'err');
   };
+
+  } catch(e) {
+    // Errore durante il caricamento di Firebase — feedback visibile all'utente
+    console.error('RiskFlow: errore inizializzazione Firebase:', e);
+    const btn = document.getElementById('rf-login-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
+    const errEl = document.getElementById('rf-login-err');
+    if (errEl) {
+      errEl.style.color = 'var(--red)';
+      errEl.textContent = 'Errore di connessione. Ricarica la pagina.';
+    }
+  }
 
 })();
 
