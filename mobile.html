@@ -635,7 +635,9 @@ input[type=number]{-moz-appearance:textfield}
   --sheet-snap-full: 88vh;
 }
 
-* { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+* { -webkit-tap-highlight-color: transparent; }
+/* touch-action: manipulation bloccava preventDefault() sui touchmove durante il drag delle linee */
+button, a, [role="button"] { touch-action: manipulation; }
 html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 body {
   background: var(--bg);
@@ -730,11 +732,12 @@ body {
   position: absolute;
   inset: 0;
   bottom: var(--bottombar-h); /* leave space for bottom nav */
+  touch-action: none; /* permette preventDefault() nei touchmove per drag linee */
 }
 
-#chart { width: 100%; height: 100%; }
+#chart { width: 100%; height: 100%; touch-action: none; }
 
-#dragCanvas { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+#dragCanvas { position: absolute; inset: 0; z-index: 10; pointer-events: none; touch-action: none; }
 
 /* Panel resize handle — hidden on mobile */
 .panel-resize { display: none; }
@@ -7636,6 +7639,7 @@ chartEl.addEventListener('touchmove', function(e) {
 
   if (!dragState && !window._posDragState) return;
 
+  // Blocca lo scroll/pan di LightweightCharts durante il drag di una linea
   e.preventDefault();
   e.stopPropagation();
 
