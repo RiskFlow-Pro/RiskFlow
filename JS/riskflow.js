@@ -1,4 +1,4 @@
-// ─── DAILY LOSS LIMIT (DLL)  ───
+// ─── DAILY LOSS LIMIT (DLL)   ───
 // Persistenza: localStorage keys
 // dll_enabled: 'true'/'false'
 // dll_pct: soglia percentuale (default 2)
