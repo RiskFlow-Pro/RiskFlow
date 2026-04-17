@@ -915,42 +915,25 @@ window.addEventListener('load', function() {
 // We patch the exchange button IDs to match what riskflow.js expects.
 // riskflow.js looks for: exBtnBitget, exBtnBybit, exBtnBybitDemo, exBtnWeex, exBtnBingx
 // We'll use same IDs in a shim:
+// Il patch getElementById è ora in riskflow-mobile-patch.js
+// Manteniamo solo il sync rfUsername → rfUsername2
 document.addEventListener('DOMContentLoaded', function() {
-  // Map mobile exchange buttons to the IDs expected by riskflow.js
-  const idMap = {
-    'exBtnBitget':    'm-exBtnBitget',
-    'exBtnBybit':     'm-exBtnBybit',
-    'exBtnBybitDemo': 'm-exBtnBybitDemo',
-    'exBtnWeex':      'm-exBtnWeex',
-    'exBtnBingx':     'm-exBtnBingx',
-  };
-  // Patch getElementById to return mobile elements for desktop IDs
-  const _origGetById = document.getElementById.bind(document);
-  document.getElementById = function(id) {
-    // Balance/PnL fields in API modal
-    if(id === 'apiBitgetBalance') return _origGetById('m-apiBitgetBalance') || _origGetById(id);
-    if(id === 'apiBitgetUpnl')   return _origGetById('m-apiBitgetUpnl')   || _origGetById(id);
-    // Exchange buttons
-    if(idMap[id]) return _origGetById(idMap[id]) || _origGetById(id);
-    // Pos modal
-    if(id === 'posModal') return _origGetById('m-posModal') || _origGetById(id);
-    return _origGetById(id);
-  };
-
-  // rfUsername sync
   const origRfUsername = document.getElementById('rfUsername');
-  // Will be updated by riskflow.js — also update secondary badge
-  const usernameObserver = new MutationObserver(function(muts) {
-    muts.forEach(function(m) {
-      const el2 = document.getElementById('rfUsername2');
-      if(el2) el2.textContent = m.target.textContent;
-    });
-  });
-  if(origRfUsername) usernameObserver.observe(origRfUsername, {childList:true,characterData:true,subtree:true});
+  if(origRfUsername) {
+    new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        const el2 = document.getElementById('rfUsername2');
+        if(el2) el2.textContent = m.target.textContent;
+      });
+    }).observe(origRfUsername, {childList:true,characterData:true,subtree:true});
+  }
 });
 </script>
 
-<!-- ── MAIN JS (same as desktop, patched inline above) ── -->
+<!-- ── MOBILE PATCH (carica PRIMA di riskflow.js) ── -->
+<script src="JS/riskflow-mobile-patch.js"></script>
+
+<!-- ── MAIN JS ── -->
 <script src="JS/riskflow.js"></script>
 </body>
 </html>
