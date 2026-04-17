@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>RiskFlow — Mobile</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%233dffa0' stroke-width='1.2' stroke-linecap='round'/%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<link rel="stylesheet" href="CSS/riskflow-mobile.css">
+</head>
+<body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="m-auth-overlay">
+  <div class="m-auth-card">
+    <div class="m-auth-logo"><em>Risk</em><strong>Flow</strong></div>
+    <div class="m-auth-sub">Position sizing &amp; risk management</div>
+    <div class="m-auth-tabs">
+      <button class="m-auth-tab active" onclick="rfSwitchTab('login')">Accedi</button>
+      <button class="m-auth-tab" onclick="rfSwitchTab('register')">Registrati</button>
+      <button class="m-auth-tab" onclick="rfSwitchTab('forgot')">Password</button>
+    </div>
+    <div class="m-auth-form" id="rf-form-login">
+      <div class="m-field-group"><label>Username</label><input type="text" id="rf-login-user" placeholder="il tuo username" autocomplete="username" inputmode="text" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="m-field-group"><label>Password</label><input type="password" id="rf-login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="m-auth-err" id="rf-login-err"></div>
+      <button class="m-auth-btn" id="rf-login-btn" onclick="rfDoLogin()">Accedi</button>
+      <div class="m-forgot-link" onclick="rfSwitchTab('forgot')">Password dimenticata?</div>
+    </div>
+    <div class="m-auth-form hidden" id="rf-form-register">
+      <div class="m-field-group"><label>Username</label><input type="text" id="rf-reg-user" placeholder="scegli un username" maxlength="24"/></div>
+      <div class="m-field-group"><label>Email</label><input type="email" id="rf-reg-email" placeholder="tua@email.com" inputmode="email"/></div>
+      <div class="m-field-group"><label>Password</label><input type="password" id="rf-reg-pass" placeholder="min 6 caratteri"/></div>
+      <div class="m-auth-err" id="rf-reg-err"></div>
+      <div class="m-gdpr-row"><input type="checkbox" id="rf-reg-gdpr"/><label for="rf-reg-gdpr">Ho letto e accetto la Privacy Policy. <span style="color:var(--red)">*richiesto</span></label></div>
+      <button class="m-auth-btn" id="rf-reg-btn" onclick="rfDoRegister()">Crea account</button>
+    </div>
+    <div class="m-auth-form hidden" id="rf-form-forgot">
+      <div class="m-field-group"><label>Email</label><input type="email" id="rf-forgot-email" placeholder="tua@email.com" inputmode="email"/></div>
+      <div class="m-auth-err" id="rf-forgot-err"></div>
+      <div class="m-auth-ok" id="rf-forgot-ok"></div>
+      <button class="m-auth-btn" id="rf-forgot-btn" onclick="rfDoForgot()">Invia link di recupero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── API MODAL (bottom sheet) ── -->
+<div id="m-apiModal">
+  <div class="m-api-card">
+    <div class="m-api-title">🔑 Connetti Exchange</div>
+    <div class="m-api-ex-tabs">
+      <button class="m-api-ex-btn active" id="m-exBtnBitget" onclick="rfSelectExchange('bitget')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACoklEQVR42r1VXUuUURB+5ny853XDMKKotnULUqLUoKsSLexDLyws6bqIKIjoqi77Fd30H4IgqEgvgoSIIlwySFGTIrIMandt1N3f3fc850419retiEg3n5nBmhmeemXkOIc/4Fybwj0zVe/Qe3oMABoSAEGtK5DwaBBp+BFeAEkB/m8g6bJDq5aS8dZNDg2yWunuic2e5wqCVcOW5+nyxsKzHJsPmtAEMELbtU1PvUHDI+Rr+eUaeRQ0sTVKPT8kTvfzpIwRRz/H4yTObTiMmEK2ua86jSeqJaXmil+dmEcfo6olv33HSYMGC6g/KT3hZhwqr1zNheqdRwgDhoSPyaxGWscgoM8qMnEeudmm0NJDMUJC5rO7cz3OzEJI6u+P7Q46UnH6LqIzAwDvf2sKO4bG8xt9K88wJw20dsA5K4vMcvZlBAnLufdDXpQ/s1Qfbg2tXaR2BPJjrlOZRZFGMTf+AAYwUYTKlMhNgDh4+DhvXB4E2gLl4hSwjb6s7+Mcl61HwohiZ/lMGMFqGqbQaHQdzMDQSNjaaQBsgvHCZLGPB/5GrmrasQ8GLQmROng4FGSDcuk09zYBZD4+Y7SmzLmEAc/4SLVSQd8vIrlqxQFDk5MsMa02Li7xxk9uzSzL0scM8+hw2pmRz9OKVTzTC/SS+5qTmPOYZMSNiVBiWZfZbePioIRglw9QO/WoKZUb2F6IVdo0InlFgOAcjZbyozwzyyCNoRVuS7sFwvKcF8x5S1N2137mvsMyXwqN9hmACHW5vVmOTsIwvcZXzyjLCDM3yw6weHOCxDADavMXeG7Z7W5G3UGr1wsYkSd2565NJtHcgitz1G7ZjN3I1sgCgeprNIANuADwggBJQquJllVJL4Aqj5H91QIo1afZSsPyvv8h3EP+qljDdOGgAAAAASUVORK5CYII=" width="22" height="22" style="border-radius:4px" alt="Bitget"/>
+        <span class="m-api-ex-name">Bitget</span>
+        <span class="m-api-ex-badge">Live</span>
+      </button>
+      <button class="m-api-ex-btn" id="m-exBtnBybit" onclick="rfSelectExchange('bybit')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px" alt="Bybit"/>
+        <span class="m-api-ex-name">Bybit</span>
+        <span class="m-api-ex-badge">Live</span>
+      </button>
+      <button class="m-api-ex-btn" id="m-exBtnBybitDemo" onclick="rfSelectExchange('bybit_demo')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="22" height="22" style="border-radius:4px;opacity:.5" alt="Bybit Demo"/>
+        <span class="m-api-ex-name">Bybit</span>
+        <span class="m-api-ex-badge m-api-ex-badge--demo">Demo</span>
+      </button>
+      <button class="m-api-ex-btn" id="m-exBtnWeex" onclick="rfSelectExchange('weex')">
+        <span style="font-size:16px;font-weight:800;color:#00c2cb">W</span>
+        <span class="m-api-ex-name">Weex</span>
+        <span class="m-api-ex-badge">Live</span>
+      </button>
+      <button class="m-api-ex-btn" id="m-exBtnBingx" onclick="rfSelectExchange('bingx')">
+        <span style="font-size:16px;font-weight:800;color:#1da2ff">B</span>
+        <span class="m-api-ex-name">BingX</span>
+        <span class="m-api-ex-badge">Live</span>
+      </button>
+      <button class="m-api-ex-btn" onclick="document.getElementById('m-apiModal').classList.remove('open')" style="border-color:var(--border2)">
+        <span style="font-size:18px;color:var(--muted2)">✕</span>
+        <span class="m-api-ex-name" style="color:var(--muted2)">Chiudi</span>
+      </button>
+    </div>
+    <div class="m-api-status" id="m-apiStatus"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Balance</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent)" id="m-apiBitgetBalance">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Unrealized PnL</div>
+        <div style="font-size:14px;font-weight:700" id="m-apiBitgetUpnl">—</div>
+      </div>
+    </div>
+    <div class="m-field-group" style="margin-bottom:10px"><label>API Key</label><input type="text" id="apiKeyInput" placeholder="la tua API key" autocomplete="off"/></div>
+    <div class="m-field-group" style="margin-bottom:10px"><label>Secret Key</label><input type="password" id="apiSecretInput" placeholder="secret key" autocomplete="off"/></div>
+    <div class="m-field-group" id="apiPassRow" style="margin-bottom:12px"><label>Passphrase</label><input type="password" id="apiPassInput" placeholder="passphrase (solo Bitget)" autocomplete="off"/></div>
+    <div class="m-api-btns">
+      <button class="m-api-save-btn" onclick="rfSaveApiKeys()">Salva &amp; Connetti</button>
+      <button class="m-api-save-btn" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text)" onclick="rfBitgetSync()">⟳ Sync</button>
+      <button class="m-api-del-btn" onclick="rfDeleteApiKeys()">Elimina</button>
+    </div>
+    <div class="m-api-io-row" style="margin-top:8px">
+      <button class="m-api-io-btn" onclick="rfExportApiKeys()">⬇ Esporta JSON</button>
+      <label class="m-api-io-btn">⬆ Importa JSON<input type="file" id="apiImportInput" accept=".json" style="display:none" onchange="rfImportApiKeys(this)"/></label>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAIR MODAL (bottom sheet) ── -->
+<div id="m-pairModal" onclick="if(event.target===this)closePairModal()">
+  <div class="m-pm-box">
+    <div class="m-pm-head">
+      <span class="m-pm-title">Seleziona Pair</span>
+      <button class="m-pm-close" onclick="closePairModal()">✕</button>
+    </div>
+    <div class="m-pm-search-wrap">
+      <input class="m-pm-search" id="pmSearch" placeholder="Cerca pair… es. BTC, SOL" oninput="renderPairModal(this.value)" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="m-pm-cats" id="pmCats"></div>
+    <div class="m-pm-body" id="pmBody"></div>
+  </div>
+</div>
+
+<!-- ── CONFIRM ORDER MODAL ── -->
+<div class="m-modal-bg" id="modalBg">
+  <div class="m-modal">
+    <div class="m-modal-title">Confirm Order</div>
+    <div class="m-modal-rows" id="modalRows"></div>
+    <div class="m-modal-btns">
+      <button class="m-modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="m-modal-btn confirm" onclick="executeOrder()">Open Trade</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── POS ACTION MODAL ── -->
+<div id="m-posModal">
+  <div class="m-pos-modal-card">
+    <div class="m-pos-modal-title" id="pmTitle">Chiudi posizione</div>
+    <div class="m-pos-modal-sub" id="pmSub"></div>
+    <div class="m-pos-modal-rows" id="pmRows"></div>
+    <div style="display:flex;gap:6px">
+      <button class="m-pmb-cancel" onclick="closePosModal()">Annulla</button>
+      <button class="m-pmb-confirm" id="pmConfirmBtn" onclick="executePosAction()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTEXT MENU (long press on chart) ── -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxSet('entry')"><div class="ctx-dot" style="background:var(--yellow)"></div>Set Entry</div>
+  <div class="ctx-item" onclick="ctxSet('sl')"><div class="ctx-dot" style="background:var(--red)"></div>Set Stop Loss</div>
+  <div class="ctx-item" onclick="ctxSet('tp1')"><div class="ctx-dot" style="background:var(--green)"></div>Set TP1</div>
+  <div class="ctx-item" onclick="ctxSet('tp2')"><div class="ctx-dot" style="background:#3dffcc"></div>Set TP2</div>
+  <div class="ctx-item" onclick="ctxSet('tp3')"><div class="ctx-dot" style="background:#3dddff"></div>Set TP3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(0)"><div class="ctx-dot" style="background:#ffc940"></div>Set L1</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(1)"><div class="ctx-dot" style="background:#f59e0b"></div>Set L2</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(2)"><div class="ctx-dot" style="background:#fb923c"></div>Set L3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(3)"><div class="ctx-dot" style="background:#ef4444"></div>Set L4</div>
+</div>
+
+<!-- ── NOTIF ── -->
+<div class="notif" id="notif"></div>
+
+<!-- ── BETA POPUP ── -->
+<div id="m-betaPopupOverlay" style="display:none">
+  <div class="m-beta-popup">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span class="m-beta-badge">BETA</span>
+      <button onclick="document.getElementById('m-betaPopupOverlay').style.display='none'" style="background:none;border:none;color:var(--muted2);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div class="m-beta-popup-title">RiskFlow Mobile</div>
+    <div class="m-beta-popup-sub">Versione ottimizzata per smartphone</div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+      <li style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px">📊 <strong style="color:var(--accent)">Chart draggabile</strong> — trascina le linee TP/SL con il dito</li>
+      <li style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px">👆 <strong style="color:var(--accent)">Long press</strong> sulla chart per impostare entry/SL/TP</li>
+      <li style="font-size:12px;color:var(--text);line-height:1.5;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px">📱 <strong style="color:var(--accent)">Touch first</strong> — UI ottimizzata per dita, non mouse</li>
+    </ul>
+    <button class="m-beta-popup-btn" onclick="document.getElementById('m-betaPopupOverlay').style.display='none'">Inizia →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MAIN UI                                    -->
+<!-- ══════════════════════════════════════════ -->
+
+<!-- TOPBAR -->
+<div class="m-topbar">
+  <div class="m-logo"><em>Risk</em><strong>Flow</strong></div>
+  <div id="m-userBadge">
+    <div class="m-user-dot"></div>
+    <span id="rfUsername" style="font-size:11px;color:var(--muted2)">—</span>
+    <button class="m-logout-btn" onclick="rfDoLogout()">Out</button>
+  </div>
+  <button class="m-sym-btn" onclick="openPairModal()">
+    <span style="font-size:9px;color:var(--muted2)">▼</span>
+    <span id="symInput" style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--text)">BTCUSDT</span>
+  </button>
+  <div class="m-price-wrap">
+    <div class="m-price" id="topPrice">—</div>
+    <div class="m-chg" id="topChg"></div>
+  </div>
+  <button class="m-api-btn" onclick="document.getElementById('m-apiModal').classList.add('open');rfLoadApiKeysUI()">🔑</button>
+</div>
+
+<!-- TF BAR -->
+<div class="m-tf-bar">
+  <div style="display:flex;align-items:center;gap:3px;margin-right:4px">
+    <div class="m-live-dot"></div>
+  </div>
+  <button class="m-tf-btn" onclick="setTF('1m')">1m</button>
+  <button class="m-tf-btn" onclick="setTF('5m')">5m</button>
+  <button class="m-tf-btn active" onclick="setTF('15m')">15m</button>
+  <button class="m-tf-btn" onclick="setTF('1H')">1h</button>
+  <button class="m-tf-btn" onclick="setTF('4H')">4h</button>
+  <button class="m-tf-btn" onclick="setTF('1D')">1D</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+    <span style="font-size:9px;color:var(--muted2)">Balance</span>
+    <span id="tbBalance" style="font-size:11px;font-weight:600;color:var(--accent)">—</span>
+  </div>
+</div>
+
+<!-- CHART -->
+<div class="m-chart-wrap" id="chartWrap">
+  <div id="chart"></div>
+  <div class="m-watermark">RiskFlow</div>
+  <div class="m-chart-loading" id="chartLoading"><div class="spin"></div><span style="font-size:11px;color:var(--muted2)">Loading...</span></div>
+  <canvas id="dragCanvas"></canvas>
+  <button class="m-goto-btn" onclick="gotoPrice()" id="m-gotoBtn">⊙ live</button>
+
+  <!-- LINE SET TOOLBAR — appare quando ci sono linee sul chart, per attivare drag touch -->
+  <div class="m-line-toolbar" id="m-lineToolbar">
+    <button class="m-lt-btn entry" id="m-ltEntry" onclick="mActivateDrag('entry')">⊕ ENTRY</button>
+    <button class="m-lt-btn sl" id="m-ltSL" onclick="mActivateDrag('sl')">⊕ SL</button>
+    <button class="m-lt-btn tp1" id="m-ltTP" onclick="mActivateDrag('tp1')">⊕ TP</button>
+  </div>
+  <div class="m-lt-hint" id="m-ltHint">Tocca chart per spostare</div>
+</div>
+
+<!-- BOTTOM TABS -->
+<div class="m-tabs">
+  <div class="m-tab active" id="tab-trade" onclick="switchTab('trade')">
+    <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    Trade
+  </div>
+  <div class="m-tab" id="tab-positions" onclick="switchTab('positions')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    <span>Posizioni <span id="posCount" style="font-size:9px"></span></span>
+  </div>
+  <div class="m-tab" id="tab-account" onclick="switchTab('account')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    Account
+  </div>
+  <div class="m-tab" id="tab-settings" onclick="switchTab('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </div>
+</div>
+
+<!-- ══ TRADE PANEL ══ -->
+<div class="m-panel open" id="panel-trade">
+  <div class="m-sec">
+    <div class="m-sec-title">Tipo Ordine</div>
+    <div class="m-otype-row">
+      <div class="m-otype-btn active" id="otMarket" onclick="setOType('market')">Market<span class="ob-sub">entry live</span></div>
+      <div class="m-otype-btn" id="otLimit" onclick="setOType('limit')">Limit<span class="ob-sub">set prezzo</span></div>
+      <div class="m-otype-btn" id="otLadder" onclick="setOType('ladder')">Ladder<span class="ob-sub">strategia</span></div>
+    </div>
+
+    <!-- LADDER PANEL -->
+    <div id="ladderPanel" style="display:none;margin-bottom:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Top</div>
+          <div class="m-iwrap" style="border-color:var(--yellow)">
+            <input type="number" id="ladderTop" placeholder="0.00" step="0.01" oninput="onLadderInput()" inputmode="decimal"/>
+            <span class="unit">$</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Bottom</div>
+          <div class="m-iwrap" style="border-color:var(--yellow)">
+            <input type="number" id="ladderBottom" placeholder="0.00" step="0.01" oninput="onLadderInput()" inputmode="decimal"/>
+            <span class="unit">$</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--muted2);flex-shrink:0">Ordini</div>
+        <div class="m-lev-presets ladder-n-row" style="margin:0">
+          <div class="m-lev-p ladder-n active" onclick="setLadderN(2)">2</div>
+          <div class="m-lev-p ladder-n" onclick="setLadderN(3)">3</div>
+          <div class="m-lev-p ladder-n" onclick="setLadderN(4)">4</div>
+        </div>
+        <div style="font-size:9px;color:var(--muted2);margin-left:auto">+ lontano = + size</div>
+      </div>
+      <div id="ladderOrders" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px"></div>
+      <div id="ladderSummary" style="display:none;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px">
+          <div><div style="font-size:8px;color:var(--muted)">Size tot.</div><div style="font-size:11px;font-weight:500;color:var(--accent)" id="laddTotalSize">—</div></div>
+          <div><div style="font-size:8px;color:var(--muted)">Risk tot.</div><div style="font-size:11px;font-weight:500;color:var(--red)" id="laddTotalRisk">—</div></div>
+          <div><div style="font-size:8px;color:var(--muted)">Fee</div><div style="font-size:11px;font-weight:500;color:var(--muted2)" id="laddTotalFee">—</div></div>
+          <div><div style="font-size:8px;color:var(--muted)">Entry avg</div><div style="font-size:11px;font-weight:500" id="laddAvgEntry">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARGIN MODE -->
+    <div class="m-margin-tabs">
+      <div class="m-margin-tab active" id="tabCross" onclick="setMarginMode('cross')">Cross</div>
+      <div class="m-margin-tab" id="tabIso" onclick="setMarginMode('isolated')">Isolated</div>
+    </div>
+
+    <!-- MARKET BANNER -->
+    <div class="m-mkt-banner" id="mktBanner">
+      <div class="m-mb-dot"></div>
+      <div class="m-mb-txt">Entry = prezzo di mercato live<br>Imposta solo lo <strong>Stop Loss</strong></div>
+    </div>
+
+    <!-- DIRECTION -->
+    <div class="m-dir-row">
+      <div class="m-dir-btn long active" id="btnLong" onclick="setDir('long')">▲ LONG</div>
+      <div class="m-dir-btn short" id="btnShort" onclick="setDir('short')">▼ SHORT</div>
+    </div>
+
+    <!-- RISK MODE TABS -->
+    <div class="m-risk-tabs">
+      <div class="m-risk-tab active" id="tabPct" onclick="setRiskMode('pct')">Risk %</div>
+      <div class="m-risk-tab" id="tabUsd" onclick="setRiskMode('usd')">Risk USDT</div>
+    </div>
+
+    <!-- RISK INPUT -->
+    <div class="m-irow">
+      <div class="m-ilabel">Risk</div>
+      <div class="m-iwrap">
+        <input type="number" id="riskVal" value="2" step="0.5" min="0.1" oninput="calc()" inputmode="decimal"/>
+        <span class="unit" id="riskUnit">%</span>
+        <div class="m-iwrap stpr">
+          <button class="m-stpr-btn" onclick="step('riskVal',.5)">▲</button>
+          <button class="m-stpr-btn" onclick="step('riskVal',-.5)">▼</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVA -->
+    <div class="m-irow">
+      <div class="m-ilabel">Leva</div>
+      <div class="m-iwrap">
+        <input type="number" id="levVal" value="10" step="1" min="1" max="125" oninput="calc();updateLevPresets()" inputmode="numeric"/>
+        <span class="unit">x</span>
+        <div class="m-iwrap stpr">
+          <button class="m-stpr-btn" onclick="step('levVal',1);updateLevPresets()">▲</button>
+          <button class="m-stpr-btn" onclick="step('levVal',-1);updateLevPresets()">▼</button>
+        </div>
+      </div>
+    </div>
+    <div class="m-lev-presets">
+      <div class="m-lev-p" onclick="setLev(5)">5x</div>
+      <div class="m-lev-p active" onclick="setLev(10)">10x</div>
+      <div class="m-lev-p" onclick="setLev(20)">20x</div>
+      <div class="m-lev-p" onclick="setLev(50)">50x</div>
+    </div>
+
+    <!-- ENTRY (hidden in market mode) -->
+    <div class="m-irow" id="entryRow">
+      <div class="m-ilabel">Entry</div>
+      <div class="m-iwrap hl-entry" id="wEntry">
+        <input type="number" id="entryVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('entry')" inputmode="decimal"/>
+        <span class="unit">$</span>
+        <div class="m-iwrap stpr">
+          <button class="m-stpr-btn" onclick="stepP('entryVal',1)">▲</button>
+          <button class="m-stpr-btn" onclick="stepP('entryVal',-1)">▼</button>
+        </div>
+      </div>
+      <button class="m-set-btn entry-c" onclick="activateClick('entry')" title="Tap sulla chart per impostare">⊕</button>
+    </div>
+
+    <!-- ENTRY MARKET LIVE -->
+    <div class="m-irow" id="entryMktRow">
+      <div class="m-ilabel">Entry</div>
+      <div class="m-iwrap hl-mkt">
+        <input type="text" id="entryMktVal" readonly class="mkt-val" placeholder="—"/>
+        <span class="unit" style="color:var(--yellow);font-size:9px">LIVE</span>
+      </div>
+    </div>
+
+    <!-- STOP LOSS -->
+    <div class="m-irow">
+      <div class="m-ilabel">SL</div>
+      <div class="m-iwrap hl-sl">
+        <input type="number" id="slVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('sl')" inputmode="decimal"/>
+        <span class="unit">$</span>
+        <div class="m-iwrap stpr">
+          <button class="m-stpr-btn" onclick="stepP('slVal',1)">▲</button>
+          <button class="m-stpr-btn" onclick="stepP('slVal',-1)">▼</button>
+        </div>
+      </div>
+      <button class="m-set-btn sl-c" onclick="activateClick('sl')">⊕</button>
+    </div>
+
+    <!-- CALC BOX -->
+    <div class="m-calc-box">
+      <div class="m-calc-main">
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Position Size</div>
+          <div><span class="m-calc-size" id="calcSize">—</span> <span class="m-calc-size-unit">USDT</span></div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-align:right">Margin req.</div>
+          <div class="m-calc-margin-val" id="calcMargin">—</div>
+        </div>
+      </div>
+      <div class="m-calc-details">
+        <div class="m-cd"><span class="m-cd-l">SL dist.</span><span class="m-cd-v r" id="cdSlDist">—</span></div>
+        <div class="m-cd"><span class="m-cd-l">Risk $</span><span class="m-cd-v r" id="cdRiskUsd">—</span></div>
+        <div class="m-cd"><span class="m-cd-l">Fee est.</span><span class="m-cd-v" style="color:var(--muted2)" id="cdFee">—</span></div>
+        <div class="m-cd"><span class="m-cd-l">R:R</span><span class="m-cd-v y" id="cdRR">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAKE PROFITS -->
+  <div class="m-sec">
+    <div class="m-tp-hdr">
+      <div class="m-sec-title" style="margin-bottom:0">Take Profits</div>
+      <div class="m-toggle" onclick="toggleTP()">
+        <div class="m-tgl-sw" id="tpSw"></div>
+        <span class="m-tgl-lbl" id="tpLbl">OFF</span>
+      </div>
+    </div>
+    <div id="tpRows" style="margin-top:8px">
+      <div class="m-tp-row" id="tpRow1">
+        <span class="m-tp-lbl">TP1</span>
+        <div class="m-iwrap" style="flex:1">
+          <input type="number" id="tp1" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp1')" inputmode="decimal"/>
+          <span class="unit">$</span>
+        </div>
+        <button class="m-set-btn" style="border-color:var(--green);color:var(--green)" onclick="activateClick('tp1')">⊕</button>
+        <span class="m-tp-rr" id="rr1">—</span>
+        <div class="m-tp-pct-wrap"><input type="number" id="tpPct1" value="25" min="1" max="100" step="1" oninput="calc()" inputmode="numeric"/><span class="unit">%</span></div>
+        <input type="checkbox" class="m-tp-chk" id="tp1en" checked onchange="calc()"/>
+      </div>
+      <div class="m-tp-row" id="tpRow2">
+        <span class="m-tp-lbl">TP2</span>
+        <div class="m-iwrap" style="flex:1">
+          <input type="number" id="tp2" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp2')" inputmode="decimal"/>
+          <span class="unit">$</span>
+        </div>
+        <button class="m-set-btn" style="border-color:#00ffcc;color:#00ffcc" onclick="activateClick('tp2')">⊕</button>
+        <span class="m-tp-rr" id="rr2">—</span>
+        <div class="m-tp-pct-wrap"><input type="number" id="tpPct2" value="50" min="1" max="100" step="1" oninput="calc()" inputmode="numeric"/><span class="unit">%</span></div>
+        <input type="checkbox" class="m-tp-chk" id="tp2en" onchange="calc()"/>
+      </div>
+      <div class="m-tp-row" id="tpRow3">
+        <span class="m-tp-lbl">TP3</span>
+        <div class="m-iwrap" style="flex:1">
+          <input type="number" id="tp3" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp3')" inputmode="decimal"/>
+          <span class="unit">$</span>
+        </div>
+        <button class="m-set-btn" style="border-color:#3dddff;color:#3dddff" onclick="activateClick('tp3')">⊕</button>
+        <span class="m-tp-rr" id="rr3">—</span>
+        <div class="m-tp-pct-wrap"><input type="number" id="tpPct3" value="50" min="1" max="100" step="1" oninput="calc()" inputmode="numeric"/><span class="unit">%</span></div>
+        <input type="checkbox" class="m-tp-chk" id="tp3en" onchange="calc()"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPEN BUTTON -->
+  <div class="m-sec">
+    <button class="m-btn-open long" id="btnOpen" onclick="openModal()">OPEN LONG</button>
+    <div class="m-btn-row">
+      <button class="m-btn-sec" onclick="clearAll()">Clear tutto</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POSITIONS PANEL ══ -->
+<div class="m-panel" id="panel-positions">
+  <div class="m-sec">
+    <div class="m-sec-title">
+      Positions <span id="m-posCountBadge" style="background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:9px;color:var(--muted2)">0</span>
+      <button style="background:var(--red-dim);border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer" onclick="closeAllPositions()">✕ Chiudi tutto</button>
+    </div>
+    <div id="posList"><div class="no-pos">No open positions</div></div>
+  </div>
+  <div class="m-sec">
+    <div class="m-sec-title">
+      Orders <span id="ordCount" style="background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:9px;color:var(--muted2)">0</span>
+      <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="fetchBitgetOrders()">⟳</button>
+    </div>
+    <div id="ordList"><div class="no-ord">Nessun ordine pending</div></div>
+  </div>
+</div>
+
+<!-- ══ ACCOUNT PANEL ══ -->
+<div class="m-panel" id="panel-account">
+  <div class="m-sec">
+    <div class="m-sec-title">Account <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" onclick="refreshAccount()">⟳</button></div>
+    <div class="m-acc-grid">
+      <div class="m-acc-card"><div class="al">Balance</div><div class="av acc" id="accBalance">—</div></div>
+      <div class="m-acc-card"><div class="al">Available</div><div class="av" id="accAvail">—</div></div>
+      <div class="m-acc-card"><div class="al">Unreal. PnL</div><div class="av" id="accPnl">—</div></div>
+      <div class="m-acc-card"><div class="al">Margin</div><div class="av" id="accMargin">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS PANEL ══ -->
+<div class="m-panel" id="panel-settings">
+  <!-- SL SHIELD -->
+  <div class="m-sec">
+    <div class="m-sec-title" style="margin-bottom:8px">SL Shield</div>
+    <div class="m-slp-wrap" id="slpWrap" onclick="slpToggle()">
+      <span style="font-size:14px">🛡</span>
+      <span class="m-slp-label">SL Shield — impedisce di allargare lo stop loss</span>
+      <div class="m-slp-sw" id="slpSw" style="margin-left:auto"></div>
+      <span id="slpState" style="font-size:10px;font-weight:600;color:var(--muted2);font-family:'DM Mono',monospace">OFF</span>
+    </div>
+  </div>
+
+  <!-- DAILY LOSS LIMIT -->
+  <div class="m-sec" id="dllSec">
+    <div class="m-tp-hdr">
+      <div class="m-sec-title" style="margin-bottom:0">Daily Loss Limit
+        <span style="font-size:9px;color:var(--muted);cursor:help;margin-left:4px;border:1px solid var(--border2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px" title="Se perdi più della soglia % in un giorno, blocca le nuove posizioni per 24h.">ⓘ</span>
+      </div>
+      <div class="m-toggle" id="dllToggle" onclick="dllToggleSwitch()">
+        <div class="m-tgl-sw" id="dllSw"></div>
+        <span class="m-tgl-lbl" id="dllLbl">OFF</span>
+      </div>
+    </div>
+    <div id="dllSettings" style="display:none;margin-top:10px">
+      <div class="m-irow">
+        <div class="m-ilabel" style="width:90px">Soglia</div>
+        <div class="m-iwrap" style="max-width:120px">
+          <input type="number" id="dllPct" value="2" min="0.1" max="50" step="0.5" oninput="dllSaveSettings()" inputmode="decimal"/>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="m-dll-hint">Se il wallet scende di questa % in 24h, nessuna nuova posizione.</div>
+    </div>
+    <div id="dllBanner" style="display:none;margin-top:10px">
+      <div class="m-dll-triggered-box">
+        <div style="font-size:20px">🛑</div>
+        <div>
+          <div class="m-dll-triggered-title">Trading bloccato</div>
+          <div style="font-size:10px;color:var(--muted2)">Hai superato il limite di perdita giornaliero</div>
+          <div class="m-dll-countdown" id="dllCountdown">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEE SETTINGS -->
+  <div class="m-sec">
+    <div class="m-sec-title" style="margin-bottom:8px">Fee Exchange
+      <span style="font-size:9px;color:var(--muted);cursor:help;margin-left:4px;border:1px solid var(--border2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px" title="Taker: ordini market/stop. Maker: ordini limit.">ⓘ</span>
+    </div>
+    <div class="m-fee-wrap">
+      <span class="m-fee-label">Taker fee</span>
+      <div class="m-iwrap" style="max-width:120px">
+        <input type="number" id="feeTakerInput" value="0.055" min="0" max="1" step="0.001" oninput="saveTakerFee()" inputmode="decimal"/>
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div class="m-fee-wrap">
+      <span class="m-fee-label">Maker fee</span>
+      <div class="m-iwrap" style="max-width:120px">
+        <input type="number" id="feeMakerInput" value="0.02" min="0" max="1" step="0.001" oninput="saveMakerFee()" inputmode="decimal"/>
+        <span class="unit">%</span>
+      </div>
+    </div>
+    <div class="m-dll-hint">Market/Stop → taker×2 · Limit → maker+taker</div>
+  </div>
+
+  <!-- LOGOUT -->
+  <div class="m-sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div id="m-userBadge2" style="display:flex;align-items:center;gap:6px">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--green)"></div>
+        <span id="rfUsername2" style="font-size:12px;color:var(--muted2)">—</span>
+      </div>
+      <button style="background:none;border:1px solid var(--red);color:var(--red);border-radius:5px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer" onclick="rfDoLogout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MOBILE-SPECIFIC JS (touch drag + UI glue) -->
+<!-- ══════════════════════════════════════════ -->
+<script>
+// ─── TAB SWITCHING ───
+function switchTab(name) {
+  ['trade','positions','account','settings'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+    const p = document.getElementById('panel-'+t);
+    if(p) p.classList.toggle('open', t===name);
+  });
+  // Close context menu on tab switch
+  document.getElementById('ctxMenu').style.display='none';
+}
+
+// ─── SHIM: redirect desktop IDs used by riskflow.js to mobile IDs ───
+// riskflow.js uses getElementById for some elements — we bridge them
+function shimEl(desktopId, mobileId) {
+  const orig = document.getElementById.bind(document);
+  // already handled via same ID in HTML (we kept same IDs for inputs)
+}
+
+// Override posModal functions to use mobile modal
+function closePosModal() {
+  document.getElementById('m-posModal').classList.remove('open');
+}
+function openPosModalInternal() {
+  document.getElementById('m-posModal').classList.add('open');
+}
+
+// Positions count sync
+const _origRenderPosList = window.renderPosList;
+function syncPosCount() {
+  const cnt = (window._positions||[]).length;
+  const badge = document.getElementById('m-posCountBadge');
+  if(badge) badge.textContent = cnt;
+  const tabBadge = document.getElementById('posCount');
+  if(tabBadge) tabBadge.textContent = cnt > 0 ? '('+cnt+')' : '';
+}
+
+// ─── TOUCH DRAG SYSTEM FOR LINES ───
+// Strategy: 
+//   1. Long press (500ms) on chart → open context menu to SET lines
+//   2. Once lines exist, tap the toolbar button to ACTIVATE drag mode
+//   3. In drag mode, single-finger drag moves the selected line
+//   4. Two-finger pinch/scroll = chart zoom/pan (normal LightweightCharts behavior)
+//   5. Tap anywhere outside a line zone → deactivate drag mode
+
+let _mDragActive = false;   // true when in drag mode for a specific line
+let _mDragType   = null;    // 'entry'|'sl'|'tp1'|'tp2'|'tp3'
+let _mLongPressTimer = null;
+let _mLongPressX = 0, _mLongPressY = 0;
+let _mTouchStartY = 0;
+let _mTouchStartTime = 0;
+
+const LONG_PRESS_MS = 500;
+const DRAG_THRESHOLD_PX = 8;
+
+function mUpdateLineToolbar() {
+  // Show toolbar if any lines are set
+  const hasSL   = !!window.DRAG_PRICES?.sl;
+  const hasTP   = !!(window.DRAG_PRICES?.tp1 || window.DRAG_PRICES?.tp2 || window.DRAG_PRICES?.tp3);
+  const hasEntry= !!(window.DRAG_PRICES?.entry);
+  const hasAny  = hasSL || hasTP || hasEntry;
+
+  const toolbar = document.getElementById('m-lineToolbar');
+  if(toolbar) toolbar.classList.toggle('visible', hasAny);
+
+  const ltEntry = document.getElementById('m-ltEntry');
+  const ltSL    = document.getElementById('m-ltSL');
+  const ltTP    = document.getElementById('m-ltTP');
+
+  if(ltEntry) {
+    const show = hasEntry && window.S && window.S.orderType !== 'market';
+    ltEntry.style.display = show ? '' : 'none';
+    ltEntry.classList.toggle('active', _mDragActive && _mDragType === 'entry');
+  }
+  if(ltSL)   { ltSL.style.display = hasSL ? '' : 'none'; ltSL.classList.toggle('active', _mDragActive && _mDragType === 'sl'); }
+  if(ltTP)   { ltTP.style.display = hasTP ? '' : 'none'; ltTP.classList.toggle('active', _mDragActive && (_mDragType==='tp1'||_mDragType==='tp2'||_mDragType==='tp3')); }
+}
+
+function mActivateDrag(type) {
+  if(_mDragActive && _mDragType === type) {
+    // Deactivate
+    _mDragActive = false;
+    _mDragType   = null;
+    mUpdateLineToolbar();
+    const hint = document.getElementById('m-ltHint');
+    if(hint) hint.classList.remove('visible');
+    return;
+  }
+  // If TP requested, pick the active one
+  let actualType = type;
+  if(type === 'tp1') {
+    // find first active TP
+    for(const t of ['tp1','tp2','tp3']){
+      if(window.DRAG_PRICES?.[t]) { actualType = t; break; }
+    }
+  }
+  _mDragActive = true;
+  _mDragType   = actualType;
+  mUpdateLineToolbar();
+  const hint = document.getElementById('m-ltHint');
+  if(hint) {
+    const labels = {entry:'ENTRY',sl:'STOP LOSS',tp1:'TP1',tp2:'TP2',tp3:'TP3'};
+    hint.textContent = 'Trascina per spostare ' + (labels[actualType]||actualType);
+    hint.classList.add('visible');
+    setTimeout(()=>hint.classList.remove('visible'), 2500);
+  }
+  // brief haptic feedback if available
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+// ─── TOUCH EVENTS ON CHART ───
+const _chartWrapEl = document.getElementById('chartWrap');
+
+_chartWrapEl.addEventListener('touchstart', function(e) {
+  const touches = e.touches;
+
+  // 2+ fingers = let LightweightCharts handle pinch zoom, cancel drag
+  if(touches.length >= 2) {
+    _cancelLongPress();
+    if(_mDragActive) {
+      // Don't prevent default — let chart handle zoom
+      return;
+    }
+    return;
+  }
+
+  const touch = touches[0];
+  _mTouchStartY = touch.clientY;
+  _mTouchStartTime = Date.now();
+  _mLongPressX = touch.clientX;
+  _mLongPressY = touch.clientY;
+
+  // If in drag mode, prevent default to stop chart panning
+  if(_mDragActive) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+
+  // Start long press timer for context menu
+  _mLongPressTimer = setTimeout(function() {
+    _mLongPressTimer = null;
+    // Check we haven't moved too much
+    mOpenCtxAt(_mLongPressX, _mLongPressY);
+    if(navigator.vibrate) navigator.vibrate([30, 20, 50]);
+  }, LONG_PRESS_MS);
+
+}, {passive: false, capture: true});
+
+_chartWrapEl.addEventListener('touchmove', function(e) {
+  const touches = e.touches;
+
+  // 2+ fingers: let chart handle
+  if(touches.length >= 2) {
+    _cancelLongPress();
+    return;
+  }
+
+  const touch = touches[0];
+  const dy = Math.abs(touch.clientY - _mTouchStartY);
+  const dx = Math.abs(touch.clientX - (_mLongPressX||0));
+
+  // Cancel long press if moved
+  if(dy > 10 || dx > 10) {
+    _cancelLongPress();
+  }
+
+  if(!_mDragActive) {
+    // Normal chart panning — let LightweightCharts handle
+    return;
+  }
+
+  // === DRAG MODE ===
+  e.preventDefault();
+  e.stopPropagation();
+
+  const chartWrapRect = _chartWrapEl.getBoundingClientRect();
+  const y = touch.clientY - chartWrapRect.top;
+
+  // Need access to candleSeries from the main JS scope
+  if(!window.candleSeries) return;
+  const price = window.candleSeries.coordinateToPrice(y);
+  if(!price || price <= 0) return;
+
+  const type = _mDragType;
+  if(!window.DRAG_PRICES || !window.DRAG_PRICES.hasOwnProperty(type)) return;
+
+  // SL protect check
+  if(type === 'sl') {
+    const S = window.S || {};
+    const entry = S.orderType === 'market' ? S.lastPrice : parseFloat(document.getElementById('entryVal')?.value || 0);
+    const dir = S.dir || 'long';
+    // Don't cross entry
+    if(entry > 0) {
+      if(dir === 'long' && price >= entry) { window.drawCanvas && window.drawCanvas(); return; }
+      if(dir === 'short' && price <= entry) { window.drawCanvas && window.drawCanvas(); return; }
+    }
+    // SLP check
+    if(window.slpCheck) {
+      const refSL = window.DRAG_PRICES['sl'];
+      if(!window.slpCheck(price, refSL, dir, true)) {
+        window.drawCanvas && window.drawCanvas();
+        return;
+      }
+    }
+  }
+
+  // Update the price
+  window.DRAG_PRICES[type] = price;
+
+  // Update chart line
+  if(window.setChartLine) window.setChartLine(type, price);
+
+  // Update input field
+  const idMap = {entry:'entryVal',sl:'slVal',tp1:'tp1',tp2:'tp2',tp3:'tp3'};
+  const inputId = idMap[type];
+  if(inputId) {
+    const el = document.getElementById(inputId);
+    if(el && window.fmtPrice) el.value = window.fmtPrice(price);
+  }
+
+  // Redraw
+  window.drawCanvas && window.drawCanvas();
+
+}, {passive: false, capture: true});
+
+_chartWrapEl.addEventListener('touchend', function(e) {
+  _cancelLongPress();
+
+  if(!_mDragActive) return;
+
+  // Recalculate after drag ends
+  window.calc && window.calc();
+  const labels = {entry:'ENTRY',sl:'SL',tp1:'TP1',tp2:'TP2',tp3:'TP3'};
+  const price = window.DRAG_PRICES && window.DRAG_PRICES[_mDragType];
+  if(price && window.notify && window.fmtPrice) {
+    window.notify('Set ' + (labels[_mDragType]||_mDragType) + ' → $' + window.fmtPrice(price), 'ok');
+  }
+  mUpdateLineToolbar();
+
+  e.preventDefault();
+}, {passive: false});
+
+_chartWrapEl.addEventListener('touchcancel', function() {
+  _cancelLongPress();
+  mUpdateLineToolbar();
+});
+
+function _cancelLongPress() {
+  if(_mLongPressTimer) {
+    clearTimeout(_mLongPressTimer);
+    _mLongPressTimer = null;
+  }
+}
+
+// ─── LONG PRESS CONTEXT MENU ───
+function mOpenCtxAt(clientX, clientY) {
+  if(!window.candleSeries) return;
+  const rect = _chartWrapEl.getBoundingClientRect();
+  const y = clientY - rect.top;
+  const price = window.candleSeries.coordinateToPrice(y);
+  if(!price) return;
+
+  window.ctxPrice = price;
+
+  const m = document.getElementById('ctxMenu');
+  const S = window.S || {};
+  const isMarket = S.orderType === 'market';
+  const isLadder = S.orderType === 'ladder';
+  m.children[0].style.display = (!isLadder && !isMarket) ? 'flex' : 'none';
+  for(let i=5;i<=8;i++){
+    const el=m.children[i]; if(!el) continue;
+    el.style.display=isLadder?'flex':'none';
+  }
+  m.style.display='block';
+
+  // Position: keep inside viewport
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = clientX, top = clientY + 10;
+  if(left + 170 > vw) left = vw - 180;
+  if(top + 200 > vh) top = clientY - 210;
+  m.style.left = left + 'px';
+  m.style.top  = top  + 'px';
+}
+
+// Tap anywhere to close context menu
+document.addEventListener('touchstart', function(e) {
+  const m = document.getElementById('ctxMenu');
+  if(m.style.display==='block' && !m.contains(e.target)) {
+    m.style.display='none';
+  }
+}, {passive: true});
+
+// ─── HOOK INTO drawCanvas to update toolbar ───
+// Wait for the main JS to init, then patch drawCanvas
+window.addEventListener('load', function() {
+  const _origDrawCanvas = window.drawCanvas;
+  if(_origDrawCanvas) {
+    window.drawCanvas = function() {
+      _origDrawCanvas();
+      mUpdateLineToolbar();
+      syncPosCount();
+    };
+  }
+  // Also patch posModal to use mobile modal
+  if(window.openPosModal) {
+    const origOpen = window.openPosModal;
+    window.openPosModal = function(idx, action) {
+      origOpen(idx, action);
+      // Move content if needed
+      document.getElementById('m-posModal').classList.add('open');
+    };
+  }
+
+  // Show beta popup once
+  const betaKey = 'rf_mobile_beta_seen';
+  if(!localStorage.getItem(betaKey)) {
+    document.getElementById('m-betaPopupOverlay').style.display='flex';
+    localStorage.setItem(betaKey, '1');
+  }
+});
+
+// ─── API MODAL EXCHANGE TAB BRIDGE ───
+// rfSelectExchange is defined in riskflow.js, but it updates desktop IDs.
+// We patch the exchange button IDs to match what riskflow.js expects.
+// riskflow.js looks for: exBtnBitget, exBtnBybit, exBtnBybitDemo, exBtnWeex, exBtnBingx
+// We'll use same IDs in a shim:
+document.addEventListener('DOMContentLoaded', function() {
+  // Map mobile exchange buttons to the IDs expected by riskflow.js
+  const idMap = {
+    'exBtnBitget':    'm-exBtnBitget',
+    'exBtnBybit':     'm-exBtnBybit',
+    'exBtnBybitDemo': 'm-exBtnBybitDemo',
+    'exBtnWeex':      'm-exBtnWeex',
+    'exBtnBingx':     'm-exBtnBingx',
+  };
+  // Patch getElementById to return mobile elements for desktop IDs
+  const _origGetById = document.getElementById.bind(document);
+  document.getElementById = function(id) {
+    // Balance/PnL fields in API modal
+    if(id === 'apiBitgetBalance') return _origGetById('m-apiBitgetBalance') || _origGetById(id);
+    if(id === 'apiBitgetUpnl')   return _origGetById('m-apiBitgetUpnl')   || _origGetById(id);
+    // Exchange buttons
+    if(idMap[id]) return _origGetById(idMap[id]) || _origGetById(id);
+    // Pos modal
+    if(id === 'posModal') return _origGetById('m-posModal') || _origGetById(id);
+    return _origGetById(id);
+  };
+
+  // rfUsername sync
+  const origRfUsername = document.getElementById('rfUsername');
+  // Will be updated by riskflow.js — also update secondary badge
+  const usernameObserver = new MutationObserver(function(muts) {
+    muts.forEach(function(m) {
+      const el2 = document.getElementById('rfUsername2');
+      if(el2) el2.textContent = m.target.textContent;
+    });
+  });
+  if(origRfUsername) usernameObserver.observe(origRfUsername, {childList:true,characterData:true,subtree:true});
+});
+</script>
+
+<!-- ── MAIN JS (same as desktop, patched inline above) ── -->
+<script src="JS/riskflow.js"></script>
+</body>
+</html>
