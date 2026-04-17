@@ -64,7 +64,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font
   touch-action:none; /* gestito dal JS */
 }
 #m-chart{width:100%;height:100%}
+#chart{width:100%;height:100%}
 #m-drag-canvas{position:absolute;inset:0;z-index:10;pointer-events:none}
+#dragCanvas{position:absolute;inset:0;z-index:10;pointer-events:none}
 .m-chart-loading{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   background:rgba(7,7,10,.7);z-index:50;flex-direction:column;gap:8px;
@@ -136,14 +138,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font
   position:fixed;
   bottom:var(--tab-h);
   left:0;right:0;
-  top:calc(var(--topbar-h) + 28px);
+  max-height:58vh;
   background:var(--surface);
-  border-top:1px solid var(--border);
+  border-top:1px solid var(--border2);
+  border-radius:14px 14px 0 0;
   overflow-y:auto;
   transform:translateY(100%);
   transition:transform .25s cubic-bezier(.4,0,.2,1);
   z-index:50;
   -webkit-overflow-scrolling:touch;
+  box-shadow:0 -8px 32px rgba(0,0,0,.5);
 }
 .m-panel.open{transform:translateY(0)}
 .m-panel::-webkit-scrollbar{display:none}
