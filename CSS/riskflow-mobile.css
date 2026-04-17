@@ -133,14 +133,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font
 
 /* ── PANELS ── */
 .m-panel{
-  position:absolute;bottom:var(--tab-h);left:0;right:0;
+  position:fixed;
+  bottom:var(--tab-h);
+  left:0;right:0;
+  top:calc(var(--topbar-h) + 28px);
   background:var(--surface);
   border-top:1px solid var(--border);
   overflow-y:auto;
   transform:translateY(100%);
   transition:transform .25s cubic-bezier(.4,0,.2,1);
   z-index:50;
-  max-height:calc(100vh - var(--topbar-h) - 28px - var(--tab-h));
   -webkit-overflow-scrolling:touch;
 }
 .m-panel.open{transform:translateY(0)}
