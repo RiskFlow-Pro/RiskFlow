@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-//  riskflow-mobile-patch.js  v2
-//  Carica PRIMA di riskflow.js  —  non toccare l'ordine degli script
+//  riskflow-mobile-patch.js  v3
+//  Carica PRIMA di riskflow.js nel mobile.html
 // ═══════════════════════════════════════════════════════════════
 
 ;(function () {
@@ -24,7 +24,6 @@
   };
 
   // ── 2. GHOST — oggetti plain che simulano elementi DOM ────────
-  // Non usiamo appendChild perché il body potrebbe non esistere ancora.
   function makeGhost(id) {
     return {
       id: id, _ghost: true,
@@ -41,9 +40,14 @@
       getAttribute: function(){ return null; },
       setAttribute: function(){},
       addEventListener: function(){},
-      getBoundingClientRect: function(){ return {top:0,left:0,width:0,height:0}; },
+      removeEventListener: function(){},
+      getBoundingClientRect: function(){ return {top:0,left:0,width:0,height:0,right:0,bottom:0}; },
       querySelectorAll: function(){ return []; },
+      querySelector: function(){ return null; },
+      appendChild: function(){},
       focus: function(){}, blur: function(){},
+      click: function(){},
+      remove: function(){},
     };
   }
 
@@ -55,6 +59,7 @@
     'moneyShotModal','msShotCanvas',
     'dllSw','dllLbl','dllToggle','dllSettings','dllBanner','dllPct','dllCountdown',
     'betaPopupOverlay',
+    'chartHint',   // desktop-only hint element
   ];
 
   var _ghosts = {};
@@ -70,7 +75,6 @@
     if (_ghosts[id]) return _ghosts[id];
     var found = _orig(id);
     if (!found) {
-      // ghost on-the-fly per qualsiasi ID sconosciuto
       _ghosts[id] = makeGhost(id);
       return _ghosts[id];
     }
@@ -78,11 +82,9 @@
   };
 
   // ── 4. loadAccount() ridefinita IMMEDIATAMENTE ────────────────
-  // riskflow.js la chiama a livello globale alla riga ~3697.
-  // Definendola qui prima, il crash "Cannot set properties of null" non avviene.
   window.loadAccount = function() {
     var setText = function(id, val){
-      var el = document.getElementById(id); if(el) el.textContent = val;
+      var el = document.getElementById(id); if(el && !el._ghost) el.textContent = val;
     };
     setText('accBalance', '—');
     setText('accAvail',   '—');
@@ -92,12 +94,10 @@
     setText('tbPnl',      '—');
     setText('posCount',   '0');
     var pl = document.getElementById('posList');
-    if (pl && !pl._ghost) pl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted2);font-size:12px">Connetti il tuo exchange per vedere le posizioni</div>';
+    if (pl && !pl._ghost) pl.innerHTML = '<div class="no-pos">Connetti il tuo exchange per vedere le posizioni</div>';
   };
 
-  // ── 5. SYNC ghost accBalance/accPnl → panel mobile ───────────
-  // Aggiunge setter a textContent/className sui ghost account
-  // così quando riskflow.js ci scrive i valori arrivano nel DOM mobile
+  // ── 5. SYNC ghost account → elementi panel mobile ─────────────
   var ACC_SYNC = {
     'accBalance': 'm-acc-balance',
     'accAvail':   'm-acc-avail',
@@ -122,8 +122,6 @@
   });
 
   // ── 6. PATCH FUNZIONI AUTH con polling ────────────────────────
-  // rfDoLogin/rfSwitchTab/rfShowApp vengono definite dentro un async IIFE
-  // (il blocco Firebase in riskflow.js) — non disponibili subito.
   function patchWhen(name, fn) {
     if (window[name]) { fn(window[name]); return; }
     var n = 0, t = setInterval(function(){
@@ -145,8 +143,13 @@
 
   patchWhen('rfShowApp', function(orig) {
     window.rfShowApp = function(username) {
-      var ov = _orig('m-auth-overlay'); if(ov) ov.style.display='none';
-      var bd = _orig('m-userBadge');    if(bd) bd.style.display='flex';
+      // Nascondi overlay
+      var ov = _orig('m-auth-overlay');
+      if (ov) { ov.style.display='none'; ov.classList.add('hidden'); }
+      // Mostra badge
+      var bd = _orig('m-userBadge');
+      if (bd) { bd.style.display='flex'; bd.classList.add('visible'); }
+      // Username
       var u1 = _orig('rfUsername');     if(u1) u1.textContent=username;
       var u2 = _orig('rfUsername2');    if(u2) u2.textContent=username;
       try { orig(username); } catch(e){}
@@ -156,8 +159,10 @@
   patchWhen('rfDoLogout', function(orig) {
     window.rfDoLogout = async function() {
       try { await orig(); } catch(e){}
-      var ov = _orig('m-auth-overlay'); if(ov) ov.style.display='flex';
-      var bd = _orig('m-userBadge');    if(bd) bd.style.display='none';
+      var ov = _orig('m-auth-overlay');
+      if (ov) { ov.style.display='flex'; ov.classList.remove('hidden'); }
+      var bd = _orig('m-userBadge');
+      if (bd) { bd.style.display='none'; bd.classList.remove('visible'); }
     };
   });
 
@@ -175,7 +180,7 @@
     };
   });
 
-  // ── 7. DOMContentLoaded: assicura m-posList e sync username ──
+  // ── 7. DOMContentLoaded ───────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
     // Crea m-posList se manca
     if (!_orig('m-posList')) {
@@ -196,6 +201,32 @@
         });
       }).observe(u1, {childList:true,characterData:true,subtree:true});
     }
+  });
+
+  // ── 8. CHART RESIZE — forza ridimensionamento dopo layout ─────
+  // riskflow.js crea la chart con offsetWidth/offsetHeight al momento
+  // del parse — spesso sono 0 su mobile. Forziamo il resize dopo il load.
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      try {
+        if (window.chart) {
+          var chartEl = _orig('chart');
+          if (chartEl && chartEl.offsetWidth > 0) {
+            window.chart.resize(chartEl.offsetWidth, chartEl.offsetHeight);
+          }
+        }
+      } catch(e) { console.warn('[mobile-patch] chart resize:', e); }
+    }, 200);
+
+    // Anche al resize della finestra
+    window.addEventListener('resize', function() {
+      try {
+        if (window.chart) {
+          var chartEl = _orig('chart');
+          if (chartEl) window.chart.resize(chartEl.offsetWidth, chartEl.offsetHeight);
+        }
+      } catch(e){}
+    });
   });
 
 })();
