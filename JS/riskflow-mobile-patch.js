@@ -1,135 +1,105 @@
 // ═══════════════════════════════════════════════════════════════
-//  riskflow-mobile-patch.js  v3
+//  riskflow-mobile-patch.js  v4
 //  Carica PRIMA di riskflow.js nel mobile.html
 // ═══════════════════════════════════════════════════════════════
-
 ;(function () {
   'use strict';
 
-  // ── 1. MAPPA ID desktop → ID mobile ──────────────────────────
+  // ── 1. ID desktop → ID mobile (solo quelli che DAVVERO differiscono) ──
   var ID_MAP = {
-    'auth-overlay':       'm-auth-overlay',
-    'userBadge':          'm-userBadge',
-    'apiModal':           'm-apiModal',
-    'apiStatus':          'm-apiStatus',
-    'apiBitgetBalance':   'm-apiBitgetBalance',
-    'apiBitgetUpnl':      'm-apiBitgetUpnl',
-    'exBtnBitget':        'm-exBtnBitget',
-    'exBtnBybit':         'm-exBtnBybit',
-    'exBtnBybitDemo':     'm-exBtnBybitDemo',
-    'exBtnWeex':          'm-exBtnWeex',
-    'exBtnBingx':         'm-exBtnBingx',
-    'posModal':           'm-posModal',
-    'posList':            'm-posList',
+    'auth-overlay':  'm-auth-overlay',
+    'userBadge':     'm-userBadge',
+    'apiModal':      'm-apiModal',
+    'apiStatus':     'm-apiStatus',
+    'apiBitgetBalance': 'm-apiBitgetBalance',
+    'apiBitgetUpnl':    'm-apiBitgetUpnl',
+    'exBtnBitget':      'm-exBtnBitget',
+    'exBtnBybit':       'm-exBtnBybit',
+    'exBtnBybitDemo':   'm-exBtnBybitDemo',
+    'exBtnWeex':        'm-exBtnWeex',
+    'exBtnBingx':       'm-exBtnBingx',
+    'posModal':         'm-posModal',
   };
 
-  // ── 2. GHOST — oggetti plain che simulano elementi DOM ────────
+  // ── 2. Ghost per ID che NON esistono nel mobile ───────────────
+  // Solo quelli puramente desktop — accBalance/dllSw/ecc esistono nel panel mobile!
   function makeGhost(id) {
-    return {
-      id: id, _ghost: true,
-      textContent: '', innerHTML: '', className: '', value: '',
-      disabled: false, checked: false,
-      style: { display: '' },
-      classList: {
-        _c: {},
+    var g = {
+      id:id, _ghost:true, textContent:'', innerHTML:'', className:'', value:'',
+      disabled:false, checked:false,
+      style:{ display:'' },
+      classList:{
+        _c:{},
         add:     function(c){ this._c[c]=1; },
         remove:  function(c){ delete this._c[c]; },
-        toggle:  function(c,f){ if(f===undefined)f=!this._c[c]; f?this._c[c]=1:delete this._c[c]; },
+        toggle:  function(c,f){ f===undefined?( this._c[c]?delete this._c[c]:this._c[c]=1 ):(f?this._c[c]=1:delete this._c[c]); },
         contains:function(c){ return !!this._c[c]; },
       },
-      getAttribute: function(){ return null; },
-      setAttribute: function(){},
-      addEventListener: function(){},
-      removeEventListener: function(){},
-      getBoundingClientRect: function(){ return {top:0,left:0,width:0,height:0,right:0,bottom:0}; },
-      querySelectorAll: function(){ return []; },
-      querySelector: function(){ return null; },
-      appendChild: function(){},
-      focus: function(){}, blur: function(){},
-      click: function(){},
-      remove: function(){},
+      getAttribute:function(){ return null; },
+      setAttribute:function(){},
+      addEventListener:function(){},
+      removeEventListener:function(){},
+      getBoundingClientRect:function(){ return {top:0,left:0,right:0,bottom:0,width:0,height:0}; },
+      querySelectorAll:function(){ return []; },
+      querySelector:function(){ return null; },
+      appendChild:function(){}, remove:function(){},
+      focus:function(){}, blur:function(){}, click:function(){},
     };
+    return g;
   }
 
+  // Solo ID che davvero non hanno equivalente mobile
   var GHOST_IDS = [
-    'accBalance','accAvail','accPnl','accMargin',
-    'tbPnl',
-    'apiBitgetPositions','apiSyncTime',
     'panelResize','panel',
     'moneyShotModal','msShotCanvas',
-    'dllSw','dllLbl','dllToggle','dllSettings','dllBanner','dllPct','dllCountdown',
+    'chartHint',
     'betaPopupOverlay',
-    'chartHint',   // desktop-only hint element
+    'apiBitgetPositions','apiSyncTime',
+    'tbPnl',
   ];
-
   var _ghosts = {};
   GHOST_IDS.forEach(function(id){ _ghosts[id] = makeGhost(id); });
 
-  // ── 3. OVERRIDE getElementById ────────────────────────────────
+  // ── 3. Override getElementById ────────────────────────────────
   var _orig = document.getElementById.bind(document);
 
   document.getElementById = function(id) {
-    if (ID_MAP[id]) {
-      return _orig(ID_MAP[id]) || _orig(id) || makeGhost(id);
-    }
+    // Remappa a ID mobile
+    if (ID_MAP[id]) return _orig(ID_MAP[id]) || _orig(id) || makeGhost(id);
+    // Ghost per ID desktop-only
     if (_ghosts[id]) return _ghosts[id];
-    var found = _orig(id);
-    if (!found) {
-      _ghosts[id] = makeGhost(id);
-      return _ghosts[id];
-    }
-    return found;
+    // Normale
+    var el = _orig(id);
+    // Ghost on-the-fly solo se non trovato E non è un ID mobile legittimo
+    if (!el) { _ghosts[id] = makeGhost(id); return _ghosts[id]; }
+    return el;
   };
 
-  // ── 4. loadAccount() ridefinita IMMEDIATAMENTE ────────────────
+  // ── 4. loadAccount() — evita il crash a riga ~3697 ───────────
+  // NB: accBalance/accAvail/accPnl/accMargin esistono nel panel-account mobile
+  //     quindi NON sono ghost — getElementById li trova normalmente
   window.loadAccount = function() {
-    var setText = function(id, val){
-      var el = document.getElementById(id); if(el && !el._ghost) el.textContent = val;
+    var set = function(id, val) {
+      var el = document.getElementById(id);
+      if (el && !el._ghost) el.textContent = val;
     };
-    setText('accBalance', '—');
-    setText('accAvail',   '—');
-    setText('accPnl',     '—');
-    setText('accMargin',  '—');
-    setText('tbBalance',  '—');
-    setText('tbPnl',      '—');
-    setText('posCount',   '0');
-    var pl = document.getElementById('posList');
-    if (pl && !pl._ghost) pl.innerHTML = '<div class="no-pos">Connetti il tuo exchange per vedere le posizioni</div>';
+    set('accBalance','—'); set('accAvail','—');
+    set('accPnl','—');     set('accMargin','—');
+    set('tbBalance','—');  set('posCount','0');
+    var pl = _orig('posList');
+    if (pl) pl.innerHTML = '<div class="no-pos">Connetti il tuo exchange per vedere le posizioni</div>';
   };
 
-  // ── 5. SYNC ghost account → elementi panel mobile ─────────────
-  var ACC_SYNC = {
-    'accBalance': 'm-acc-balance',
-    'accAvail':   'm-acc-avail',
-    'accPnl':     'm-acc-pnl',
-    'accMargin':  'm-acc-margin',
-  };
-  Object.keys(ACC_SYNC).forEach(function(gid) {
-    var mid = ACC_SYNC[gid];
-    var g = _ghosts[gid];
-    if (!g) return;
-    var _tv = '—', _cv = '';
-    Object.defineProperty(g, 'textContent', {
-      get: function(){ return _tv; },
-      set: function(v){ _tv = v; var m=_orig(mid); if(m) m.textContent=v; },
-      configurable: true,
-    });
-    Object.defineProperty(g, 'className', {
-      get: function(){ return _cv; },
-      set: function(v){ _cv = v; var m=_orig(mid); if(m) m.className=v; },
-      configurable: true,
-    });
-  });
-
-  // ── 6. PATCH FUNZIONI AUTH con polling ────────────────────────
+  // ── 5. Patch funzioni auth — polling (definite in async IIFE) ─
   function patchWhen(name, fn) {
     if (window[name]) { fn(window[name]); return; }
-    var n = 0, t = setInterval(function(){
+    var n=0, t=setInterval(function(){
       if (window[name]) { clearInterval(t); fn(window[name]); }
-      else if (++n > 150) clearInterval(t);
-    }, 100);
+      else if (++n>200) clearInterval(t);
+    }, 50);
   }
 
+  // rfSwitchTab: desktop usa '.auth-tab', mobile usa '.m-auth-tab'
   patchWhen('rfSwitchTab', function() {
     window.rfSwitchTab = function(tab) {
       ['login','register','forgot'].forEach(function(t) {
@@ -141,21 +111,21 @@
     };
   });
 
+  // rfShowApp: nasconde overlay mobile, mostra badge
   patchWhen('rfShowApp', function(orig) {
     window.rfShowApp = function(username) {
-      // Nascondi overlay
       var ov = _orig('m-auth-overlay');
       if (ov) { ov.style.display='none'; ov.classList.add('hidden'); }
-      // Mostra badge
       var bd = _orig('m-userBadge');
       if (bd) { bd.style.display='flex'; bd.classList.add('visible'); }
-      // Username
-      var u1 = _orig('rfUsername');     if(u1) u1.textContent=username;
-      var u2 = _orig('rfUsername2');    if(u2) u2.textContent=username;
+      ['rfUsername','rfUsername2'].forEach(function(id){
+        var el=_orig(id); if(el) el.textContent=username;
+      });
       try { orig(username); } catch(e){}
     };
   });
 
+  // rfDoLogout: mostra overlay mobile dopo logout
   patchWhen('rfDoLogout', function(orig) {
     window.rfDoLogout = async function() {
       try { await orig(); } catch(e){}
@@ -166,67 +136,53 @@
     };
   });
 
+  // rfSaveApiKeys / rfDeleteApiKeys: chiudono modal mobile
   patchWhen('rfSaveApiKeys', function(orig) {
     window.rfSaveApiKeys = function() {
       try { orig(); } catch(e){}
-      var m = _orig('m-apiModal'); if(m) m.classList.remove('open');
+      var m=_orig('m-apiModal'); if(m) m.classList.remove('open');
     };
   });
-
   patchWhen('rfDeleteApiKeys', function(orig) {
     window.rfDeleteApiKeys = function() {
       try { orig(); } catch(e){}
-      var m = _orig('m-apiModal'); if(m) m.classList.remove('open');
+      var m=_orig('m-apiModal'); if(m) m.classList.remove('open');
     };
+  });
+
+  // ── 6. Chart resize dopo load ─────────────────────────────────
+  // riskflow.js inizializza la chart con offsetWidth/Height che potrebbero
+  // essere 0 se il layout flex non è ancora calcolato. Forziamo resize dopo.
+  window.addEventListener('load', function() {
+    function doResize() {
+      try {
+        var chartEl = _orig('chart');
+        if (window.chart && chartEl && chartEl.offsetWidth > 0 && chartEl.offsetHeight > 0) {
+          window.chart.resize(chartEl.offsetWidth, chartEl.offsetHeight);
+          if (typeof resizeCanvas === 'function') resizeCanvas();
+        }
+      } catch(e){}
+    }
+    // Multipli tentativi per essere sicuri
+    setTimeout(doResize, 100);
+    setTimeout(doResize, 500);
+    setTimeout(doResize, 1000);
+
+    // Resize on window resize
+    window.addEventListener('resize', doResize);
   });
 
   // ── 7. DOMContentLoaded ───────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function() {
-    // Crea m-posList se manca
-    if (!_orig('m-posList')) {
-      var panel = _orig('panel-positions');
-      if (panel) {
-        var div = document.createElement('div');
-        div.id = 'm-posList';
-        panel.insertBefore(div, panel.firstChild);
-      }
-    }
     // Sync rfUsername → rfUsername2
     var u1 = _orig('rfUsername');
     if (u1) {
       new MutationObserver(function(muts) {
         muts.forEach(function(m) {
-          var u2 = _orig('rfUsername2');
-          if(u2) u2.textContent = m.target.textContent;
+          var u2=_orig('rfUsername2'); if(u2) u2.textContent=m.target.textContent;
         });
       }).observe(u1, {childList:true,characterData:true,subtree:true});
     }
-  });
-
-  // ── 8. CHART RESIZE — forza ridimensionamento dopo layout ─────
-  // riskflow.js crea la chart con offsetWidth/offsetHeight al momento
-  // del parse — spesso sono 0 su mobile. Forziamo il resize dopo il load.
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      try {
-        if (window.chart) {
-          var chartEl = _orig('chart');
-          if (chartEl && chartEl.offsetWidth > 0) {
-            window.chart.resize(chartEl.offsetWidth, chartEl.offsetHeight);
-          }
-        }
-      } catch(e) { console.warn('[mobile-patch] chart resize:', e); }
-    }, 200);
-
-    // Anche al resize della finestra
-    window.addEventListener('resize', function() {
-      try {
-        if (window.chart) {
-          var chartEl = _orig('chart');
-          if (chartEl) window.chart.resize(chartEl.offsetWidth, chartEl.offsetHeight);
-        }
-      } catch(e){}
-    });
   });
 
 })();
