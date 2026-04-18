@@ -157,7 +157,7 @@
 <nav class="sidebar">
   <div class="logo-wrap">
     <div class="logo">Risk<span>Flow</span></div>
-    <div class="logo-sub">Guida all'utilizzo v3</div>
+    <div class="logo-sub">Guida all'utilizzo v4</div>
   </div>
 
   <div class="nav-section">Introduzione</div>
@@ -175,6 +175,7 @@
   <a class="nav-item" href="#chart"><span class="nav-dot"></span>Chart interattiva</a>
   <a class="nav-item" href="#lines"><span class="nav-dot"></span>Linee draggabili</a>
   <a class="nav-item" href="#pair-modal"><span class="nav-dot"></span>Selezione pair</a>
+  <a class="nav-item" href="#hotkeys"><span class="nav-dot"></span>Hotkeys</a>
 
   <div class="nav-section">Trading</div>
   <a class="nav-item" href="#risk"><span class="nav-dot"></span>Calcolo rischio</a>
@@ -501,8 +502,8 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Recupero API key</div>
-        <div class="step-desc">Al login, le API key cifrate vengono recuperate automaticamente dal cloud e decifrate localmente. Se è il primo accesso, le key non saranno presenti finché non le configuri nel pannello API.</div>
+        <div class="step-title">Caricamento API key</div>
+        <div class="step-desc">Al login, RiskFlow carica le API key dal localStorage del browser. Se è il primo accesso su questo dispositivo, le key non saranno presenti — configurale nel pannello API oppure importale da un file JSON precedentemente esportato.</div>
       </div>
     </div>
     <div class="step">
@@ -530,6 +531,11 @@
     <h2 class="section-title">Configurazione API</h2>
   </div>
   <p class="prose">Il pannello API si apre cliccando il pulsante <kbd>🔑 API</kbd> nella topbar in alto a destra. Qui puoi configurare le credenziali per tutti e cinque gli exchange, verificare lo stato della connessione in tempo reale e sincronizzare balance e posizioni.</p>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div><strong>Storage locale:</strong> le API key sono salvate nel <strong>localStorage</strong> del browser — rimangono sul tuo dispositivo e non vengono mai trasmesse a server esterni. Se cambi browser o dispositivo, usa la funzione <strong>Esporta JSON</strong> per trasferire le tue chiavi.</div>
+  </div>
 
   <div class="mockup-wrap">
     <div class="mockup-caption">Modal configurazione API keys</div>
@@ -640,7 +646,7 @@
       <div class="step-num">4</div>
       <div class="step-body">
         <div class="step-title">Salva e connetti</div>
-        <div class="step-desc">Clicca <strong>Salva &amp; Connetti</strong>. Le chiavi vengono cifrate automaticamente e salvate in modo sicuro. Dopo pochi istanti viene eseguito un test di connessione che recupera balance e posizioni dall'exchange.</div>
+        <div class="step-desc">Clicca <strong>Salva &amp; Connetti</strong>. Le chiavi vengono salvate nel localStorage del browser. Dopo pochi istanti viene eseguito un test di connessione che recupera balance e posizioni dall'exchange.</div>
       </div>
     </div>
     <div class="step">
@@ -648,6 +654,20 @@
       <div class="step-body">
         <div class="step-title">Verifica balance e posizioni</div>
         <div class="step-desc">Il pannello API mostra in tempo reale il Balance totale (equity), l'Unrealized PnL aggregato e il numero di posizioni aperte. Il timestamp di ultima sincronizzazione è visibile in basso a destra. Usa <strong>⟳ Sync</strong> per forzare un aggiornamento manuale.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Esporta le chiavi (backup)</div>
+        <div class="step-desc">Clicca <strong>⬇ Esporta JSON</strong> per scaricare un file <code>riskflow-api-keys.json</code> con tutte le chiavi configurate per tutti gli exchange. Conserva questo file in un posto sicuro — ti permette di ripristinare la configurazione su un altro browser o dispositivo. In alternativa usa la hotkey <kbd>Alt+S</kbd>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <div class="step-title">Importa le chiavi</div>
+        <div class="step-desc">Clicca <strong>⬆ Importa JSON</strong> e seleziona un file precedentemente esportato. Le chiavi vengono caricate per tutti gli exchange presenti nel file. L'exchange attivo viene ripristinato a quello salvato al momento dell'esportazione. In alternativa usa la hotkey <kbd>Alt+L</kbd>.</div>
       </div>
     </div>
   </div>
@@ -743,23 +763,23 @@
     <span class="section-num">04</span>
     <h2 class="section-title">Sicurezza API Keys</h2>
   </div>
-  <p class="prose">La gestione delle API key è progettata per garantire che le credenziali non vengano mai trasmesse in chiaro o esposte. Il sistema usa tre livelli di protezione indipendenti: cifratura avanzata delle chiavi, storage sicuro con accesso limitato al tuo account, e un proxy lato server che firma ogni chiamata agli exchange senza esporre le credenziali nel browser.</p>
+  <p class="prose">Le API key in RiskFlow sono salvate nel <strong>localStorage</strong> del browser, sul tuo dispositivo. Non vengono mai trasmesse a server esterni né salvate su cloud. Il proxy lato server firma le chiamate agli exchange senza che la secret key venga mai esposta nel JavaScript del browser.</p>
 
   <div class="three-col">
     <div class="card purple">
-      <span class="card-icon">🔑</span>
-      <div class="card-title">Cifratura end-to-end</div>
-      <div class="card-desc">Le API key vengono cifrate nel browser con crittografia a 256-bit prima di essere salvate. La chiave di cifratura è legata al tuo account ed è unica: nessun altro può decifrarle, nemmeno accedendo al database.</div>
+      <span class="card-icon">💾</span>
+      <div class="card-title">Storage locale</div>
+      <div class="card-desc">Le API key sono salvate nel localStorage del browser — restano sul tuo dispositivo e non vengono mai trasmesse a server RiskFlow. Solo il browser che le ha salvate può leggerle.</div>
     </div>
     <div class="card cyan">
-      <span class="card-icon">🗄️</span>
-      <div class="card-title">Storage per account</div>
-      <div class="card-desc">Le credenziali sono salvate in modo isolato per ogni account: solo l'utente autenticato con le credenziali corrette può leggere e usare le proprie key. Nessun altro utente può accedere ai dati di un altro account.</div>
+      <span class="card-icon">📦</span>
+      <div class="card-title">Export / Import JSON</div>
+      <div class="card-desc">Puoi esportare tutte le chiavi in un file JSON cifrato per fare backup o trasferirle su un altro browser. Il file di export va conservato in un posto sicuro — contiene le credenziali in chiaro.</div>
     </div>
     <div class="card yellow">
       <span class="card-icon">🛡️</span>
       <div class="card-title">Proxy lato server</div>
-      <div class="card-desc">Le richieste autenticate agli exchange non vengono firmate nel browser. Il client invia le credenziali via connessione HTTPS sicura al proxy, che firma la richiesta lato server e la inoltra all'exchange. La secret key non è mai esposta nel JavaScript del browser.</div>
+      <div class="card-desc">Le richieste autenticate agli exchange vengono firmate lato server dal proxy. La secret key non è mai esposta nel JavaScript del browser durante le chiamate API.</div>
     </div>
   </div>
 
@@ -768,17 +788,20 @@
     <div><strong>Regola fondamentale:</strong> crea sempre le API key con solo i permessi <strong>Read</strong> e <strong>Trade</strong>. <strong>Non abilitare mai il permesso Withdraw</strong>. In caso di compromissione delle chiavi, senza il permesso di prelievo i tuoi fondi non possono essere trasferiti. RiskFlow non ha mai bisogno del permesso Withdraw per operare.</div>
   </div>
 
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div><strong>Il file di export contiene le chiavi in chiaro.</strong> Non condividerlo e non caricarlo su servizi cloud non fidati. Se perdi il file e cancelli il localStorage, dovrai reinserire le chiavi manualmente dal pannello API.</div>
+  </div>
+
   <table class="param-table">
     <thead><tr><th>Layer di protezione</th><th>Cosa protegge</th></tr></thead>
     <tbody>
-      <tr><td><span class="param-name">Cifratura lato client</span></td><td>Le API key in chiaro non vengono mai salvate — vengono cifrate prima di qualsiasi trasmissione o storage</td></tr>
-      <tr><td><span class="param-name">Storage per account</span></td><td>Solo l'utente con le credenziali corrette può leggere le proprie key</td></tr>
-      <tr><td><span class="param-name">Cache locale cifrata</span></td><td>Le key decifrate sono disponibili localmente senza doverle re-decriptare ad ogni uso</td></tr>
+      <tr><td><span class="param-name">localStorage browser</span></td><td>Le API key restano sul dispositivo — nessuna trasmissione a server RiskFlow</td></tr>
+      <tr><td><span class="param-name">Export JSON</span></td><td>Backup portatile per trasferire le chiavi tra browser o dispositivi</td></tr>
       <tr><td><span class="param-name">Proxy lato server</span></td><td>La secret key non viene mai usata per firmare direttamente nel browser</td></tr>
       <tr><td><span class="param-name">Campi mascherati</span></td><td>Se ci sono key già salvate, i campi nel pannello mostrano caratteri • invece del valore reale</td></tr>
     </tbody>
   </table>
-</section>
 
 <!-- TOPBAR -->
 <section class="section" id="topbar">
@@ -851,6 +874,7 @@
       <tr><td><span class="param-name">Prezzo live</span></td><td>Last price del pair attivo, aggiornato ogni pochi secondi in tempo reale</td></tr>
       <tr><td><span class="param-name">Variazione 24h</span></td><td>Variazione percentuale rispetto all'apertura delle 24 ore. Verde per positiva, rosso per negativa</td></tr>
       <tr><td><span class="param-name">🛡 SL Shield</span></td><td>Toggle che impedisce di allargare lo SL su posizioni aperte. Arancione quando attivo, si blocca automaticamente con posizioni aperte. <a href="#sl-shield" style="color:var(--purple)">→ Dettagli</a></td></tr>
+      <tr><td><span class="param-name">⌨️ Hotkeys</span></td><td>Apre il pannello di configurazione hotkeys. Permette di visualizzare e personalizzare tutti i tasti rapidi dell'applicazione. <a href="#hotkeys" style="color:var(--purple)">→ Dettagli</a></td></tr>
       <tr><td><span class="param-name">Live dot</span></td><td>Puntino verde lampeggiante — indica che il feed prezzi è attivo e funzionante</td></tr>
       <tr><td><span class="param-name">Balance</span></td><td>Equity totale dell'account sull'exchange attivo, aggiornato automaticamente</td></tr>
       <tr><td><span class="param-name">PnL</span></td><td>Unrealized PnL aggregato di tutte le posizioni aperte, aggiornato ogni mezzo secondo</td></tr>
@@ -1037,10 +1061,87 @@
   </div>
 </section>
 
-<!-- CALCOLO RISCHIO -->
-<section class="section" id="risk">
+<!-- HOTKEYS -->
+<section class="section" id="hotkeys">
   <div class="section-header">
     <span class="section-num">09</span>
+    <h2 class="section-title">Hotkeys <span class="badge new">Nuovo</span></h2>
+  </div>
+  <p class="prose">RiskFlow supporta un sistema di hotkeys completamente personalizzabile. Ogni azione ha un tasto di default, ma puoi riassegnarle liberamente tramite il pannello <kbd>⌨️</kbd> nella topbar. Le preferenze vengono salvate in localStorage e persistono tra le sessioni.</p>
+
+  <div class="callout info">
+    <span class="callout-icon">ℹ</span>
+    <div>Le hotkeys non si attivano quando il cursore è su un campo di input, per evitare conflitti durante la digitazione. Le combo <kbd>Alt+S</kbd> e <kbd>Alt+L</kbd> sono fisse e funzionano sempre, anche con focus su un input.</div>
+  </div>
+
+  <div class="section-subtitle">Come personalizzare un tasto</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Apri il pannello hotkeys</div>
+        <div class="step-desc">Clicca il bottone <kbd>⌨️</kbd> nella topbar. Si apre il modal con la lista completa di tutte le azioni raggruppate per categoria.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Clicca sul tasto da modificare</div>
+        <div class="step-desc">Clicca il badge del tasto accanto all'azione che vuoi riassegnare. Il badge si illumina e appare l'overlay di cattura.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Premi il nuovo tasto</div>
+        <div class="step-desc">Premi il tasto che vuoi assegnare. Sono supportati tasti singoli (lettere, numeri, F1–F12, Enter, Space, frecce...) e combo come <kbd>Shift+A</kbd>. Se il tasto è già assegnato a un'altra azione, quella precedente viene liberata automaticamente.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Premi Esc per annullare</div>
+        <div class="step-desc">Se vuoi annullare la cattura senza modificare nulla, premi <kbd>Esc</kbd>. Il tasto precedente rimane invariato.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-subtitle">Tasti di default</div>
+
+  <table class="param-table">
+    <thead><tr><th>Categoria</th><th>Azione</th><th>Tasto default</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--muted)">Trading</td><td><span class="param-name">Open Trade</span></td><td><kbd>Enter</kbd></td><td>Apre il modal di conferma ordine</td></tr>
+      <tr><td style="color:var(--muted)">Trading</td><td><span class="param-name">Clear all</span></td><td><kbd>C</kbd></td><td>Resetta tutti i campi del pannello</td></tr>
+      <tr><td style="color:var(--muted)">Trading</td><td><span class="param-name">Toggle TP</span></td><td><kbd>T</kbd></td><td>Attiva / disattiva i Take Profits</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Goto live price</span></td><td><kbd>G</kbd></td><td>Ricentra la chart sul prezzo attuale</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Set Entry</span></td><td><kbd>E</kbd></td><td>Attiva modalità click-to-set per l'Entry</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Set Stop Loss</span></td><td><kbd>S</kbd></td><td>Attiva modalità click-to-set per lo SL</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Set TP1</span></td><td><kbd>F1</kbd></td><td>Attiva modalità click-to-set per il TP1</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Set TP2</span></td><td><kbd>F2</kbd></td><td>Attiva modalità click-to-set per il TP2</td></tr>
+      <tr><td style="color:var(--muted)">Chart</td><td><span class="param-name">Set TP3</span></td><td><kbd>F3</kbd></td><td>Attiva modalità click-to-set per il TP3</td></tr>
+      <tr><td style="color:var(--muted)">Timeframe</td><td><span class="param-name">1m / 5m / 15m</span></td><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Cambio rapido timeframe</td></tr>
+      <tr><td style="color:var(--muted)">Timeframe</td><td><span class="param-name">1h / 4h / 1D</span></td><td><kbd>4</kbd> <kbd>5</kbd> <kbd>6</kbd></td><td>Cambio rapido timeframe</td></tr>
+      <tr><td style="color:var(--muted)">Navigazione</td><td><span class="param-name">Apri pair selector</span></td><td><kbd>P</kbd></td><td>Apre il modal di selezione pair</td></tr>
+      <tr><td style="color:var(--muted)">Navigazione</td><td><span class="param-name">Order type Market</span></td><td><kbd>M</kbd></td><td>Imposta l'order type su Market</td></tr>
+      <tr><td style="color:var(--muted)">Navigazione</td><td><span class="param-name">Order type Limit</span></td><td><kbd>L</kbd></td><td>Imposta l'order type su Limit</td></tr>
+      <tr><td style="color:var(--muted)">Navigazione</td><td><span class="param-name">Sync account</span></td><td><kbd>R</kbd></td><td>Forza un aggiornamento del balance</td></tr>
+      <tr><td style="color:var(--muted)">API Keys</td><td><span class="param-name">Esporta API keys</span></td><td><kbd>Alt+S</kbd></td><td style="color:var(--muted2)">Fisso — non personalizzabile</td></tr>
+      <tr><td style="color:var(--muted)">API Keys</td><td><span class="param-name">Importa API keys</span></td><td><kbd>Alt+L</kbd></td><td style="color:var(--muted2)">Fisso — non personalizzabile</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <span class="callout-icon">⚠</span>
+    <div>Le hotkeys <strong>Set Entry</strong> (<kbd>E</kbd>) e <strong>Set SL/TP</strong> (<kbd>S</kbd>, <kbd>F1–F3</kbd>) attivano la modalità click-to-set: dopo aver premuto il tasto, il prossimo click sulla chart imposta il prezzo e disegna la linea. La linea viene visualizzata immediatamente, insieme ai badge informativi.</div>
+  </div>
+
+  <div class="section-subtitle">Reset e conflitti</div>
+  <p class="prose">Se assegni un tasto già in uso a una nuova azione, la vecchia associazione viene rimossa automaticamente — non ci possono essere due azioni sullo stesso tasto. Per tornare alla configurazione originale, usa il pulsante <strong>↺ Ripristina default</strong> in fondo al modal hotkeys.</p>
+</section>
+<section class="section" id="risk">
+  <div class="section-header">
+    <span class="section-num">10</span>
     <h2 class="section-title">Calcolo Rischio & Size</h2>
   </div>
   <p class="prose">Il cuore di RiskFlow è il motore di calcolo della position size. La logica è semplice: partendo dal rischio definito (in % o in USDT fisso), dalla distanza percentuale dello stop loss dall'entry e dal prezzo di entry, viene calcolata la size in USDT e poi convertita in numero di contratti. Il calcolo si aggiorna in tempo reale ad ogni variazione di un qualsiasi parametro di input — digitazione nel pannello, drag di una linea sulla chart, cambio modalità.</p>
@@ -1109,7 +1210,7 @@
 <!-- ORDER TYPES -->
 <section class="section" id="order-types">
   <div class="section-header">
-    <span class="section-num">10</span>
+    <span class="section-num">11</span>
     <h2 class="section-title">Tipi di Ordine</h2>
   </div>
   <p class="prose">RiskFlow supporta tre modalità di inserimento ordini, selezionabili dai tab <strong>Market / Limit / Ladder</strong> nella sezione Trade del pannello. Cambiando modalità vengono aggiornati la visualizzazione dei campi, il comportamento della linea Entry sulla chart e il ricalcolo automatico della size.</p>
@@ -1152,7 +1253,7 @@
 <!-- SL / TP -->
 <section class="section" id="sl-tp">
   <div class="section-header">
-    <span class="section-num">11</span>
+    <span class="section-num">12</span>
     <h2 class="section-title">Stop Loss & Take Profit</h2>
   </div>
   <p class="prose">SL e TP possono essere impostati in tre modi: digitando direttamente il prezzo nel campo numerico del pannello, cliccando il pulsante <kbd>⊕</kbd> accanto al campo e poi cliccando sulla chart al prezzo desiderato, oppure con un click destro sulla chart e selezionando la voce dal menu contestuale. RiskFlow valida sempre che il SL sia nella direzione corretta rispetto alla direzione del trade.</p>
@@ -1206,7 +1307,7 @@
 <!-- LADDER -->
 <section class="section" id="ladder">
   <div class="section-header">
-    <span class="section-num">12</span>
+    <span class="section-num">13</span>
     <h2 class="section-title">Ladder Orders — DCA automatico</h2>
   </div>
   <p class="prose">La modalità Ladder permette di costruire un piano di DCA (Dollar Cost Averaging) automatico su 2, 3 o 4 livelli di prezzo. Ogni livello è un ordine Limit indipendente con la propria size calcolata in base al peso percentuale assegnato. Il sistema calcola automaticamente il prezzo medio di ingresso ponderato e distribuisce il rischio totale definito tra tutti i livelli attivi.</p>
@@ -1326,7 +1427,7 @@
 <!-- CONFIRM MODAL -->
 <section class="section" id="confirm-modal">
   <div class="section-header">
-    <span class="section-num">13</span>
+    <span class="section-num">14</span>
     <h2 class="section-title">Modal di Conferma Ordine</h2>
   </div>
   <p class="prose">Prima di inviare qualsiasi ordine, RiskFlow mostra un riepilogo completo del trade con tutti i dettagli. Cliccando <strong>OPEN LONG</strong> (o OPEN SHORT) nel pannello viene aperto il modal di conferma. L'esecuzione reale avviene solo al click del pulsante finale nel modal, evitando invii accidentali.</p>
@@ -1376,7 +1477,7 @@
 <!-- POSIZIONI -->
 <section class="section" id="positions">
   <div class="section-header">
-    <span class="section-num">14</span>
+    <span class="section-num">15</span>
     <h2 class="section-title">Dashboard Posizioni</h2>
   </div>
   <p class="prose">Il pannello posizioni si trova nella sezione inferiore del pannello laterale e mostra tutte le posizioni aperte sull'exchange attivo. I dati vengono sincronizzati automaticamente e aggiornati dopo ogni operazione. Le posizioni con size zero vengono filtrate e non vengono mostrate.</p>
@@ -1477,7 +1578,7 @@
 <!-- MODIFY SL/TP -->
 <section class="section" id="modify-sl-tp">
   <div class="section-header">
-    <span class="section-num">15</span>
+    <span class="section-num">16</span>
     <h2 class="section-title">Modifica SL/TP su posizioni aperte</h2>
   </div>
   <p class="prose">Per ogni posizione aperta espansa, è possibile modificare SL e TP senza chiudere la posizione. Il sistema permette di aggiornare i prezzi sia tramite i campi input nel pannello, sia tramite drag diretto sulla chart overlay. La modifica viene inviata all'exchange solo dopo conferma esplicita.</p>
@@ -1517,7 +1618,7 @@
 <!-- BREAKEVEN -->
 <section class="section" id="breakeven">
   <div class="section-header">
-    <span class="section-num">16</span>
+    <span class="section-num">17</span>
     <h2 class="section-title">Breakeven (BE)</h2>
   </div>
   <p class="prose">Il pulsante <strong>BE</strong> (Breakeven) sposta automaticamente lo Stop Loss al prezzo di entry della posizione, portando il rischio residuo a zero. Questa operazione è disponibile sia dal pannello posizioni (pulsante BE accanto al campo Mod SL) sia direttamente dalla chart overlay cliccando il badge BE giallo sulla linea SL della posizione.</p>
@@ -1543,7 +1644,7 @@
 <!-- PARTIAL CLOSE -->
 <section class="section" id="partial-close">
   <div class="section-header">
-    <span class="section-num">17</span>
+    <span class="section-num">18</span>
     <h2 class="section-title">Chiusura Parziale</h2>
   </div>
   <p class="prose">La chiusura parziale permette di ridurre la size di una posizione aperta senza chiuderla completamente. Puoi scegliere la percentuale da chiudere tramite lo slider (1%–100%) o i preset rapidi (25%, 50%, 75%, 100%). Il P&L e il numero di contratti corrispondenti alla percentuale scelta vengono mostrati in tempo reale.</p>
@@ -1581,7 +1682,7 @@
 <!-- PNL REALTIME -->
 <section class="section" id="pnl">
   <div class="section-header">
-    <span class="section-num">18</span>
+    <span class="section-num">19</span>
     <h2 class="section-title">PnL Realtime</h2>
   </div>
   <p class="prose">Il sistema di PnL realtime si basa su una cache prezzi aggiornata da due fonti indipendenti: il feed live del pair attivo sulla chart (aggiornato ogni pochi secondi) e un fetcher in background per tutti gli altri pair con posizioni aperte. Il loop di aggiornamento PnL gira ogni 500ms e usa la cache per ricalcolare il P&L di ogni posizione senza fare continuamente nuove chiamate di rete.</p>
@@ -1609,7 +1710,7 @@
 <!-- MONEY SHOT -->
 <section class="section" id="money-shot">
   <div class="section-header">
-    <span class="section-num">19</span>
+    <span class="section-num">20</span>
     <h2 class="section-title">Money Shot 📸</h2>
   </div>
   <p class="prose">Il Money Shot genera un'immagine PNG condivisibile della posizione aperta, ottimizzata per la condivisione sui social (Twitter/X, Telegram). È accessibile dal pulsante <strong>📸 Money Shot</strong> nella sezione espansa di ogni posizione. L'immagine viene generata con tutti i dati live: simbolo, side, entry, mark price corrente, PnL in USDT e ROE%.</p>
@@ -1678,7 +1779,7 @@
 <!-- SL SHIELD -->
 <section class="section" id="sl-shield">
   <div class="section-header">
-    <span class="section-num">20</span>
+    <span class="section-num">21</span>
     <h2 class="section-title">SL Shield <span class="badge new">Nuovo</span></h2>
   </div>
   <p class="prose">Lo <strong>SL Shield</strong> è un toggle di protezione nella topbar che, una volta attivato, impedisce di <strong>allargare lo stop loss</strong> su posizioni già aperte. Funziona come un vincolo disciplinare: puoi spostare lo SL in favore del trade (avvicinarlo all'entry per ridurre il rischio), ma non puoi mai portarlo più lontano dall'entry rispetto al punto in cui era al momento dell'apertura.</p>
@@ -1762,7 +1863,7 @@
 <!-- DAILY LOSS LIMIT -->
 <section class="section" id="dll">
   <div class="section-header">
-    <span class="section-num">21</span>
+    <span class="section-num">22</span>
     <h2 class="section-title">Daily Loss Limit <span class="badge new">Nuovo</span></h2>
   </div>
   <p class="prose">Il <strong>Daily Loss Limit</strong> è un circuit breaker giornaliero che blocca automaticamente l'apertura di nuove posizioni se il wallet scende di una percentuale configurabile in 24 ore. Progettato per proteggere il conto nelle giornate negative, una volta scattato non può essere disattivato manualmente fino alla scadenza del blocco.</p>
@@ -1890,7 +1991,7 @@
 <!-- FEE EXCHANGE -->
 <section class="section" id="fee-settings">
   <div class="section-header">
-    <span class="section-num">22</span>
+    <span class="section-num">23</span>
     <h2 class="section-title">Fee Exchange <span class="badge new">Nuovo</span></h2>
   </div>
   <p class="prose">RiskFlow include un sistema di calcolo fee integrato nel calcolo della size. Le fee vengono sottratte dal rischio accettabile <em>prima</em> di calcolare la posizione, così il rischio netto che arrivi al tuo stop loss corrisponde esattamente a quello che hai impostato — senza sorprese.</p>
@@ -1959,7 +2060,7 @@
 <!-- FORMULE REFERENCE -->
 <section class="section" id="formulas">
   <div class="section-header">
-    <span class="section-num">23</span>
+    <span class="section-num">24</span>
     <h2 class="section-title">Formule & Calcoli — Reference</h2>
   </div>
 
@@ -2008,7 +2109,7 @@
 <!-- TROUBLESHOOTING -->
 <section class="section" id="troubleshooting">
   <div class="section-header">
-    <span class="section-num">24</span>
+    <span class="section-num">25</span>
     <h2 class="section-title">Troubleshooting</h2>
   </div>
 
