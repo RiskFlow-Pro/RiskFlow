@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow — Trade with Precision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07070a;
+    --surface: #0d0d11;
+    --surface2: #121218;
+    --surface3: #18181f;
+    --border: #1a1a22;
+    --border2: #252530;
+    --text: #dddde8;
+    --muted: #3a3a48;
+    --muted2: #686878;
+    --accent: #a855f7;
+    --accent2: #9333ea;
+    --accent3: #7c3aed;
+    --red: #ff2d4a;
+    --green: #00d17a;
+    --yellow: #ffc940;
+    --blue: #5ab4ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.6; overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 60px; background: rgba(7,7,10,0.7); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 18px; color: var(--accent); letter-spacing: -0.5px; text-decoration: none; }
+  .nav-logo em { color: var(--muted2); font-style: normal; font-weight: 400; }
+  .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted2); text-decoration: none; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; transition: color 0.15s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff !important; padding: 8px 18px; border-radius: 6px; font-weight: 500; transition: background 0.15s !important; }
+  .nav-cta:hover { background: var(--accent2) !important; }
+
+  /* HERO */
+  .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 100px 48px 60px; gap: 48px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -200px; left: -200px; width: 700px; height: 700px; background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%); pointer-events: none; animation: ambientPulse 8s ease-in-out infinite; }
+  .hero::after { content: ''; position: absolute; bottom: -100px; right: 30%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(90,180,255,0.06) 0%, transparent 70%); pointer-events: none; animation: ambientPulse 10s ease-in-out infinite reverse; }
+  @keyframes ambientPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.1)} }
+
+  .hero-left { position: relative; z-index: 2; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); border-radius: 100px; padding: 5px 14px; font-size: 10px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 28px; animation: fadeUp 0.6s ease both; }
+  .hero-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .hero-title { font-family: 'Syne', sans-serif; font-size: clamp(40px, 5vw, 66px); font-weight: 900; line-height: 1.05; letter-spacing: -2px; color: #fff; margin-bottom: 24px; animation: fadeUp 0.6s 0.1s ease both; }
+  .hero-title .accent { color: var(--accent); }
+  .hero-title .dim { color: var(--muted2); }
+  .hero-sub { font-size: 14px; color: var(--muted2); line-height: 1.7; max-width: 460px; margin-bottom: 36px; animation: fadeUp 0.6s 0.2s ease both; }
+  .hero-actions { display: flex; align-items: center; gap: 14px; margin-bottom: 48px; animation: fadeUp 0.6s 0.3s ease both; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #fff; text-decoration: none; padding: 13px 26px; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; transition: all 0.15s; box-shadow: 0 0 30px rgba(168,85,247,0.3); }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 40px rgba(168,85,247,0.4); }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; color: var(--muted2); text-decoration: none; padding: 13px 22px; border-radius: 8px; border: 1px solid var(--border2); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; transition: all 0.15s; }
+  .btn-secondary:hover { color: var(--text); border-color: var(--accent); transform: translateY(-2px); }
+  .hero-stats { display: flex; gap: 28px; animation: fadeUp 0.6s 0.4s ease both; }
+  .stat { display: flex; flex-direction: column; gap: 3px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: #fff; }
+  .stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); }
+  .stat-divider { width: 1px; background: var(--border2); align-self: stretch; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* TERMINAL */
+  .hero-right { position: relative; z-index: 2; animation: fadeUp 0.7s 0.15s ease both; }
+  .terminal-frame { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border2); box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 60px rgba(168,85,247,0.08); background: var(--surface); }
+  .terminal-bar { height: 32px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; gap: 7px; }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .t-dot:nth-child(1){background:#ff5f56} .t-dot:nth-child(2){background:#febc2e} .t-dot:nth-child(3){background:#27c840}
+  .terminal-label { margin-left: 10px; font-size: 10px; color: var(--muted2); }
+  .terminal-body { height: 420px; position: relative; overflow: hidden; background: #07070a; }
+  .chart-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 40px; }
+  .chart-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .candles-area { position: absolute; bottom: 60px; left: 20px; right: 60px; height: 280px; display: flex; align-items: flex-end; gap: 4px; }
+  .candle { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .candle-body { width: 100%; border-radius: 2px; }
+  .candle-wick { width: 1px; background: currentColor; }
+  .y-axis { position: absolute; right: 0; top: 0; bottom: 0; width: 55px; display: flex; flex-direction: column; justify-content: space-around; align-items: flex-end; padding: 20px 8px; border-left: 1px solid var(--border); }
+  .y-tick { font-size: 9px; color: var(--muted2); }
+  .pnl-badge { position: absolute; top: 16px; left: 16px; background: rgba(0,209,122,0.12); border: 1px solid rgba(0,209,122,0.3); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; gap: 2px; animation: pnlGlow 3s ease-in-out infinite; }
+  @keyframes pnlGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,209,122,0)} 50%{box-shadow:0 0 16px rgba(0,209,122,0.15)} }
+  .pnl-label { font-size: 8px; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+  .pnl-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--green); }
+  .order-line { position: absolute; left: 0; right: 60px; height: 1px; display: flex; align-items: center; }
+  .order-line::before { content: ''; flex: 1; height: 1px; border-top: 1px dashed currentColor; opacity: 0.4; }
+  .order-tag { font-size: 8px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; animation: tagPulse 3s ease-in-out infinite; }
+  @keyframes tagPulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  .terminal-panel { height: 56px; background: var(--surface2); border-top: 1px solid var(--border); display: flex; align-items: center; }
+  .panel-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0 10px; border-right: 1px solid var(--border); }
+  .panel-stat:last-child{border-right:none}
+  .ps-lbl { font-size: 8px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .ps-val { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+
+  /* TICKER */
+  .ticker-wrap { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; padding: 14px 0; background: var(--surface); }
+  .ticker-inner { display: flex; gap: 48px; animation: marquee 28s linear infinite; width: max-content; }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .ticker-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 11px; }
+  .ticker-sym{color:#fff;font-weight:500} .ticker-price{color:var(--muted2)}
+  .ticker-chg.pos{color:var(--green)} .ticker-chg.neg{color:var(--red)}
+  .ticker-sep{color:var(--border2)}
+
+  /* SECTIONS */
+  .section { padding: 100px 48px; border-top: 1px solid var(--border); }
+  .section-header { text-align: center; margin-bottom: 64px; }
+  .section-num { font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: #fff; letter-spacing: -1px; margin-bottom: 16px; }
+  .section-sub { font-size: 13px; color: var(--muted2); max-width: 540px; margin: 0 auto; line-height: 1.7; }
+
+  /* FEATURES */
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .feature-card { background: var(--surface); padding: 32px 28px; transition: background 0.2s; position: relative; overflow: hidden; }
+  .feature-card:hover { background: var(--surface2); }
+  .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0; transition: opacity 0.3s; }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 18px; }
+  .feature-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .feature-desc { font-size: 11.5px; color: var(--muted2); line-height: 1.7; }
+
+  /* ORDER SECTION */
+  .order-section { padding: 100px 48px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .hotkeys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+  .hk-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; transition: border-color 0.15s, transform 0.15s; }
+  .hk-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .hk-key { background: var(--surface3); border: 1px solid var(--border2); border-bottom: 2px solid var(--muted); border-radius: 5px; padding: 3px 8px; font-size: 10px; color: var(--text); white-space: nowrap; flex-shrink: 0; }
+  .hk-desc { font-size: 10px; color: var(--muted2); line-height: 1.4; }
+  .hk-desc strong { color: var(--text); display: block; font-size: 11px; }
+  .order-panel-mock { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+  .opm-tabs { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .opm-tab { flex: 1; padding: 10px 8px; text-align: center; font-size: 10px; color: var(--muted2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.5px; }
+  .opm-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(168,85,247,0.05); }
+  .opm-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .opm-row { display: flex; flex-direction: column; gap: 4px; }
+  .opm-label { font-size: 9px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .opm-input { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--text); display: flex; align-items: center; justify-content: space-between; }
+  .opm-input .hint { font-size: 9px; color: var(--muted2); }
+  .opm-input.highlight { border-color: rgba(168,85,247,0.4); background: rgba(168,85,247,0.05); }
+  .opm-btns { display: flex; gap: 8px; margin-top: 4px; }
+  .opm-btn-long { flex: 1; padding: 11px; border-radius: 7px; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; background: rgba(0,209,122,0.15); color: var(--green); border: 1px solid rgba(0,209,122,0.3); transition: all 0.15s; }
+  .opm-btn-long:hover { background: rgba(0,209,122,0.25); transform: translateY(-1px); }
+  .opm-btn-short { flex: 1; padding: 11px; border-radius: 7px; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; background: rgba(255,45,74,0.1); color: var(--red); border: 1px solid rgba(255,45,74,0.25); transition: all 0.15s; }
+  .opm-btn-short:hover { background: rgba(255,45,74,0.2); transform: translateY(-1px); }
+  .opm-risk-preview { background: rgba(168,85,247,0.07); border: 1px solid rgba(168,85,247,0.2); border-radius: 7px; padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .orp-item { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+  .orp-lbl { font-size: 8px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .orp-val { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .speed-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,201,64,0.08); border: 1px solid rgba(255,201,64,0.2); border-radius: 100px; padding: 4px 12px; font-size: 10px; color: var(--yellow); margin-bottom: 20px; }
+
+  /* CALC */
+  .calc-section { padding: 100px 48px; border-top: 1px solid var(--border); }
+  .calc-inner { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: start; margin-top: 64px; }
+  .calc-mock { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5); position: sticky; top: 80px; }
+  .calc-header { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .calc-title { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; color:var(--text); }
+  .calc-live { font-size:9px; color:var(--green); display:flex; align-items:center; gap:5px; }
+  .calc-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .calc-field { display: flex; flex-direction: column; gap: 5px; }
+  .calc-lbl { font-size: 9px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.8px; }
+  .calc-inp { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 9px 12px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+  .calc-inp:focus { border-color: var(--accent); }
+  .calc-inp-row { display: flex; gap: 8px; }
+  .calc-result { background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(90,180,255,0.05)); border: 1px solid rgba(168,85,247,0.2); border-radius: 8px; padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cr-item { display: flex; flex-direction: column; gap: 3px; }
+  .cr-lbl { font-size: 8px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.8px; }
+  .cr-val { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+  .cr-val.good{color:var(--green)} .cr-val.warn{color:var(--yellow)} .cr-val.white{color:#fff}
+  .calc-steps { display: flex; flex-direction: column; gap: 20px; }
+  .calc-step { display: flex; gap: 16px; align-items: flex-start; }
+  .cs-num { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 800; color: var(--accent); }
+  .cs-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 5px; }
+  .cs-desc { font-size: 11.5px; color: var(--muted2); line-height: 1.65; }
+  .cs-desc strong { color: var(--text); }
+
+  /* LADDER */
+  .ladder-section { padding: 100px 48px; border-top: 1px solid var(--border); }
+  .ladder-inner { display: grid; grid-template-columns: 1.1fr 1fr; gap: 80px; align-items: center; margin-top: 64px; }
+  .ladder-mock { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+  .lm-header { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .lm-title { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; }
+  .lm-badge { font-size:9px; color:var(--blue); background:rgba(90,180,255,0.1); border:1px solid rgba(90,180,255,0.25); border-radius:4px; padding:2px 8px; }
+  .lm-config { padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; border-bottom: 1px solid var(--border); }
+  .lmc-field { display: flex; flex-direction: column; gap: 4px; }
+  .lmc-lbl { font-size: 8px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .lmc-val { background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; padding: 6px 9px; font-size: 11px; color: var(--text); }
+  .lm-orders { padding: 8px 16px; display: flex; flex-direction: column; }
+  .lm-order-row { display: grid; grid-template-columns: 28px 1fr 60px 80px 60px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(26,26,34,0.6); font-size: 10px; opacity: 0; animation: slideRowIn 0.5s ease forwards; }
+  .lm-order-row:nth-child(1){animation-delay:0.1s} .lm-order-row:nth-child(2){animation-delay:0.2s} .lm-order-row:nth-child(3){animation-delay:0.3s} .lm-order-row:nth-child(4){animation-delay:0.4s}
+  @keyframes slideRowIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+  .lm-order-row:last-child{border-bottom:none}
+  .lor-idx { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+  .lor-price { font-weight: 500; font-size: 11px; }
+  .lor-qty { color: var(--muted2); }
+  .lor-val { color: var(--blue); font-weight: 500; }
+  .lm-footer { padding: 10px 16px; background: rgba(90,180,255,0.04); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
+  .lmf-stat { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+  .lmf-lbl { font-size: 8px; color: var(--muted2); text-transform: uppercase; }
+  .lmf-val { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--blue); }
+  .ladder-features { display: flex; flex-direction: column; gap: 16px; }
+  .lf-item { display: flex; gap: 14px; align-items: flex-start; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: border-color 0.15s, transform 0.15s; }
+  .lf-item:hover { border-color: var(--border2); transform: translateX(4px); }
+  .lf-icon { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; background: rgba(90,180,255,0.08); border: 1px solid rgba(90,180,255,0.15); }
+  .lf-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:#fff; margin-bottom:4px; }
+  .lf-desc { font-size:11px; color:var(--muted2); line-height:1.6; }
+
+  /* RISK SECTION */
+  .risk-section { padding: 100px 48px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .risk-left .section-num{text-align:left} .risk-left .section-title{text-align:left;margin-bottom:16px}
+  .risk-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+  .risk-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+  .risk-list li::before { content: '▸'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .risk-list strong { color: var(--text); }
+  .risk-panel-mock { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+  .rpm-header { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .rpm-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--text); }
+  .rpm-badge { background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .rpm-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .rpm-row { display: flex; flex-direction: column; gap: 6px; }
+  .rpm-row-top { display: flex; justify-content: space-between; font-size: 10px; }
+  .rpm-lbl { color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .rpm-val{color:var(--text);font-weight:500} .rpm-val.pos{color:var(--green)} .rpm-val.neg{color:var(--red)} .rpm-val.warn{color:var(--yellow)}
+  .rpm-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
+  .rpm-bar-fill { height: 100%; border-radius: 100px; transition: width 1.8s cubic-bezier(0.22,1,0.36,1); }
+  .dll-alert { background: rgba(255,201,64,0.08); border: 1px solid rgba(255,201,64,0.3); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--yellow); margin-top: 4px; }
+  .dll-icon { font-size: 14px; flex-shrink: 0; }
+
+  /* CTA + FOOTER */
+  .cta-section { padding: 120px 48px; text-align: center; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+  .cta-section::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%); pointer-events: none; animation: ambientPulse 6s ease-in-out infinite; }
+  .cta-actions { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  footer { border-top: 1px solid var(--border); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 15px; color: var(--accent); }
+  .footer-logo em { color: var(--muted2); font-style: normal; font-weight: 400; }
+  .footer-copy { font-size: 10px; color: var(--muted2); }
+  .footer-links { display: flex; gap: 20px; list-style: none; }
+  .footer-links a { font-size: 10px; color: var(--muted2); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ANIMATIONS */
+  @keyframes candleGrow { 0%{transform:scaleY(0);transform-origin:bottom} 100%{transform:scaleY(1);transform-origin:bottom} }
+  @keyframes drawLine { to{stroke-dashoffset:0} }
+  .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: none; }
+  #live-price { display:inline-block; animation: pricePulse 3s ease-in-out infinite; }
+  @keyframes pricePulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">Risk<em>Flow</em></a>
+  <ul class="nav-links">
+    <li><a href="#">Features</a></li>
+    <li><a href="#">Risk Tools</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="index.html" class="nav-cta">Open Terminal →</a></li>
+  </ul>
+</nav>
+
+<div class="ticker-wrap" style="margin-top:60px">
+  <div class="ticker-inner" id="ticker"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag"><span class="hero-tag-dot"></span>Beta — Risk-first trading terminal</div>
+    <h1 class="hero-title">Trade Smarter.<br><span class="accent">Risk Less.</span><br><span class="dim">Win More.</span></h1>
+    <p class="hero-sub">A professional-grade trading terminal engineered for risk-conscious traders. Real-time charts, smart order management, and built-in safeguards — all in one dark, fast interface.</p>
+    <div class="hero-actions">
+      <a href="index.html" class="btn-primary"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polygon points="3,1 13,7 3,13" fill="white"/></svg>Launch Terminal</a>
+      <a href="riskflowdocs.html" class="btn-secondary">Read the Docs ↗</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-val">0%</span><span class="stat-lbl">Platform fees</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-val">10+</span><span class="stat-lbl">Risk tools</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-val"><span id="live-price">97.4%</span></span><span class="stat-lbl">Uptime</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-val">&lt;10ms</span><span class="stat-lbl">Execution</span></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="terminal-frame">
+      <div class="terminal-bar">
+        <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
+        <span class="terminal-label">RiskFlow Terminal — BTC/USDT Perpetual</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--green);display:flex;align-items:center;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite;display:inline-block"></span>LIVE</span>
+      </div>
+      <div class="terminal-body">
+        <div class="chart-grid"></div>
+        <div class="candles-area" id="candles"></div>
+        <div class="y-axis" id="yaxis"></div>
+        <div class="pnl-badge">
+          <span class="pnl-label">Unrealized P&amp;L</span>
+          <span class="pnl-val" id="pnl-val">+$842.30</span>
+        </div>
+        <div class="order-line" style="bottom:180px;color:var(--accent)"><span class="order-tag" style="background:rgba(168,85,247,0.15);color:var(--accent);border:1px solid rgba(168,85,247,0.3);font-size:8px">LONG ×5  104,200</span></div>
+        <div class="order-line" style="bottom:240px;color:var(--red)"><span class="order-tag" style="background:rgba(255,45,74,0.1);color:var(--red);border:1px solid rgba(255,45,74,0.3);font-size:8px">SL  102,800</span></div>
+        <div class="order-line" style="bottom:310px;color:var(--green)"><span class="order-tag" style="background:rgba(0,209,122,0.1);color:var(--green);border:1px solid rgba(0,209,122,0.3);font-size:8px">TP  106,500</span></div>
+      </div>
+      <div class="terminal-panel">
+        <div class="panel-stat"><span class="ps-lbl">Balance</span><span class="ps-val" style="color:#fff">$12,480</span></div>
+        <div class="panel-stat"><span class="ps-lbl">Daily PnL</span><span class="ps-val" style="color:var(--green)">+2.84%</span></div>
+        <div class="panel-stat"><span class="ps-lbl">Risk Used</span><span class="ps-val" style="color:var(--yellow)">1.4%</span></div>
+        <div class="panel-stat"><span class="ps-lbl">Win Rate</span><span class="ps-val" style="color:var(--blue)">68.3%</span></div>
+        <div class="panel-stat"><span class="ps-lbl">Drawdown</span><span class="ps-val" style="color:var(--red)">-0.8%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 — CORE FEATURES -->
+<section class="section">
+  <div class="section-header fade-in">
+    <div class="section-num">01 — Core Features</div>
+    <h2 class="section-title">Everything a serious trader needs.</h2>
+    <p class="section-sub">Purpose-built for speed and precision. Every panel, every hotkey, every number is placed where it matters most.</p>
+  </div>
+  <div class="features-grid fade-in">
+    <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Live Charts</div><p class="feature-desc">TradingView-powered charts with custom timeframes, indicators, and draggable order lines rendered directly on-canvas.</p></div>
+    <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Fast Execution</div><p class="feature-desc">One-click Market, Limit, and Stop orders with configurable hotkeys. Execution latency under 10ms via direct exchange API.</p></div>
+    <div class="feature-card"><div class="feature-icon">🛡️</div><div class="feature-title">Risk Controls</div><p class="feature-desc">Daily Loss Limit (DLL), per-trade risk %, position sizing calculator, auto-SL on entry. Lose less to win more.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Smart R:R Calc</div><p class="feature-desc">Draw your trade on the chart — SL and TP lines snap to price. Instant R:R ratio, position size, and dollar risk output.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔑</div><div class="feature-title">Hotkeys Engine</div><p class="feature-desc">Fully customizable keyboard shortcuts for every action. Close all, reduce position, toggle panels — without touching the mouse.</p></div>
+    <div class="feature-card"><div class="feature-icon">🌙</div><div class="feature-title">Dark. Always.</div><p class="feature-desc">Designed from day one for long sessions. High-contrast dark theme with zero eye strain. No light mode. Ever.</p></div>
+  </div>
+</section>
+
+<!-- 02 — ORDER ENTRY -->
+<section class="order-section">
+  <div class="fade-in">
+    <div class="speed-tag">⚡ Sub-100ms order flow</div>
+    <div class="section-num">02 — Order Entry &amp; Hotkeys</div>
+    <h2 class="section-title" style="text-align:left;margin-bottom:16px">Every action,<br>one keystroke.</h2>
+    <p style="font-size:12px;color:var(--muted2);line-height:1.7;max-width:440px;margin-bottom:28px">All hotkeys are fully customizable. Press the key, click on the chart — Entry, SL and TP lines are set instantly. No popups, no forms to fill.</p>
+    <div class="hotkeys-grid">
+      <div class="hk-card"><span class="hk-key">E</span><div class="hk-desc"><strong>Set Entry</strong>Click-to-set on chart</div></div>
+      <div class="hk-card"><span class="hk-key">S</span><div class="hk-desc"><strong>Set Stop Loss</strong>Click-to-set SL on chart</div></div>
+      <div class="hk-card"><span class="hk-key">F1</span><div class="hk-desc"><strong>Set TP1</strong>First take profit level</div></div>
+      <div class="hk-card"><span class="hk-key">F2 F3</span><div class="hk-desc"><strong>Set TP2 / TP3</strong>Second and third levels</div></div>
+      <div class="hk-card"><span class="hk-key">Enter</span><div class="hk-desc"><strong>Open Trade</strong>Opens confirmation modal</div></div>
+      <div class="hk-card"><span class="hk-key">C</span><div class="hk-desc"><strong>Clear All</strong>Reset all fields</div></div>
+      <div class="hk-card"><span class="hk-key">T</span><div class="hk-desc"><strong>Toggle TP</strong>Enable / disable TPs</div></div>
+      <div class="hk-card"><span class="hk-key">M / L</span><div class="hk-desc"><strong>Market / Limit</strong>Instant order type switch</div></div>
+      <div class="hk-card"><span class="hk-key">G</span><div class="hk-desc"><strong>Goto Live Price</strong>Re-center chart on price</div></div>
+      <div class="hk-card"><span class="hk-key">P</span><div class="hk-desc"><strong>Pair Selector</strong>Open pair selection modal</div></div>
+      <div class="hk-card"><span class="hk-key">1–6</span><div class="hk-desc"><strong>Quick Timeframe</strong>1m 5m 15m 1h 4h 1D</div></div>
+      <div class="hk-card"><span class="hk-key">R</span><div class="hk-desc"><strong>Sync Account</strong>Force balance refresh</div></div>
+    </div>
+  </div>
+  <div class="fade-in">
+    <div class="order-panel-mock">
+      <div class="opm-tabs">
+        <div class="opm-tab active">Market</div>
+        <div class="opm-tab">Limit</div>
+        <div class="opm-tab">Ladder</div>
+      </div>
+      <div class="opm-body">
+        <div class="opm-row"><div class="opm-label">Entry (live price)</div><div class="opm-input highlight"><span id="demo-entry-price">104,218.40</span><span class="hint" style="color:var(--yellow);font-size:9px">● LIVE</span></div></div>
+        <div class="opm-row"><div class="opm-label">Stop Loss</div><div class="opm-input"><span style="color:var(--red)">102,800.00</span><span class="hint">−1.36% · drag on chart</span></div></div>
+        <div class="opm-row"><div class="opm-label">TP1 · 50% size</div><div class="opm-input"><span style="color:var(--green)">106,500.00</span><span class="hint" style="color:var(--green)">R:R 1:2.2</span></div></div>
+        <div class="opm-row"><div class="opm-label">TP2 · 50% size</div><div class="opm-input"><span style="color:var(--green)">108,400.00</span><span class="hint" style="color:var(--green)">R:R 1:3.9</span></div></div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:2px">
+          <span style="font-size:9px;color:var(--muted2)">Leverage</span>
+          <span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--yellow)">×10</span>
+          <span style="font-size:9px;color:var(--muted2);margin-left:8px">Margin</span>
+          <span style="background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--muted2)">Isolated</span>
+        </div>
+        <div class="opm-risk-preview">
+          <div class="orp-item"><span class="orp-lbl">$ Risk</span><span class="orp-val" style="color:var(--red)">$124</span></div>
+          <div class="orp-item"><span class="orp-lbl">Size USDT</span><span class="orp-val" style="color:var(--green)">$9,132</span></div>
+          <div class="orp-item"><span class="orp-lbl">Req. Margin</span><span class="orp-val" style="color:var(--yellow)">$913</span></div>
+        </div>
+        <div class="opm-btns">
+          <button class="opm-btn-long">▲ Long BTC</button>
+          <button class="opm-btn-short">▼ Short BTC</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 — RISK CALCULATOR -->
+<section class="calc-section">
+  <div class="section-header fade-in">
+    <div class="section-num">03 — Risk &amp; Position Sizing</div>
+    <h2 class="section-title">Risk calculated<br>before the click.</h2>
+    <p class="section-sub">Enter balance, risk %, entry and SL — RiskFlow calculates exact size in USDT, number of contracts rounded to exchange step size, required margin, and estimated gain for every TP. Leverage changes the margin, not the real risk.</p>
+  </div>
+  <div class="calc-inner">
+    <div class="calc-mock fade-in">
+      <div class="calc-header">
+        <span class="calc-title">⚖️ Risk Calculator</span>
+        <span class="calc-live"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite;display:inline-block"></span>Live update</span>
+      </div>
+      <div class="calc-body">
+        <div class="calc-inp-row">
+          <div class="calc-field" style="flex:1.4"><span class="calc-lbl">Balance (USDT)</span><input class="calc-inp" id="ci-balance" type="number" value="10000" oninput="calcUpdate()"></div>
+          <div class="calc-field" style="flex:1"><span class="calc-lbl">Risk %</span><input class="calc-inp" id="ci-riskpct" type="number" value="1" step="0.1" oninput="calcUpdate()"></div>
+        </div>
+        <div class="calc-inp-row">
+          <div class="calc-field" style="flex:1"><span class="calc-lbl">Entry</span><input class="calc-inp" id="ci-entry" type="number" value="84500" oninput="calcUpdate()"></div>
+          <div class="calc-field" style="flex:1"><span class="calc-lbl">Stop Loss</span><input class="calc-inp" id="ci-sl" type="number" value="83100" oninput="calcUpdate()"></div>
+        </div>
+        <div class="calc-inp-row">
+          <div class="calc-field" style="flex:1"><span class="calc-lbl">Take Profit</span><input class="calc-inp" id="ci-tp" type="number" value="88200" oninput="calcUpdate()"></div>
+          <div class="calc-field" style="flex:1"><span class="calc-lbl">Leverage</span><input class="calc-inp" id="ci-lev" type="number" value="10" step="1" oninput="calcUpdate()"></div>
+        </div>
+        <div class="calc-result">
+          <div class="cr-item"><span class="cr-lbl">$ at Risk</span><span class="cr-val warn" id="cr-risk">$100.00</span></div>
+          <div class="cr-item"><span class="cr-lbl">Size USDT</span><span class="cr-val white" id="cr-size">$6,036</span></div>
+          <div class="cr-item"><span class="cr-lbl">Contracts</span><span class="cr-val white" id="cr-contracts">0.071 BTC</span></div>
+          <div class="cr-item"><span class="cr-lbl">Req. Margin</span><span class="cr-val warn" id="cr-margin">$604</span></div>
+          <div class="cr-item"><span class="cr-lbl">R:R</span><span class="cr-val good" id="cr-rr">1 : 2.64</span></div>
+          <div class="cr-item"><span class="cr-lbl">Est. Gain</span><span class="cr-val good" id="cr-gain">+$264</span></div>
+        </div>
+        <div class="calc-field" style="background:rgba(255,201,64,0.05);border:1px solid rgba(255,201,64,0.15);border-radius:7px;padding:10px 12px">
+          <span style="font-size:9px;color:var(--yellow);letter-spacing:0.5px">⚠ LEVERAGE &amp; RISK</span>
+          <span style="font-size:11px;color:var(--muted2);margin-top:4px;display:block">Increasing leverage <strong style="color:var(--text)">does not increase real risk</strong>. With 1% risk and ×10 leverage you still risk $100 — but the locked margin is $604 instead of $6,036. Leverage amplifies ROE, not absolute P&amp;L.</span>
+        </div>
+      </div>
+    </div>
+    <div class="calc-steps fade-in">
+      <div class="calc-step"><div class="cs-num">1</div><div class="cs-body"><div class="cs-title">Risk % or fixed amount</div><p class="cs-desc">Define risk as a <strong>percentage of balance</strong> or as a <strong>fixed USDT amount</strong>. Both fields are synced: change one and the other updates automatically.</p></div></div>
+      <div class="calc-step"><div class="cs-num">2</div><div class="cs-body"><div class="cs-title">Entry and SL from chart or panel</div><p class="cs-desc">Set prices by typing in the panel or with <kbd style="background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:10px">E</kbd> and <kbd style="background:var(--surface3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:10px">S</kbd> + click on chart. Lines appear immediately and the calculation updates in real time.</p></div></div>
+      <div class="calc-step"><div class="cs-num">3</div><div class="cs-body"><div class="cs-title">Size rounded to step size</div><p class="cs-desc">RiskFlow automatically rounds the number of contracts to the correct <strong>exchange step size</strong> — no rounding errors, no order rejections for invalid size.</p></div></div>
+      <div class="calc-step"><div class="cs-num">4</div><div class="cs-body"><div class="cs-title">Up to 3 TP levels with live R:R</div><p class="cs-desc">Enable TP1, TP2, TP3 with independent checkboxes. For each level see in real time: <strong>distance %, R:R and estimated gain</strong> based on the position % assigned to that level.</p></div></div>
+      <div class="calc-step"><div class="cs-num">5</div><div class="cs-body"><div class="cs-title">SL and TP attached to the order</div><p class="cs-desc">In Market and Limit mode, SL and TP are attached directly as <strong>preset orders on the exchange</strong> — active from the moment of fill. No manual post-entry operations.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 — LADDER ORDERS -->
+<section class="ladder-section">
+  <div class="section-header fade-in">
+    <div class="section-num">04 — Ladder Orders — Auto DCA</div>
+    <h2 class="section-title">DCA across 2–4 levels,<br>risk distributed.</h2>
+    <p class="section-sub">Ladder mode builds an entry plan across 2, 3 or 4 independent Limit orders. Weights are automatically distributed in increasing fashion toward the SL — the closer a level is to SL, the more likely it fills, so it carries more weight to lower the average entry.</p>
+  </div>
+  <div class="ladder-inner">
+    <div class="ladder-mock fade-in">
+      <div class="lm-header">
+        <span class="lm-title">🪜 Ladder Orders — ETH/USDT Long</span>
+        <span class="lm-badge">4 LEVELS</span>
+      </div>
+      <div class="lm-config">
+        <div class="lmc-field"><span class="lmc-lbl">Risk %</span><div class="lmc-val" style="color:var(--accent)">1%</div></div>
+        <div class="lmc-field"><span class="lmc-lbl">Risk $</span><div class="lmc-val" style="color:var(--red)">$100</div></div>
+        <div class="lmc-field"><span class="lmc-lbl">Common SL</span><div class="lmc-val" style="color:var(--red)">1,800</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:26px 70px 52px 80px 64px;gap:8px;padding:8px 16px 4px;border-bottom:1px solid var(--border);font-size:8px;color:var(--muted2);text-transform:uppercase;letter-spacing:0.5px">
+        <span>#</span><span>Price $</span><span>Weight</span><span>Size USDT</span><span>SL dist.</span>
+      </div>
+      <div class="lm-orders">
+        <div class="lm-order-row"><div class="lor-idx" style="background:rgba(255,201,64,0.1);border:1px solid rgba(255,201,64,0.3);color:var(--yellow)">1</div><span class="lor-price" style="color:var(--yellow)">2,200</span><span class="lor-qty">15%</span><span class="lor-val">$750</span><span style="font-size:10px;color:var(--red)">18.2%</span></div>
+        <div class="lm-order-row"><div class="lor-idx" style="background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.3);color:#fb923c">2</div><span class="lor-price" style="color:#fb923c">2,100</span><span class="lor-qty">25%</span><span class="lor-val">$1,153</span><span style="font-size:10px;color:var(--red)">14.3%</span></div>
+        <div class="lm-order-row"><div class="lor-idx" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171">3</div><span class="lor-price" style="color:#f87171">2,000</span><span class="lor-qty">30%</span><span class="lor-val">$1,500</span><span style="font-size:10px;color:var(--red)">10.0%</span></div>
+        <div class="lm-order-row"><div class="lor-idx" style="background:rgba(255,45,74,0.1);border:1px solid rgba(255,45,74,0.3);color:var(--red)">4</div><span class="lor-price" style="color:var(--red)">1,920</span><span class="lor-qty">30%</span><span class="lor-val">$1,667</span><span style="font-size:10px;color:var(--red)">6.3%</span></div>
+      </div>
+      <div class="lm-footer">
+        <div class="lmf-stat"><span class="lmf-lbl">Total</span><span class="lmf-val">100%</span></div>
+        <div class="lmf-stat"><span class="lmf-lbl">Tot. Size</span><span class="lmf-val">$5,070</span></div>
+        <div class="lmf-stat"><span class="lmf-lbl">Avg. Entry</span><span class="lmf-val">~$2,020</span></div>
+        <div class="lmf-stat"><span class="lmf-lbl">Common SL</span><span class="lmf-val" style="color:var(--red)">$1,800</span></div>
+      </div>
+    </div>
+    <div class="ladder-features fade-in">
+      <div class="lf-item"><div class="lf-icon">🤖</div><div><div class="lf-title">Auto weights increasing toward SL</div><p class="lf-desc">Level L1 (furthest from SL) carries the lowest weight; subsequent levels carry progressively higher weights. <strong>Logic:</strong> the closer a level is to SL, the more likely it fills.</p></div></div>
+      <div class="lf-item"><div class="lf-icon">✏️</div><div><div class="lf-title">Manual weights — must sum to 100%</div><p class="lf-desc">You can freely override each level's weight. The system blocks submission if the sum isn't exactly 100% — no order ever goes outside the defined risk.</p></div></div>
+      <div class="lf-item"><div class="lf-icon">🛑</div><div><div class="lf-title">Shared SL across all levels</div><p class="lf-desc">A single Stop Loss is attached to all orders. Total risk stays as defined — it doesn't multiply with the number of levels. Weighted average entry is calculated automatically.</p></div></div>
+      <div class="lf-item"><div class="lf-icon">📐</div><div><div class="lf-title">Per-level size formula</div><p class="lf-desc">For each level: <code style="background:var(--surface3);padding:1px 5px;border-radius:3px;font-size:10px">size_i = (risk × weight_i) / sl_distance_i</code> — size is calculated proportionally to the risk allocated to that specific level.</p></div></div>
+      <div class="lf-item"><div class="lf-icon">⚡</div><div><div class="lf-title">All orders sent in one shot</div><p class="lf-desc">After confirmation, all levels are placed on the exchange simultaneously. Margin mode and leverage are configured automatically — no manual steps required.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 — SL SHIELD + DLL -->
+<section class="risk-section">
+  <div class="risk-left fade-in">
+    <div class="section-num">05 — Risk Management</div>
+    <h2 class="section-title" style="text-align:left">SL Shield &amp;<br>Daily Loss Limit.</h2>
+    <p style="color:var(--muted2);font-size:12px;line-height:1.7;max-width:420px;margin-bottom:24px">Two operational discipline tools that act at different levels: the first protects the individual trade, the second protects the entire session.</p>
+    <ul class="risk-list">
+      <li><span><strong>SL Shield</strong> — prevents widening the stop loss on open positions. You can only move it toward entry (reducing risk), never away from it.</span></li>
+      <li><span><strong>refSL</strong> — SL value confirmed by the exchange at the moment of opening. Shield compares every modification against this reference.</span></li>
+      <li><span><strong>Daily Loss Limit (DLL)</strong> — set a daily drawdown cap in %. When triggered, the terminal locks all orders for 24h.</span></li>
+      <li><span><strong>Persistent lock</strong> — DLL lock persists after refresh, browser close, tab change. Not bypassable — saved in localStorage.</span></li>
+      <li><span><strong>Breakeven with one click</strong> — automatically moves SL to entry price. Zero residual risk on the open position.</span></li>
+    </ul>
+  </div>
+  <div class="risk-right fade-in">
+    <div class="risk-panel-mock">
+      <div class="rpm-header">
+        <span class="rpm-title">🛡 SL Shield + Daily Loss Limit</span>
+        <span class="rpm-badge">ON</span>
+      </div>
+      <div class="rpm-body">
+        <div style="font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">SL Shield — Open BTC Long</div>
+        <div class="rpm-row">
+          <div class="rpm-row-top"><span class="rpm-lbl">Current SL</span><span class="rpm-val pos">102,800 ↑ from 101,900</span></div>
+          <div class="rpm-bar"><div class="rpm-bar-fill bar-anim" style="background:var(--green)" data-w="55"></div></div>
+        </div>
+        <div class="rpm-row">
+          <div class="rpm-row-top"><span class="rpm-lbl">refSL (at open)</span><span class="rpm-val" style="color:var(--muted2)">101,900 — hard limit</span></div>
+          <div class="rpm-bar"><div class="rpm-bar-fill" style="width:100%;background:var(--border2)"></div></div>
+        </div>
+        <div style="background:rgba(0,209,122,0.06);border:1px solid rgba(0,209,122,0.2);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--green);margin-bottom:12px">✓ SL move allowed — moving toward entry</div>
+        <div style="font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Daily Loss Limit</div>
+        <div class="rpm-row">
+          <div class="rpm-row-top"><span class="rpm-lbl">Session Drawdown</span><span class="rpm-val warn">−1.4% / −2.0% limit</span></div>
+          <div class="rpm-bar"><div class="rpm-bar-fill bar-anim" style="background:var(--yellow)" data-w="70"></div></div>
+        </div>
+        <div class="dll-alert">
+          <span class="dll-icon">⏱</span>
+          <span>Trading active — lock triggers at <strong>−2%</strong>. Resets in <strong id="dll-countdown">18:42:30</strong>.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-num">Get Started</div>
+  <h2 class="section-title fade-in">Ready to trade with discipline?</h2>
+  <p class="section-sub fade-in">RiskFlow is free during beta. No setup fees, no exchange commissions.<br>Just you, your strategy, and a terminal that has your back.</p>
+  <div class="cta-actions fade-in" style="margin-top:36px">
+    <a href="index.html" class="btn-primary"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polygon points="3,1 13,7 3,13" fill="white"/></svg>Open Terminal — Free</a>
+    <a href="riskflowdocs.html" class="btn-secondary">View Documentation ↗</a>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">Risk<em>Flow</em></span>
+  <ul class="footer-links">
+    <li><a href="#">Changelog</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">Discord</a></li>
+    <li><a href="#">Twitter/X</a></li>
+  </ul>
+  <span class="footer-copy">© 2026 RiskFlow — Beta</span>
+</footer>
+
+<script>
+// Ticker
+const tickers = [
+  {sym:'BTC/USDT',price:'104,218.40',chg:'+1.84%',pos:true},{sym:'ETH/USDT',price:'3,842.10',chg:'-0.62%',pos:false},
+  {sym:'SOL/USDT',price:'185.30',chg:'+3.21%',pos:true},{sym:'BNB/USDT',price:'614.80',chg:'+0.45%',pos:true},
+  {sym:'DOGE/USDT',price:'0.18420',chg:'-1.10%',pos:false},{sym:'WIF/USDT',price:'2.6480',chg:'+7.82%',pos:true},
+  {sym:'ARB/USDT',price:'0.9240',chg:'-2.14%',pos:false},{sym:'OP/USDT',price:'1.840',chg:'+1.03%',pos:true},
+  {sym:'AVAX/USDT',price:'38.24',chg:'+2.40%',pos:true},{sym:'LINK/USDT',price:'18.94',chg:'-0.88%',pos:false},
+];
+document.getElementById('ticker').innerHTML = [...tickers,...tickers].map(t=>`<div class="ticker-item"><span class="ticker-sym">${t.sym}</span><span class="ticker-price">${t.price}</span><span class="ticker-chg ${t.pos?'pos':'neg'}">${t.chg}</span><span class="ticker-sep">·</span></div>`).join('');
+
+// Candles
+(function(){
+  const prices=[101,103,102,105,104,106,105,107,106,108,107,110,109,111,110,112,111,113,112,114];
+  const mn=Math.min(...prices),mx=Math.max(...prices),rng=mx-mn,h=260;
+  const wrap=document.getElementById('candles');
+  for(let i=0;i<prices.length-1;i++){
+    const o=prices[i],c=prices[i+1],green=c>=o;
+    const bH=Math.abs(c-o)/rng*h*0.6+4;
+    const bB=(Math.min(o,c)-mn)/rng*h*0.8;
+    const div=document.createElement('div'); div.className='candle'; div.style.height=h+'px';
+    const wt=document.createElement('div'); wt.className='candle-wick'; wt.style.height=(Math.random()*18+4)+'px'; wt.style.color=green?'var(--green)':'var(--red)';
+    const bd=document.createElement('div'); bd.className='candle-body'; bd.style.height=bH+'px'; bd.style.background=green?'var(--green)':'var(--red)'; bd.style.marginBottom=bB+'px'; bd.style.animation=`candleGrow 0.4s ${i*0.05}s ease both`;
+    const wb=document.createElement('div'); wb.className='candle-wick'; wb.style.height=(Math.random()*12+2)+'px'; wb.style.color=green?'var(--green)':'var(--red)';
+    div.appendChild(wt); div.appendChild(bd); div.appendChild(wb); wrap.appendChild(div);
+  }
+})();
+
+// Animated SVG price line on hero
+(function(){
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('class','chart-svg'); svg.setAttribute('viewBox','0 0 600 420'); svg.setAttribute('preserveAspectRatio','none');
+  const defs=document.createElementNS(ns,'defs');
+  const grad=document.createElementNS(ns,'linearGradient'); grad.setAttribute('id','lG'); grad.setAttribute('x1','0'); grad.setAttribute('x2','1'); grad.setAttribute('y1','0'); grad.setAttribute('y2','0');
+  const s1=document.createElementNS(ns,'stop'); s1.setAttribute('offset','0%'); s1.setAttribute('stop-color','#a855f7'); s1.setAttribute('stop-opacity','0.3');
+  const s2=document.createElementNS(ns,'stop'); s2.setAttribute('offset','100%'); s2.setAttribute('stop-color','#00d17a'); s2.setAttribute('stop-opacity','0.9');
+  grad.appendChild(s1); grad.appendChild(s2); defs.appendChild(grad); svg.appendChild(defs);
+  const pts=[[0,320],[40,300],[80,310],[120,280],[160,268],[200,248],[240,258],[280,228],[320,218],[360,198],[400,208],[440,183],[480,168],[540,153],[600,138]];
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ');
+  // Fill area
+  const area=document.createElementNS(ns,'path');
+  area.setAttribute('d',d+` L600,420 L0,420 Z`); area.setAttribute('fill','url(#lG)'); area.setAttribute('opacity','0.04'); svg.appendChild(area);
+  const path=document.createElementNS(ns,'path');
+  path.setAttribute('d',d); path.setAttribute('fill','none'); path.setAttribute('stroke','url(#lG)'); path.setAttribute('stroke-width','1.5'); path.setAttribute('opacity','0.55');
+  path.style.strokeDasharray='900'; path.style.strokeDashoffset='900'; path.style.animation='drawLine 2.8s 0.3s ease forwards';
+  svg.appendChild(path);
+  const dot=document.createElementNS(ns,'circle'); dot.setAttribute('cx','600'); dot.setAttribute('cy','138'); dot.setAttribute('r','3'); dot.setAttribute('fill','var(--green)'); dot.style.animation='blink 2s 3.2s infinite'; dot.style.opacity='0'; dot.style.animationFillMode='forwards'; svg.appendChild(dot);
+  document.querySelector('.terminal-body').appendChild(svg);
+})();
+
+// Y axis
+const y=document.getElementById('yaxis');
+['106,500','105,800','105,100','104,400','103,700','103,000','102,300'].forEach(t=>{const s=document.createElement('span');s.className='y-tick';s.textContent=t;y.appendChild(s);});
+
+// Scroll observer
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      e.target.querySelectorAll('.bar-anim').forEach(b=>{
+        const w=b.getAttribute('data-w');
+        setTimeout(()=>{ b.style.width=w+'%'; },100);
+      });
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// Animated PnL
+let pnl=842.30;
+setInterval(()=>{
+  pnl+=(Math.random()-0.4)*12;
+  const el=document.getElementById('pnl-val');
+  if(el) el.textContent=(pnl>=0?'+':'')+`$${pnl.toFixed(2)}`;
+},1800);
+
+// Live calculator
+function calcUpdate(){
+  const bal=parseFloat(document.getElementById('ci-balance')?.value)||10000;
+  const rp=parseFloat(document.getElementById('ci-riskpct')?.value)||1;
+  const lev=parseFloat(document.getElementById('ci-lev')?.value)||10;
+  const ent=parseFloat(document.getElementById('ci-entry')?.value)||84500;
+  const sl=parseFloat(document.getElementById('ci-sl')?.value)||83100;
+  const tp=parseFloat(document.getElementById('ci-tp')?.value)||88200;
+  const riskUSD=bal*rp/100;
+  const slD=Math.abs(ent-sl)/ent;
+  const size=slD>0?riskUSD/slD:0;
+  const contracts=size/ent;
+  const margin=size/lev;
+  const tpD=Math.abs(tp-ent)/ent;
+  const rr=slD>0?tpD/slD:0;
+  const gain=riskUSD*rr;
+  const fmt=(n,d=2)=>n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('cr-risk','$'+fmt(riskUSD)); set('cr-size','$'+fmt(size,0));
+  set('cr-contracts',fmt(contracts,4)+' BTC'); set('cr-margin','$'+fmt(margin,0));
+  set('cr-rr','1 : '+fmt(rr)); set('cr-gain','+$'+fmt(gain));
+  const rrEl=document.getElementById('cr-rr');
+  if(rrEl) rrEl.className='cr-val '+(rr>=2?'good':rr>=1?'warn':'neg');
+}
+calcUpdate();
+
+// DLL countdown
+let dllSecs=67350;
+setInterval(()=>{
+  dllSecs=Math.max(0,dllSecs-1);
+  const h=Math.floor(dllSecs/3600),m=Math.floor((dllSecs%3600)/60),s=dllSecs%60;
+  const el=document.getElementById('dll-countdown');
+  if(el) el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+},1000);
+
+// Live entry price animation in demo panel
+let demoPrice=104218.40;
+setInterval(()=>{
+  demoPrice+=(Math.random()-0.49)*8;
+  const el=document.getElementById('demo-entry-price');
+  if(el) el.textContent=demoPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+},900);
+</script>
+</body>
+</html>
