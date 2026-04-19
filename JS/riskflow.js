@@ -551,6 +551,12 @@ const HL_INFO  = 'https://api.hyperliquid.xyz/info';
 function _quoteLabel() {
   return (window._activeExchange === 'hyperliquid') ? 'USDC' : 'USDT';
 }
+// Genera un cloid valido per Hyperliquid: 128-bit hex string (32 hex chars dopo 0x)
+function _hlCloid(prefix) {
+  const ts = Date.now().toString(16).padStart(12,'0');
+  const rand = Math.random().toString(16).slice(2).padStart(20,'0').slice(0,20);
+  return '0x'+ts+rand;
+}
 
 // BingX usa simboli con trattino: BTC-USDT
 function toBingxSym(symbol) {
@@ -3088,25 +3094,25 @@ async function executeOrder(){
     const isBuy    = S.dir === 'long';
     const isMarket = S.orderType === 'market';
     try {
-      // Leverage
-      try {
-        const hlMetaLev = await hlInfo({type:'meta'});
-        const hlIdxLev  = (hlMetaLev?.universe||[]).findIndex(a=>a.name===coin);
-        await window._hlRequest({type:'updateLeverage',asset:hlIdxLev>=0?hlIdxLev:0,isCross:true,leverage:parseInt(lev)});
-      } catch(e){ console.warn('[HL LEV]',e.message); }
-      // Ordine principale
+      // Una sola chiamata meta per tutto
       const hlMeta = await hlInfo({type:'meta'});
       const hlIdx  = (hlMeta?.universe||[]).findIndex(a=>a.name===coin);
+      const asset  = hlIdx>=0 ? hlIdx : 0;
+      // Leverage
+      try {
+        await window._hlRequest({type:'updateLeverage',asset,isCross:true,leverage:parseInt(lev)});
+      } catch(e){ console.warn('[HL LEV]',e.message); }
+      // Ordine principale
       const orderAction = {
         type:'order',
         orders:[{
-          a:   hlIdx>=0?hlIdx:0,
-          b:   isBuy,
-          p:   isMarket ? '0' : String(fmtPrice_(entry)),
-          s:   contractStr,
-          r:   false,
-          t:   isMarket ? {market:{}} : {limit:{tif:'Gtc'}},
-          c:   'rf_'+Date.now(),
+          a: asset,
+          b: isBuy,
+          p: isMarket ? '0' : String(fmtPrice_(entry)),
+          s: contractStr,
+          r: false,
+          t: isMarket ? {market:{}} : {limit:{tif:'Gtc'}},
+          c: _hlCloid('main'),
         }],
         grouping:'na',
       };
@@ -3114,17 +3120,25 @@ async function executeOrder(){
       // SL
       if (sl && sl>0) {
         try {
-          const hlMeta2 = await hlInfo({type:'meta'});
-          const hlIdx2  = (hlMeta2?.universe||[]).findIndex(a=>a.name===coin);
-          await window._hlRequest({type:'order',orders:[{a:hlIdx2>=0?hlIdx2:0,b:!isBuy,p:String(fmtPrice_(sl)),s:contractStr,r:true,t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(sl)),tpsl:'sl'}},c:'rf_sl_'+Date.now()}],grouping:'na'});
+          await window._hlRequest({
+            type:'order',
+            orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(sl)),s:contractStr,r:true,
+              t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(sl)),tpsl:'sl'}},
+              c:_hlCloid('sl')}],
+            grouping:'normalTpsl',
+          });
         } catch(e){ console.warn('[HL SL]',e.message); }
       }
       // TP
       if (tpList.length>0) {
         try {
-          const hlMeta3 = await hlInfo({type:'meta'});
-          const hlIdx3  = (hlMeta3?.universe||[]).findIndex(a=>a.name===coin);
-          await window._hlRequest({type:'order',orders:[{a:hlIdx3>=0?hlIdx3:0,b:!isBuy,p:String(fmtPrice_(tpList[0])),s:contractStr,r:true,t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(tpList[0])),tpsl:'tp'}},c:'rf_tp_'+Date.now()}],grouping:'na'});
+          await window._hlRequest({
+            type:'order',
+            orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(tpList[0])),s:contractStr,r:true,
+              t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(tpList[0])),tpsl:'tp'}},
+              c:_hlCloid('tp')}],
+            grouping:'normalTpsl',
+          });
         } catch(e){ console.warn('[HL TP]',e.message); }
       }
       notify('✓ Ordine inviato su Hyperliquid!','ok');
@@ -5286,13 +5300,34 @@ function roundRect(cx,x,y,w,h,r){
     if (side === 'long'  && newTP <= entry) { notify("TP long deve essere sopra l'entry", 'err'); return; }
     if (side === 'short' && newTP >= entry) { notify("TP short deve essere sotto l'entry", 'err'); return; }
 
+    const isHL = _activeExchange === 'hyperliquid';
     notify(`Modifica TP${tpN} in corso...`, '');
 
     try {
       const cInfo = await fetchContractInfo(p.symbol);
       const tpStr = roundToTick(newTP, cInfo.pricePlace).toFixed(cInfo.pricePlace);
 
-      if (isBingx) {
+      if (isHL) {
+        const coin    = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+        const hlMeta  = await hlInfo({type:'meta'});
+        const asset   = Math.max(0,(hlMeta?.universe||[]).findIndex(a=>a.name===coin));
+        const isBuy   = side === 'long';
+        // Cancella TP esistente se presente
+        const tpslMap = window._tpslOrdersMap || {};
+        const key     = (p.symbol||'')+'_'+side;
+        const existing = (tpslMap[key]||[]).filter(o=>o.type==='tp'&&o.orderId);
+        for (const o of existing) {
+          try { await window._hlRequest({type:'cancel',cancels:[{a:asset,o:parseInt(o.orderId)}]}); } catch(e){}
+        }
+        await window._hlRequest({
+          type:'order',
+          orders:[{a:asset,b:!isBuy,p:tpStr,s:String(parseFloat(p.total||p.available||0)),r:true,
+            t:{trigger:{isMarket:true,triggerPx:tpStr,tpsl:'tp'}},c:_hlCloid('tp')}],
+          grouping:'normalTpsl',
+        });
+        notify(`✓ TP${tpN}#${posIdx+1} impostato a $${fmtPrice(newTP)}`, 'ok');
+        setTimeout(() => fetchBitgetDashboard(), 1200);
+      } else if (isBingx) {
         const bsym = p._bingxSymbol || toBingxSym(p.symbol);
         await bingxRequest('/openApi/swap/v2/trade/order', {}, {
           method: 'POST',
@@ -5389,13 +5424,35 @@ function roundRect(cx,x,y,w,h,r){
     if (side === 'long'  && newSL >= entry) { notify("SL long deve essere sotto l'entry", 'err'); return; }
     if (side === 'short' && newSL <= entry) { notify("SL short deve essere sopra l'entry", 'err'); return; }
 
+    const isHL = _activeExchange === 'hyperliquid';
     notify('Modifica SL in corso...', '');
 
     try {
       const cInfo = await fetchContractInfo(p.symbol);
       const slStr = roundToTick(newSL, cInfo.pricePlace).toFixed(cInfo.pricePlace);
 
-      if (isBingx) {
+      if (isHL) {
+        const coin    = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+        const hlMeta  = await hlInfo({type:'meta'});
+        const asset   = Math.max(0,(hlMeta?.universe||[]).findIndex(a=>a.name===coin));
+        const isBuy   = side === 'long';
+        // Cancella SL esistente se presente
+        const tpslMap = window._tpslOrdersMap || {};
+        const key     = (p.symbol||'')+'_'+side;
+        const existing = (tpslMap[key]||[]).filter(o=>o.type==='sl'&&o.orderId);
+        for (const o of existing) {
+          try { await window._hlRequest({type:'cancel',cancels:[{a:asset,o:parseInt(o.orderId)}]}); } catch(e){}
+        }
+        await window._hlRequest({
+          type:'order',
+          orders:[{a:asset,b:!isBuy,p:slStr,s:String(parseFloat(p.total||p.available||0)),r:true,
+            t:{trigger:{isMarket:true,triggerPx:slStr,tpsl:'sl'}},c:_hlCloid('sl')}],
+          grouping:'normalTpsl',
+        });
+        slpCommitRef(idx, newSL);
+        notify(`✓ SL impostato a $${fmtPrice(newSL)}`, 'ok');
+        setTimeout(() => fetchBitgetDashboard(), 1500);
+      } else if (isBingx) {
         const bsym = p._bingxSymbol || toBingxSym(p.symbol);
         await bingxRequest('/openApi/swap/v2/trade/order', {}, {
           method: 'POST',
@@ -5502,13 +5559,31 @@ function roundRect(cx,x,y,w,h,r){
 
     if (!confirm('Spostare lo SL a Breakeven ($'+fmtPrice(entry)+') per '+sym+' '+side.toUpperCase()+'?')) return;
 
+    const isHL = _activeExchange === 'hyperliquid';
     notify('Imposto BE in corso...', '');
 
     try {
       const cInfo = await fetchContractInfo(p.symbol);
       const beStr = roundToTick(entry, cInfo.pricePlace).toFixed(cInfo.pricePlace);
 
-      if (isBingx) {
+      if (isHL) {
+        const coin    = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+        const hlMeta  = await hlInfo({type:'meta'});
+        const asset   = Math.max(0,(hlMeta?.universe||[]).findIndex(a=>a.name===coin));
+        const isBuy   = side === 'long';
+        const tpslMap = window._tpslOrdersMap || {};
+        const key     = (p.symbol||'')+'_'+side;
+        const existing = (tpslMap[key]||[]).filter(o=>o.type==='sl'&&o.orderId);
+        for (const o of existing) {
+          try { await window._hlRequest({type:'cancel',cancels:[{a:asset,o:parseInt(o.orderId)}]}); } catch(e){}
+        }
+        await window._hlRequest({
+          type:'order',
+          orders:[{a:asset,b:!isBuy,p:beStr,s:String(parseFloat(p.total||p.available||0)),r:true,
+            t:{trigger:{isMarket:true,triggerPx:beStr,tpsl:'sl'}},c:_hlCloid('be')}],
+          grouping:'normalTpsl',
+        });
+      } else if (isBingx) {
         const bsym = p._bingxSymbol || toBingxSym(p.symbol);
         await bingxRequest('/openApi/swap/v2/trade/order', {}, {
           method: 'POST',
@@ -5686,11 +5761,27 @@ function roundRect(cx,x,y,w,h,r){
     const isWeex  = _activeExchange === 'weex';
     const isBybit = _activeExchange === 'bybit' || _activeExchange === 'bybit_demo';
 
+    const isHL = _activeExchange === 'hyperliquid';
     try {
       const totalSize = parseFloat(p.total||p.totalPos||p.available||0);
       if (!totalSize || totalSize <= 0) throw new Error('Nessuna posizione aperta');
 
-      if (isBingx) {
+      if (isHL) {
+        // ─── HYPERLIQUID CLOSE ───
+        const coin   = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+        const hlMeta = await hlInfo({type:'meta'});
+        const asset  = Math.max(0,(hlMeta?.universe||[]).findIndex(a=>a.name===coin));
+        const isBuy  = side !== 'long'; // chiudi: direzione opposta
+        const raw    = type === 'full' ? totalSize : totalSize * (pct / 100);
+        const cInfo  = await fetchContractInfo(p.symbol);
+        const qty    = (Math.floor(raw / cInfo.sizeMultiplier) * cInfo.sizeMultiplier)
+                         .toFixed(String(cInfo.sizeMultiplier).split('.')[1]?.length ?? 3);
+        await window._hlRequest({
+          type:'order',
+          orders:[{a:asset,b:isBuy,p:'0',s:qty,r:true,t:{market:{}},c:_hlCloid('close')}],
+          grouping:'na',
+        });
+      } else if (isBingx) {
         // ─── BINGX CLOSE ───
         const bsym = p._bingxSymbol || toBingxSym(p.symbol);
         const closeSide = side === 'long' ? 'SELL' : 'BUY';
