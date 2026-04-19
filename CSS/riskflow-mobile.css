@@ -36,7 +36,6 @@ body {
   font-size: 12px;
   display: flex;
   flex-direction: column;
-  touch-action: none;
 }
 
 /* ── TOPBAR ──────────────────────────────────────────────────── */
@@ -95,8 +94,7 @@ body {
   flex: 1;
   position: relative;
   overflow: hidden;
-  touch-action: none;
-  min-height: 0; /* fondamentale per flex:1 in colonna */
+  min-height: 120px;
 }
 #chart      { width:100%; height:100%; }
 #dragCanvas { position:absolute; inset:0; z-index:10; pointer-events:none; }
@@ -160,44 +158,29 @@ body {
 .m-tab.active { color:var(--accent); border-top-color:var(--accent); }
 .m-tab svg { width:18px; height:18px; stroke-width:1.5; fill:none; stroke:currentColor; }
 
-/* ── PANELS — bottom sheet, NON coprono la chart ────────────── */
+/* ── PANELS — sotto i tab, nel flusso normale ─────────────── */
 /*
-   Logica: position:fixed, ancorati al bottom dei tab.
-   max-height = schermo - topbar - tfbar - tabs = solo la zona chart.
-   Entrano da sotto con translateY(100%), escono con translateY(0).
-   La chart rimane SEMPRE visibile sopra il panel.
+   I panel stanno nel normale flusso del body (non fixed).
+   La chart ha flex:1 e si riduce per fare spazio.
+   display:none / display:block — nessuna animazione che copre la chart.
 */
 .m-panel {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
-  max-height: var(--panel-max);
-  padding-bottom: var(--tab-h);
-  background: var(--surface);
-  border-top: 1px solid var(--border2);
-  border-radius: 14px 14px 0 0;
+  display: none;
+  flex-shrink: 0;
+  height: 42vh;              /* altezza fissa panel aperto */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
-  transform: translateY(100%);
-  transition: transform .28s cubic-bezier(.4,0,.2,1);
-  z-index: 50;
-  box-shadow: 0 -8px 32px rgba(0,0,0,.5);
-  will-change: transform;
+  background: var(--surface);
+  border-top: 2px solid var(--border2);
 }
-.m-panel.open { transform: translateY(0); }
+.m-panel.open {
+  display: block;
+}
 .m-panel::-webkit-scrollbar { width:2px; }
 .m-panel::-webkit-scrollbar-thumb { background:var(--border2); }
 
-/* drag handle visivo in cima ai panel */
-.m-panel::before {
-  content: '';
-  display: block;
-  width: 36px; height: 4px;
-  background: var(--border2);
-  border-radius: 2px;
-  margin: 10px auto 0;
-}
+
 
 /* ── PANEL SECTIONS ──────────────────────────────────────────── */
 .m-sec { padding:12px; border-bottom:1px solid var(--border); }
@@ -494,20 +477,9 @@ body {
 .m-user-dot  { width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0; }
 .m-logout-btn { background:none; border:1px solid var(--border); border-radius:3px; padding:3px 8px; font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); cursor:pointer; }
 
-/* Context menu — position:absolute dentro .m-chart-wrap (overflow:hidden lo clampa) */
-.ctx-menu {
-  position: absolute;          /* relativo a .m-chart-wrap */
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 5px;
-  z-index: 200;                /* sopra dragCanvas (z-index:10) */
-  min-width: 170px;
-  box-shadow: 0 8px 24px #00000090;
-  display: none;
-  /* Appare sempre SOTTO il dito: top viene settato in JS */
-}
-.ctx-item  { padding:11px 14px; border-radius:5px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:10px; transition:background .1s; -webkit-tap-highlight-color:transparent; }
+/* Context menu */
+.ctx-menu { position:fixed; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:5px; z-index:400; min-width:170px; box-shadow:0 8px 24px #00000070; display:none; }
+.ctx-item  { padding:10px 12px; border-radius:5px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:10px; transition:background .1s; }
 .ctx-item:active { background:var(--surface3); }
 .ctx-dot   { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
 
