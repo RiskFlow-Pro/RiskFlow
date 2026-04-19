@@ -146,18 +146,7 @@
   </div>
 </div>
 
-<!-- ── CONTEXT MENU (long press on chart) ── -->
-<div class="ctx-menu" id="ctxMenu">
-  <div class="ctx-item" onclick="mCtxSet('entry')"><div class="ctx-dot" style="background:var(--yellow)"></div>Set Entry</div>
-  <div class="ctx-item" onclick="mCtxSet('sl')"><div class="ctx-dot" style="background:var(--red)"></div>Set Stop Loss</div>
-  <div class="ctx-item" onclick="mCtxSet('tp1')"><div class="ctx-dot" style="background:var(--green)"></div>Set TP1</div>
-  <div class="ctx-item" onclick="mCtxSet('tp2')"><div class="ctx-dot" style="background:#3dffcc"></div>Set TP2</div>
-  <div class="ctx-item" onclick="mCtxSet('tp3')"><div class="ctx-dot" style="background:#3dddff"></div>Set TP3</div>
-  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(0)"><div class="ctx-dot" style="background:#ffc940"></div>Set L1</div>
-  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(1)"><div class="ctx-dot" style="background:#f59e0b"></div>Set L2</div>
-  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(2)"><div class="ctx-dot" style="background:#fb923c"></div>Set L3</div>
-  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(3)"><div class="ctx-dot" style="background:#ef4444"></div>Set L4</div>
-</div>
+<!-- ctxMenu spostato dentro chartWrap — vedi sotto -->
 
 <!-- ── NOTIF ── -->
 <div class="m-notif" id="m-notif"></div>
@@ -235,6 +224,15 @@
     <button class="m-lt-btn tp1" id="m-ltTP" onclick="mActivateDrag('tp1')">⊕ TP</button>
   </div>
   <div class="m-lt-hint" id="m-ltHint">Tocca chart per spostare</div>
+
+  <!-- CONTEXT MENU (long press) — dentro chart-wrap per position:absolute corretto -->
+  <div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-item" onclick="mCtxSet('entry')"><div class="ctx-dot" style="background:var(--yellow)"></div>Set Entry</div>
+    <div class="ctx-item" onclick="mCtxSet('sl')"><div class="ctx-dot" style="background:var(--red)"></div>Set Stop Loss</div>
+    <div class="ctx-item" onclick="mCtxSet('tp1')"><div class="ctx-dot" style="background:var(--green)"></div>Set TP1</div>
+    <div class="ctx-item" onclick="mCtxSet('tp2')"><div class="ctx-dot" style="background:#3dffcc"></div>Set TP2</div>
+    <div class="ctx-item" onclick="mCtxSet('tp3')"><div class="ctx-dot" style="background:#3dddff"></div>Set TP3</div>
+  </div>
 </div>
 
 <!-- BOTTOM TABS -->
@@ -677,16 +675,22 @@ function _cancelLP(){if(_mLongPressTimer){clearTimeout(_mLongPressTimer);_mLongP
 
 function mOpenCtxAt(clientX,clientY){
   if(!window.candleSeries)return;
-  const y=clientY-_cw.getBoundingClientRect().top;
-  const price=window.candleSeries.coordinateToPrice(y);if(!price)return;
+  const rect=_cw.getBoundingClientRect();
+  const yRel=clientY-rect.top;
+  const price=window.candleSeries.coordinateToPrice(yRel);if(!price)return;
   window._ctxPrice=price;
   const m=document.getElementById('ctxMenu');
   if(m.children[0])m.children[0].style.display=(window.S||{}).orderType!=='market'?'flex':'none';
   m.style.display='block';
-  const vw=window.innerWidth,vh=window.innerHeight;
-  let left=clientX-10,top=clientY+12;
-  if(left+180>vw)left=vw-188;if(left<4)left=4;
-  if(top+215>vh)top=clientY-218;if(top<4)top=4;
+  const mW=m.offsetWidth||176;
+  const chartW=rect.width;
+  // Orizzontale: allineato al dito, clampa a destra
+  let left=clientX-rect.left-10;
+  if(left+mW>chartW-4)left=chartW-mW-4;
+  if(left<4)left=4;
+  // Verticale: SEMPRE sotto il dito, mai sopra
+  // Se il menu viene tagliato dall'overflow:hidden della chart va bene
+  const top=yRel+14;
   m.style.left=left+'px';m.style.top=top+'px';
 }
 document.addEventListener('touchstart',function(e){
