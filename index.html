@@ -107,12 +107,26 @@
     </div>
 
     <!-- Fields -->
-    <div class="field-group" style="margin-bottom:10px"><label>API Key</label><input type="text" id="apiKeyInput" placeholder="la tua API key" autocomplete="off"/></div>
+    <div class="field-group" style="margin-bottom:4px">
+      <label id="apiKeyLabel">API Key</label>
+      <input type="text" id="apiKeyInput" placeholder="la tua API key" autocomplete="off"/>
+    </div>
     <div class="field-group" style="margin-bottom:10px"><label>Secret Key</label><input type="password" id="apiSecretInput" placeholder="secret key" autocomplete="off"/></div>
     <!-- Passphrase: visibile solo per Bitget -->
     <div class="field-group" id="apiPassRow" style="margin-bottom:12px"><label>Passphrase</label><input type="password" id="apiPassInput" placeholder="passphrase (solo Bitget)" autocomplete="off"/></div>
-    <!-- Wallet Address: visibile solo per Hyperliquid -->
-    <div class="field-group" id="apiWalletRow" style="margin-bottom:12px;display:none"><label>Wallet Address</label><input type="text" id="apiWalletInput" placeholder="0x... indirizzo account principale" autocomplete="off" spellcheck="false"/></div>
+    <!-- Campi Hyperliquid: visibili solo per HL -->
+    <div class="field-group" id="apiWalletRow" style="margin-bottom:8px;display:none">
+      <label>Main Wallet Address</label>
+      <input type="text" id="apiWalletInput" placeholder="0x... indirizzo principale (es. 0x4d9b...)" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="field-group" id="apiAgentRow" style="margin-bottom:8px;display:none">
+      <label>Agent Wallet Address</label>
+      <input type="text" id="apiAgentInput" placeholder="0x... indirizzo API wallet agente (es. 0xc063...)" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="field-group" id="apiPrivKeyRow" style="margin-bottom:12px;display:none">
+      <label>Private Key</label>
+      <input type="password" id="apiPrivKeyInput" placeholder="0x... private key API wallet (66 caratteri)" autocomplete="off" spellcheck="false"/>
+    </div>
 
     <div class="api-btns">
       <button class="api-save-btn" onclick="rfSaveApiKeys()">Salva & Connetti</button>
