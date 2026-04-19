@@ -3103,15 +3103,33 @@ async function executeOrder(){
         await window._hlRequest({type:'updateLeverage',asset,isCross:true,leverage:parseInt(lev)});
       } catch(e){ console.warn('[HL LEV]',e.message); }
       // Ordine principale
+      // HL non ha ordini "market" nativi — si usa limit IOC con prezzo aggressivo (slippage 5%)
+      let orderPx, orderTif;
+      if (isMarket) {
+        const allMids = await hlInfo({type:'allMids'});
+        const mid = parseFloat(allMids?.[coin] || 0);
+        if (!mid) throw new Error('Impossibile ottenere il prezzo di mercato per '+coin);
+        const slippage = 0.05;
+        const rawPx = isBuy ? mid * (1 + slippage) : mid * (1 - slippage);
+        // Arrotonda a max 5 cifre significative
+        const sig = 5;
+        const mag = Math.floor(Math.log10(Math.abs(rawPx)));
+        const factor = Math.pow(10, sig - 1 - mag);
+        orderPx = String(Math.round(rawPx * factor) / factor);
+        orderTif = 'Ioc';
+      } else {
+        orderPx = String(fmtPrice_(entry));
+        orderTif = 'Gtc';
+      }
       const orderAction = {
         type:'order',
         orders:[{
           a: asset,
           b: isBuy,
-          p: isMarket ? '0' : String(fmtPrice_(entry)),
+          p: orderPx,
           s: contractStr,
           r: false,
-          t: isMarket ? {market:{}} : {limit:{tif:'Gtc'}},
+          t: {limit:{tif:orderTif}},
         }],
         grouping:'na',
       };
@@ -5775,9 +5793,16 @@ function roundRect(cx,x,y,w,h,r){
         const cInfo  = await fetchContractInfo(p.symbol);
         const qty    = (Math.floor(raw / cInfo.sizeMultiplier) * cInfo.sizeMultiplier)
                          .toFixed(String(cInfo.sizeMultiplier).split('.')[1]?.length ?? 3);
+        const allMidsClose = await hlInfo({type:'allMids'});
+        const midClose = parseFloat(allMidsClose?.[coin] || 0);
+        const slipClose = 0.05;
+        const rawPxClose = isBuy ? midClose * (1 + slipClose) : midClose * (1 - slipClose);
+        const magClose = Math.floor(Math.log10(Math.abs(rawPxClose)));
+        const facClose = Math.pow(10, 4 - magClose);
+        const pxClose  = String(Math.round(rawPxClose * facClose) / facClose);
         await window._hlRequest({
           type:'order',
-          orders:[{a:asset,b:isBuy,p:'0',s:qty,r:true,t:{market:{}}}],
+          orders:[{a:asset,b:isBuy,p:pxClose,s:qty,r:true,t:{limit:{tif:'Ioc'}}}],
           grouping:'na',
         });
       } else if (isBingx) {
