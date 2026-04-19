@@ -3142,7 +3142,7 @@ async function executeOrder(){
             orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(sl)),s:contractStr,r:true,
               t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(sl)),tpsl:'sl'}},
             }],
-            grouping:'normalTpsl',
+            grouping:'na',
           });
         } catch(e){ console.warn('[HL SL]',e.message); }
       }
@@ -3154,7 +3154,7 @@ async function executeOrder(){
             orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(tpList[0])),s:contractStr,r:true,
               t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(tpList[0])),tpsl:'tp'}},
             }],
-            grouping:'normalTpsl',
+            grouping:'na',
           });
         } catch(e){ console.warn('[HL TP]',e.message); }
       }
@@ -5340,7 +5340,7 @@ function roundRect(cx,x,y,w,h,r){
           type:'order',
           orders:[{a:asset,b:!isBuy,p:tpStr,s:String(parseFloat(p.total||p.available||0)),r:true,
             t:{trigger:{isMarket:true,triggerPx:tpStr,tpsl:'tp'}}}],
-          grouping:'normalTpsl',
+          grouping:'na',
         });
         notify(`✓ TP${tpN}#${posIdx+1} impostato a $${fmtPrice(newTP)}`, 'ok');
         setTimeout(() => fetchBitgetDashboard(), 1200);
@@ -5464,7 +5464,7 @@ function roundRect(cx,x,y,w,h,r){
           type:'order',
           orders:[{a:asset,b:!isBuy,p:slStr,s:String(parseFloat(p.total||p.available||0)),r:true,
             t:{trigger:{isMarket:true,triggerPx:slStr,tpsl:'sl'}}}],
-          grouping:'normalTpsl',
+          grouping:'na',
         });
         slpCommitRef(idx, newSL);
         notify(`✓ SL impostato a $${fmtPrice(newSL)}`, 'ok');
@@ -5598,7 +5598,7 @@ function roundRect(cx,x,y,w,h,r){
           type:'order',
           orders:[{a:asset,b:!isBuy,p:beStr,s:String(parseFloat(p.total||p.available||0)),r:true,
             t:{trigger:{isMarket:true,triggerPx:beStr,tpsl:'sl'}}}],
-          grouping:'normalTpsl',
+          grouping:'na',
         });
       } else if (isBingx) {
         const bsym = p._bingxSymbol || toBingxSym(p.symbol);
