@@ -547,6 +547,11 @@ const BINGX_PROXY = 'https://bingx-proxy-7t7k.onrender.com';
 const HL_PROXY = 'https://hyperliquid-proxy.onrender.com';
 const HL_INFO  = 'https://api.hyperliquid.xyz/info';
 
+// Restituisce 'USDC' se exchange attivo è Hyperliquid, altrimenti 'USDT'
+function _quoteLabel() {
+  return (window._activeExchange === 'hyperliquid') ? 'USDC' : 'USDT';
+}
+
 // BingX usa simboli con trattino: BTC-USDT
 function toBingxSym(symbol) {
   const s = symbol.endsWith('USDT') ? symbol : symbol + 'USDT';
@@ -573,19 +578,22 @@ async function hlInfo(payload) {
 async function loadHLPairs() {
   try {
     const data = await hlInfo({type:'meta'});
+    ASSETS.length = 0;
     (data?.universe||[]).forEach(a => {
       const sym = a.name+'USDT';
-      if (!ASSETS.find(x=>x.symbol===sym)) ASSETS.push({symbol:sym,_hlName:a.name,cat:'Crypto'});
+      if (!ASSETS.find(x=>x.sym===sym)) ASSETS.push({sym,symbol:sym,_hlName:a.name,cat:'Crypto'});
     });
   } catch(e){ console.warn('[HL] loadHLPairs:',e.message); }
 }
 async function fetchHLCandles(symbol,tf) {
-  const tfMap={'1m':1,'5m':5,'15m':15,'1H':60,'4H':240,'1D':1440};
-  const interval = tfMap[tf]||15;
+  const tfMap={'1m':'1m','5m':'5m','15m':'15m','1H':'1h','4H':'4h','1D':'1d'};
+  const tfMsMap={'1m':1,'5m':5,'15m':15,'1H':60,'4H':240,'1D':1440};
+  const interval = tfMap[tf]||'15m';
+  const intervalMs = tfMsMap[tf]||15;
   const coin = symbol.replace(/USDT$/i,'');
-  const endTime = Date.now(), startTime = endTime - interval*60*1000*500;
+  const endTime = Date.now(), startTime = endTime - intervalMs*60*1000*500;
   try {
-    const data = await hlInfo({type:'candleSnapshot',req:{coin,interval:String(interval),startTime,endTime}});
+    const data = await hlInfo({type:'candleSnapshot',req:{coin,interval,startTime,endTime}});
     if(!Array.isArray(data)||!data.length) return null;
     const seen=new Set();
     return data.map(c=>({time:Math.floor(c.t/1000),open:parseFloat(c.o),high:parseFloat(c.h),low:parseFloat(c.l),close:parseFloat(c.c)}))
@@ -2365,7 +2373,7 @@ function renderLadderOrders(){
         <span class="unit">%</span>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-        <div class="ladd-size" id="ladd-size-${i}">— USDT</div>
+        <div class="ladd-size" id="ladd-size-${i}">— ${_quoteLabel()}</div>
         <button class="ladd-toggle ${enabled?'on':'off'}" onclick="toggleLadderOrder(${i})" id="ladd-tog-${i}">${enabled?'✓':'○'}</button>
       </div>
     </div>`;
@@ -2444,7 +2452,7 @@ function calcLadder(){
     // Azzera display
     for(let i=0;i<n;i++){
       const sz = document.getElementById('ladd-size-'+i);
-      if(sz) sz.textContent = '— USDT';
+      if(sz) sz.textContent = '— '+_quoteLabel();
     }
     document.getElementById('ladderSummary').style.display='none';
     document.getElementById('chartCalcBtn').classList.remove('visible');
@@ -2471,7 +2479,7 @@ function calcLadder(){
     const sz = document.getElementById('ladd-size-'+i);
     const od = orderData.find(o=>o.i===i);
     if(!od){
-      if(sz) sz.textContent='— USDT';
+      if(sz) sz.textContent='— '+_quoteLabel();
       continue;
     }
     // Aggiorna il campo % solo se non ha un valore manuale (non interferire con editing)
@@ -2491,7 +2499,7 @@ function calcLadder(){
   // Summary
   const sumEl = document.getElementById('ladderSummary');
   sumEl.style.display = 'block';
-  document.getElementById('laddTotalSize').textContent = fmt(totalSize)+' USDT';
+  document.getElementById('laddTotalSize').textContent = fmt(totalSize)+' '+_quoteLabel();
   document.getElementById('laddTotalRisk').textContent = '$'+fmt(totalRisk);
   const laddFeeEl = document.getElementById('laddTotalFee');
   if(laddFeeEl) laddFeeEl.textContent = '$'+fmt(calcFeeUsd(totalSize, 'ladder'));
@@ -2634,7 +2642,7 @@ function renderPairModal(filter=''){
     bycat[cat].forEach(a=>{
       const base = a.sym.replace('USDT','');
       h+=`<div class="pm-item${a.sym===S.symbol?' active':''}" onclick="selectPair('${a.sym}')">
-        <span class="pm-item-sym">${base}/USDT</span>
+        <span class="pm-item-sym">${base}/${_quoteLabel()}</span>
         <span class="pm-item-base">${a.cat}</span>
       </div>`;
     });
@@ -2831,7 +2839,7 @@ async function openModal(){
     <div class="mrow"><span class="ml">Entry</span><span class="mv">$${fmtPrice(entry)}${S.orderType==='market'?' <span style="font-size:8px;color:var(--muted2)">(market)</span>':''}</span></div>
     <div class="mrow"><span class="ml">Leva</span><span class="mv">${lev}x</span></div>
     <div class="mdiv"></div>
-    <div class="mrow"><span class="ml">Size</span><span class="mv acc">${size} USDT</span></div>
+    <div class="mrow"><span class="ml">Size</span><span class="mv acc">${size} ${_quoteLabel()}</span></div>
     <div class="mrow"><span class="ml">Margin</span><span class="mv">${margin}</span></div>
     <div class="mrow"><span class="ml">Stop Loss</span><span class="mv red">$${sl} <span style="font-size:8px;color:var(--muted2)">(${slDist})</span></span></div>
     <div class="mrow"><span class="ml">Max Risk</span><span class="mv red">${riskUsd}</span></div>
@@ -2901,7 +2909,7 @@ async function openLadderModal(){
           <span class="mv">
             <span style="color:var(--text)">$${fmtPrice(d.o.price)}</span>
             <span style="color:var(--muted2);font-size:9px"> → </span>
-            <span style="color:var(--accent)">${fmt(d.size)} USDT</span>
+            <span style="color:var(--accent)">${fmt(d.size)} ${_quoteLabel()}</span>
             <span style="color:var(--muted2);font-size:8px"> (margin $${fmt(d.margin)})</span>
           </span>
         </div>`;
@@ -2969,7 +2977,7 @@ async function openLadderModal(){
     ${ordersHtml}
     ${warningHtml}
     <div class="mdiv"></div>
-    <div class="mrow"><span class="ml">Size effettiva</span><span class="mv acc">${fmt(executableTotalSize)} USDT</span></div>
+    <div class="mrow"><span class="ml">Size effettiva</span><span class="mv acc">${fmt(executableTotalSize)} ${_quoteLabel()}</span></div>
     <div class="mrow"><span class="ml">Stop Loss</span><span class="mv red">$${sl}</span></div>
     <div class="mrow"><span class="ml">Risk effettivo</span><span class="mv red">$${fmt(executableTotalRisk)}</span></div>
     <div class="mrow"><span class="ml">Fee est.</span><span class="mv" style="color:var(--muted2)">$${fmt(calcFeeUsd(executableTotalSize, 'ladder'))}</span></div>
@@ -4073,7 +4081,7 @@ function drawMoneyShotCanvas(p) {
   // pair text
   cx.font = 'bold 26px "Syne",sans-serif';
   cx.fillStyle = '#ffffff';
-  cx.fillText(base+'/USDT', W/2, symPillY+32);
+  cx.fillText(base+'/'+_quoteLabel(), W/2, symPillY+32);
   cx.restore();
 
   // side + leverage pill
@@ -4441,11 +4449,28 @@ function roundRect(cx,x,y,w,h,r){
     const isBingx = ex === 'bingx';
     const isWeex  = ex === 'weex';
     const isBybit = ex === 'bybit' || ex === 'bybit_demo';
-    const {apiKey} = isBingx ? loadBingxKeys() : isWeex ? loadWeexKeys() : isBybit ? loadBybitKeys() : loadBitgetKeys();
+    const isHL    = ex === 'hyperliquid';
+    const {apiKey} = isBingx ? loadBingxKeys() : isWeex ? loadWeexKeys() : isBybit ? loadBybitKeys() : isHL ? loadHyperliquidKeys() : loadBitgetKeys();
     if (!apiKey) return;
     try {
       let orders = [];
-      if (isBingx) {
+      if (isHL) {
+        const walletAddr = localStorage.getItem('hl_wallet_address')||'';
+        if (walletAddr) {
+          try {
+            const data = await hlInfo({type:'openOrders',user:walletAddr});
+            orders = (Array.isArray(data)?data:[]).map(o=>({
+              symbol:    (o.coin||'')+'USDT',
+              side:      o.side==='B'?'buy':'sell',
+              price:     o.limitPx||o.triggerPx||0,
+              size:      o.sz||0,
+              orderType: o.orderType||'limit',
+              orderId:   String(o.oid||''),
+              _hl:       true,
+            }));
+          } catch(e){ console.warn('[HL] fetchOrders:',e.message); }
+        }
+      } else if (isBingx) {
         const data = await bingxRequest('/openApi/swap/v2/trade/openOrders');
         const raw  = Array.isArray(data.data?.orders) ? data.data.orders : [];
         orders = raw.map(o => ({
@@ -4530,11 +4555,17 @@ function roundRect(cx,x,y,w,h,r){
     const isBingx = _activeExchange === 'bingx';
     const isWeex  = _activeExchange === 'weex';
     const isBybit = _activeExchange === 'bybit' || _activeExchange === 'bybit_demo';
+    const isHL    = _activeExchange === 'hyperliquid';
     let ok=0, fail=0;
     for (const p of _positions) {
       const side = (p.holdSide||'long').toLowerCase();
       try {
-        if (isBingx) {
+        if (isHL) {
+          const coin   = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+          const hlMeta = await hlInfo({type:'meta'});
+          const hlIdx  = (hlMeta?.universe||[]).findIndex(a=>a.name===coin);
+          await window._hlRequest({type:'order',orders:[{a:hlIdx>=0?hlIdx:0,b:side!=='long',p:'0',s:String(p.total||0),r:true,t:{market:{}},c:'rf_close_'+Date.now()}],grouping:'na'});
+        } else if (isBingx) {
           const bsym = p._bingxSymbol || toBingxSym(p.symbol);
           await bingxRequest('/openApi/swap/v2/trade/closeAllPositions', {}, {
             method: 'POST',
@@ -4581,8 +4612,14 @@ function roundRect(cx,x,y,w,h,r){
     const isBingx = _activeExchange === 'bingx';
     const isWeex  = _activeExchange === 'weex';
     const isBybit = _activeExchange === 'bybit' || _activeExchange === 'bybit_demo';
+    const isHL    = _activeExchange === 'hyperliquid';
     try {
-      if (isBingx) {
+      if (isHL && orderId) {
+        const coin = (symbol||'').replace(/USDT$/i,'');
+        const hlMeta = await hlInfo({type:'meta'});
+        const hlIdx  = (hlMeta?.universe||[]).findIndex(a=>a.name===coin);
+        await window._hlRequest({type:'cancel',cancels:[{a:hlIdx>=0?hlIdx:0,o:parseInt(orderId)}]});
+      } else if (isBingx) {
         await bingxRequest('/openApi/swap/v2/trade/order', {}, {
           method: 'POST',
           body: JSON.stringify({ symbol: toBingxSym(symbol), orderId: String(orderId) }),
@@ -4746,6 +4783,40 @@ function roundRect(cx,x,y,w,h,r){
             marginMode:   p.tradeMode === 0 ? 'crossed' : 'isolated',
             _bybit: true,
           }));
+      } else if (isHL) {
+        // ── Hyperliquid balance ──
+        const walletAddr = localStorage.getItem('hl_wallet_address')||'';
+        if (!walletAddr) throw new Error('Wallet address non configurato');
+        const balData = await hlInfo({type:'clearinghouseState',user:walletAddr});
+        const ms = balData?.marginSummary||{};
+        equity    = parseFloat(ms.accountValue||0);
+        available = parseFloat(ms.withdrawable||ms.accountValue||0);
+        upnl      = parseFloat(ms.totalUnrealizedPnl||0);
+        margin    = parseFloat(ms.totalMarginUsed||0);
+
+        // ── Hyperliquid positions ──
+        positions = (balData?.assetPositions||[])
+          .filter(ap=>parseFloat(ap?.position?.szi||0)!==0)
+          .map(ap=>{
+            const p=ap.position, szi=parseFloat(p.szi||0), side=szi>0?'long':'short';
+            return {
+              symbol:       p.coin+'USDT',
+              _hlCoin:      p.coin,
+              holdSide:     side,
+              total:        Math.abs(szi),
+              available:    Math.abs(szi),
+              openPriceAvg: parseFloat(p.entryPx||0),
+              markPrice:    parseFloat(p.markPx||0),
+              unrealizedPL: parseFloat(p.unrealizedPnl||0),
+              leverage:     parseFloat(p.leverage?.value||1),
+              liquidationPrice: parseFloat(p.liquidationPx||0),
+              stopLoss:     0,
+              takeProfit:   0,
+              marginMode:   p.leverage?.type==='isolated'?'isolated':'crossed',
+              _hl:          true,
+            };
+          });
+
       } else {
         // ── Bitget balance ──
         const balData = await bitgetRequest('/api/v2/mix/account/accounts', {productType:'USDT-FUTURES'});
@@ -4922,10 +4993,34 @@ function roundRect(cx,x,y,w,h,r){
     const isBingx = _activeExchange === 'bingx';
     const isWeex  = _activeExchange === 'weex';
     const isBybit = _activeExchange === 'bybit' || _activeExchange === 'bybit_demo';
+    const isHL    = _activeExchange === 'hyperliquid';
     try {
       const map = {};
 
-      if (isBingx) {
+      if (isHL) {
+        // HL: SL/TP sono embedded come ordini trigger — li recuperiamo via openOrders
+        const walletAddr = localStorage.getItem('hl_wallet_address')||'';
+        if (walletAddr) {
+          try {
+            const data = await hlInfo({type:'openOrders',user:walletAddr});
+            (Array.isArray(data)?data:[]).forEach(o=>{
+              const coin = o.coin||'';
+              const sym  = coin+'USDT';
+              // tpsl orders hanno o.orderType con tpsl field
+              const tpslType = o.orderType?.trigger?.tpsl;
+              if (!tpslType) return;
+              const side = o.isBuy ? 'short' : 'long'; // reduce-only: isBuy=true chiude short, false chiude long
+              const key  = sym+'_'+side;
+              if (!map[key]) map[key]=[];
+              map[key].push({type:tpslType==='sl'?'sl':'tp', price:parseFloat(o.triggerPx||0), orderId:String(o.oid||''), planType:tpslType, size:parseFloat(o.sz||0)});
+            });
+          } catch(e){ console.warn('[HL TPSL] fetch failed:',e.message); }
+        }
+        positions.forEach((p,idx)=>{
+          const key = (p.symbol||'')+'_'+(p.holdSide||'long').toLowerCase();
+          updatePosSLTPDisplay(idx, map[key]||[], p);
+        });
+      } else if (isBingx) {
         // BingX: SL/TP sono ordini separati di tipo STOP_MARKET / TAKE_PROFIT_MARKET
         // L'endpoint /positions non restituisce più stopLossPrice/takeProfitPrice affidabili,
         // quindi recuperiamo gli ordini aperti e filtriamo per tipo.
