@@ -3112,7 +3112,6 @@ async function executeOrder(){
           s: contractStr,
           r: false,
           t: isMarket ? {market:{}} : {limit:{tif:'Gtc'}},
-          c: _hlCloid('main'),
         }],
         grouping:'na',
       };
@@ -3124,7 +3123,7 @@ async function executeOrder(){
             type:'order',
             orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(sl)),s:contractStr,r:true,
               t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(sl)),tpsl:'sl'}},
-              c:_hlCloid('sl')}],
+            }],
             grouping:'normalTpsl',
           });
         } catch(e){ console.warn('[HL SL]',e.message); }
@@ -3136,7 +3135,7 @@ async function executeOrder(){
             type:'order',
             orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(tpList[0])),s:contractStr,r:true,
               t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(tpList[0])),tpsl:'tp'}},
-              c:_hlCloid('tp')}],
+            }],
             grouping:'normalTpsl',
           });
         } catch(e){ console.warn('[HL TP]',e.message); }
@@ -5322,7 +5321,7 @@ function roundRect(cx,x,y,w,h,r){
         await window._hlRequest({
           type:'order',
           orders:[{a:asset,b:!isBuy,p:tpStr,s:String(parseFloat(p.total||p.available||0)),r:true,
-            t:{trigger:{isMarket:true,triggerPx:tpStr,tpsl:'tp'}},c:_hlCloid('tp')}],
+            t:{trigger:{isMarket:true,triggerPx:tpStr,tpsl:'tp'}}}],
           grouping:'normalTpsl',
         });
         notify(`✓ TP${tpN}#${posIdx+1} impostato a $${fmtPrice(newTP)}`, 'ok');
@@ -5446,7 +5445,7 @@ function roundRect(cx,x,y,w,h,r){
         await window._hlRequest({
           type:'order',
           orders:[{a:asset,b:!isBuy,p:slStr,s:String(parseFloat(p.total||p.available||0)),r:true,
-            t:{trigger:{isMarket:true,triggerPx:slStr,tpsl:'sl'}},c:_hlCloid('sl')}],
+            t:{trigger:{isMarket:true,triggerPx:slStr,tpsl:'sl'}}}],
           grouping:'normalTpsl',
         });
         slpCommitRef(idx, newSL);
@@ -5580,7 +5579,7 @@ function roundRect(cx,x,y,w,h,r){
         await window._hlRequest({
           type:'order',
           orders:[{a:asset,b:!isBuy,p:beStr,s:String(parseFloat(p.total||p.available||0)),r:true,
-            t:{trigger:{isMarket:true,triggerPx:beStr,tpsl:'sl'}},c:_hlCloid('be')}],
+            t:{trigger:{isMarket:true,triggerPx:beStr,tpsl:'sl'}}}],
           grouping:'normalTpsl',
         });
       } else if (isBingx) {
@@ -5778,7 +5777,7 @@ function roundRect(cx,x,y,w,h,r){
                          .toFixed(String(cInfo.sizeMultiplier).split('.')[1]?.length ?? 3);
         await window._hlRequest({
           type:'order',
-          orders:[{a:asset,b:isBuy,p:'0',s:qty,r:true,t:{market:{}},c:_hlCloid('close')}],
+          orders:[{a:asset,b:isBuy,p:'0',s:qty,r:true,t:{market:{}}}],
           grouping:'na',
         });
       } else if (isBingx) {
