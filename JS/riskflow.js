@@ -4787,12 +4787,17 @@ function roundRect(cx,x,y,w,h,r){
         // ── Hyperliquid balance ──
         const walletAddr = localStorage.getItem('hl_wallet_address')||'';
         if (!walletAddr) throw new Error('Wallet address non configurato');
-        const balData = await hlInfo({type:'clearinghouseState',user:walletAddr});
-        const ms = balData?.marginSummary||{};
-        equity    = parseFloat(ms.accountValue||0);
-        available = parseFloat(ms.withdrawable||ms.accountValue||0);
-        upnl      = parseFloat(ms.totalUnrealizedPnl||0);
-        margin    = parseFloat(ms.totalMarginUsed||0);
+        const balData  = await hlInfo({type:'clearinghouseState',user:walletAddr});
+        const ms       = balData?.marginSummary||{};
+        upnl           = parseFloat(ms.totalUnrealizedPnl||0);
+        margin         = parseFloat(ms.totalMarginUsed||0);
+        const spotData = await hlInfo({type:'spotClearinghouseState',user:walletAddr});
+        const usdcBal  = (spotData?.balances||[]).find(b=>b.coin==='USDC')||{};
+        const usdcTotal = parseFloat(usdcBal.total||0);
+        const usdcHold  = parseFloat(usdcBal.hold||0);
+        const perpValue = parseFloat(ms.accountValue||0);
+        equity    = perpValue > 0 ? perpValue : usdcTotal;
+        available = perpValue > 0 ? parseFloat(ms.withdrawable||0) : (usdcTotal - usdcHold);
 
         // ── Hyperliquid positions ──
         positions = (balData?.assetPositions||[])
