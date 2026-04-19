@@ -3137,10 +3137,11 @@ async function executeOrder(){
       // SL
       if (sl && sl>0) {
         try {
+          const slPxStr = String(parseFloat(fmtPrice_(sl)));
           await window._hlRequest({
             type:'order',
-            orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(sl)),s:contractStr,r:true,
-              t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(sl)),tpsl:'sl'}},
+            orders:[{a:asset,b:!isBuy,p:slPxStr,s:contractStr,r:true,
+              t:{trigger:{isMarket:true,triggerPx:slPxStr,tpsl:'sl'}},
             }],
             grouping:'na',
           });
@@ -3149,10 +3150,11 @@ async function executeOrder(){
       // TP
       if (tpList.length>0) {
         try {
+          const tpPxStr = String(parseFloat(fmtPrice_(tpList[0])));
           await window._hlRequest({
             type:'order',
-            orders:[{a:asset,b:!isBuy,p:String(fmtPrice_(tpList[0])),s:contractStr,r:true,
-              t:{trigger:{isMarket:true,triggerPx:String(fmtPrice_(tpList[0])),tpsl:'tp'}},
+            orders:[{a:asset,b:!isBuy,p:tpPxStr,s:contractStr,r:true,
+              t:{trigger:{isMarket:true,triggerPx:tpPxStr,tpsl:'tp'}},
             }],
             grouping:'na',
           });
