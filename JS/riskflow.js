@@ -3170,46 +3170,7 @@ async function executeOrder(){
     }
 
   } else {
-    // ─── BITGET ORDER ───
-    const side      = S.dir==='long' ? 'buy' : 'sell';
-    const tradeSide = 'open';
-    const orderType = S.orderType==='market' ? 'market' : 'limit';
-
-    try {
-      await window._bitgetRequest('/api/v2/mix/account/set-margin-mode',{},{
-        method:'POST',
-        body: JSON.stringify({symbol:S.symbol,productType:'USDT-FUTURES',marginCoin:'USDT',marginMode:S.marginMode})
-      });
-    } catch(e){ console.warn('set-margin-mode error:',e.message); }
-
-    try {
-      await window._bitgetRequest('/api/v2/mix/account/set-leverage',{},{
-        method:'POST',
-        body: JSON.stringify({symbol:S.symbol,productType:'USDT-FUTURES',marginCoin:'USDT',leverage:lev,holdSide:S.dir==='long'?'long':'short'})
-      });
-    } catch(e){ console.warn('set-leverage error:',e.message); }
-
-    try {
-      const orderBody = {
-        symbol: S.symbol, productType:'USDT-FUTURES',
-        marginMode:S.marginMode, marginCoin:'USDT',
-        size:contractStr, side, tradeSide, orderType,
-        ...(orderType==='limit' ? {price: fmtPrice_(entry)} : {}),
-        clientOid:'rf_'+Date.now(),
-      };
-      if (sl)              orderBody.presetStopLossPrice   = fmtPrice_(sl);
-      if (tpList.length>0) orderBody.presetTakeProfitPrice = fmtPrice_(tpList[0]);
-
-      await window._bitgetRequest('/api/v2/mix/order/place-order',{},{method:'POST',body:JSON.stringify(orderBody)});
-      notify('✓ Ordine inviato su Bitget!','ok');
-      clearAll();
-      setTimeout(()=>window.refreshAccount(), 2000);
-    } catch(e){
-      notify('✗ Errore ordine: '+e.message,'err');
-      console.error('executeOrder error:', e);
-    }
-  
-  } else if (isHL) {
+    if (isHL) {
     // ─── HYPERLIQUID ORDER ───
     // Docs: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/exchange-endpoint
     const coin    = S.symbol.replace(/USDT$/i, '');
@@ -3298,6 +3259,47 @@ async function executeOrder(){
       console.error('[HL ORDER] errore:', e);
     }
 
+      } else {
+    // ─── BITGET ORDER ───
+    const side      = S.dir==='long' ? 'buy' : 'sell';
+    const tradeSide = 'open';
+    const orderType = S.orderType==='market' ? 'market' : 'limit';
+
+    try {
+      await window._bitgetRequest('/api/v2/mix/account/set-margin-mode',{},{
+        method:'POST',
+        body: JSON.stringify({symbol:S.symbol,productType:'USDT-FUTURES',marginCoin:'USDT',marginMode:S.marginMode})
+      });
+    } catch(e){ console.warn('set-margin-mode error:',e.message); }
+
+    try {
+      await window._bitgetRequest('/api/v2/mix/account/set-leverage',{},{
+        method:'POST',
+        body: JSON.stringify({symbol:S.symbol,productType:'USDT-FUTURES',marginCoin:'USDT',leverage:lev,holdSide:S.dir==='long'?'long':'short'})
+      });
+    } catch(e){ console.warn('set-leverage error:',e.message); }
+
+    try {
+      const orderBody = {
+        symbol: S.symbol, productType:'USDT-FUTURES',
+        marginMode:S.marginMode, marginCoin:'USDT',
+        size:contractStr, side, tradeSide, orderType,
+        ...(orderType==='limit' ? {price: fmtPrice_(entry)} : {}),
+        clientOid:'rf_'+Date.now(),
+      };
+      if (sl)              orderBody.presetStopLossPrice   = fmtPrice_(sl);
+      if (tpList.length>0) orderBody.presetTakeProfitPrice = fmtPrice_(tpList[0]);
+
+      await window._bitgetRequest('/api/v2/mix/order/place-order',{},{method:'POST',body:JSON.stringify(orderBody)});
+      notify('✓ Ordine inviato su Bitget!','ok');
+      clearAll();
+      setTimeout(()=>window.refreshAccount(), 2000);
+    } catch(e){
+      notify('✗ Errore ordine: '+e.message,'err');
+      console.error('executeOrder error:', e);
+    }
+  
+    }
   }
 }
 document.getElementById('modalBg').addEventListener('click',e=>{ if(e.target===document.getElementById('modalBg')) closeModal(); });
