@@ -3134,6 +3134,8 @@ async function executeOrder(){
         grouping:'na',
       };
       await window._hlRequest(orderAction);
+      // Aspetta che la posizione sia registrata su HL prima di piazzare SL/TP
+      await new Promise(r => setTimeout(r, 1500));
       // SL
       if (sl && sl>0) {
         try {
@@ -4598,10 +4600,17 @@ function roundRect(cx,x,y,w,h,r){
       const side = (p.holdSide||'long').toLowerCase();
       try {
         if (isHL) {
-          const coin   = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
-          const hlMeta = await hlInfo({type:'meta'});
-          const hlIdx  = (hlMeta?.universe||[]).findIndex(a=>a.name===coin);
-          await window._hlRequest({type:'order',orders:[{a:hlIdx>=0?hlIdx:0,b:side!=='long',p:'0',s:String(p.total||0),r:true,t:{market:{}},c:'rf_close_'+Date.now()}],grouping:'na'});
+          const coin    = p._hlCoin || (p.symbol||'').replace(/USDT$/i,'');
+          const hlMeta  = await hlInfo({type:'meta'});
+          const asset   = Math.max(0,(hlMeta?.universe||[]).findIndex(a=>a.name===coin));
+          const isBuy   = side !== 'long';
+          const allMids = await hlInfo({type:'allMids'});
+          const mid     = parseFloat(allMids?.[coin]||0);
+          const rawPx   = isBuy ? mid*(1.05) : mid*(0.95);
+          const mag     = Math.floor(Math.log10(Math.abs(rawPx)));
+          const px      = String(Math.round(rawPx * Math.pow(10,4-mag)) / Math.pow(10,4-mag));
+          const sz      = String(parseFloat(p.total||p.available||0));
+          await window._hlRequest({type:'order',orders:[{a:asset,b:isBuy,p:px,s:sz,r:true,t:{limit:{tif:'Ioc'}}}],grouping:'na'});
         } else if (isBingx) {
           const bsym = p._bingxSymbol || toBingxSym(p.symbol);
           await bingxRequest('/openApi/swap/v2/trade/closeAllPositions', {}, {
