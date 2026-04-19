@@ -4216,7 +4216,7 @@ function roundRect(cx,x,y,w,h,r){
     if (ex === 'bybit' || ex === 'bybit_demo') return { k:'bybit_api_key', s:'bybit_api_secret', p:null };
     if (ex === 'weex')  return { k:'weex_api_key',  s:'weex_api_secret',  p:'weex_api_passphrase' };
     if (ex === 'bingx') return { k:'bingx_api_key', s:'bingx_api_secret', p:null };
-    if (ex === 'hyperliquid') return { k:'hl_api_key', s:'hl_wallet_address', p:null };
+    if (ex === 'hyperliquid') return { k:'hl_private_key', s:'hl_wallet_address', p:null };
     return { k:'bitget_api_key', s:'bitget_api_secret', p:'bitget_api_passphrase' };
   }
   async function saveKeysToFirestore(uid, apiKey, secret, passphrase, exchange) {
@@ -4280,7 +4280,11 @@ function roundRect(cx,x,y,w,h,r){
   }
   // Restituisce le chiavi dell'exchange attivo
   function loadHyperliquidKeys() {
-    return {apiKey:localStorage.getItem('hl_api_key')||'',secret:localStorage.getItem('hl_wallet_address')||''};
+    return {
+      apiKey:     localStorage.getItem('hl_private_key')||'',
+      secret:     localStorage.getItem('hl_wallet_address')||'',
+      agentWallet:localStorage.getItem('hl_agent_wallet')||'',
+    };
   }
   function loadActiveKeys() {
     const ex = _activeExchange||'bitget';
@@ -4412,11 +4416,11 @@ function roundRect(cx,x,y,w,h,r){
 
   // ── HYPERLIQUID REQUEST via Proxy ──
   async function hyperliquidRequest(action, _params={}, _options={}) {
-    const {apiKey:privateKey, secret:walletAddr} = loadHyperliquidKeys();
-    if (!privateKey||!walletAddr) throw new Error('Chiavi Hyperliquid non configurate');
+    const {apiKey:privateKey, secret:mainWallet, agentWallet} = loadHyperliquidKeys();
+    if (!privateKey||!mainWallet) throw new Error('Chiavi Hyperliquid non configurate');
     const res = await fetch(HL_PROXY+'/exchange',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-hl-key':privateKey,'x-hl-wallet':walletAddr},
+      headers:{'Content-Type':'application/json','x-hl-key':privateKey,'x-hl-wallet':mainWallet,'x-hl-agent':agentWallet||''},
       body:JSON.stringify({action,nonce:Date.now(),vaultAddress:null}),
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -5998,12 +6002,21 @@ function roundRect(cx,x,y,w,h,r){
       const btn = document.getElementById(idMap[e]);
       if(btn) btn.classList.toggle('active', e === ex);
     });
-    const passRow   = document.getElementById('apiPassRow');
-    const walletRow = document.getElementById('apiWalletRow');
-    if(passRow)   passRow.style.display   = (ex==='bitget'||ex==='weex') ? '' : 'none';
-    if(walletRow) walletRow.style.display = ex==='hyperliquid' ? '' : 'none';
+    const isHL = ex === 'hyperliquid';
+    const passRow      = document.getElementById('apiPassRow');
+    const walletRow    = document.getElementById('apiWalletRow');
+    const agentRow     = document.getElementById('apiAgentRow');
+    const privKeyRow   = document.getElementById('apiPrivKeyRow');
+    const secretRow    = document.getElementById('apiSecretInput')?.closest('.field-group');
+    const keyLabel     = document.getElementById('apiKeyLabel');
+    if(passRow)    passRow.style.display    = (ex==='bitget'||ex==='weex') ? '' : 'none';
+    if(walletRow)  walletRow.style.display  = isHL ? '' : 'none';
+    if(agentRow)   agentRow.style.display   = isHL ? '' : 'none';
+    if(privKeyRow) privKeyRow.style.display = isHL ? '' : 'none';
+    if(secretRow)  secretRow.style.display  = isHL ? 'none' : '';
+    if(keyLabel)   keyLabel.textContent     = isHL ? 'API Key (opzionale)' : 'API Key';
     const keyInput = document.getElementById('apiKeyInput');
-    if(keyInput) keyInput.placeholder = ex==='weex' ? 'la tua API key Weex' : ex==='bingx' ? 'la tua API key BingX' : ex==='bitget' ? 'la tua API key Bitget' : ex==='hyperliquid' ? 'API Wallet private key (0x...)' : 'la tua API key Bybit';
+    if(keyInput) keyInput.placeholder = ex==='weex' ? 'la tua API key Weex' : ex==='bingx' ? 'la tua API key BingX' : ex==='bitget' ? 'la tua API key Bitget' : isHL ? '(non necessario per HL)' : 'la tua API key Bybit';
   };
 
   // ── API KEYS UI ──
@@ -6019,13 +6032,19 @@ function roundRect(cx,x,y,w,h,r){
     if(walletRowL) walletRowL.style.display = isHL ? '' : 'none';
     const passRowL = document.getElementById('apiPassRow');
     if(passRowL) passRowL.style.display = (ex==='bitget'||ex==='weex') ? '' : 'none';
-    const lsKey = _lsKeysFor(ex).k;
+    const lsKey = isHL ? 'hl_private_key' : _lsKeysFor(ex).k;
     const localKey = localStorage.getItem(lsKey);
     if (localKey) {
-      document.getElementById('apiKeyInput').value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-      document.getElementById('apiSecretInput').value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-      if (isWeex) document.getElementById('apiPassInput').value = localStorage.getItem('weex_api_passphrase') ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : '';
-      else if (!isBybit && !isBingx) document.getElementById('apiPassInput').value = localStorage.getItem('bitget_api_passphrase') ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : '';
+      if (isHL) {
+        document.getElementById('apiPrivKeyInput').value  = localStorage.getItem('hl_private_key')    ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : '';
+        document.getElementById('apiAgentInput').value   = localStorage.getItem('hl_agent_wallet')   || '';
+        document.getElementById('apiWalletInput').value  = localStorage.getItem('hl_wallet_address') || '';
+      } else {
+        document.getElementById('apiKeyInput').value    = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+        document.getElementById('apiSecretInput').value = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+        if (isWeex) document.getElementById('apiPassInput').value = localStorage.getItem('weex_api_passphrase') ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : '';
+        else if (!isBybit && !isBingx) document.getElementById('apiPassInput').value = localStorage.getItem('bitget_api_passphrase') ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : '';
+      }
       if (statusEl) { statusEl.textContent='\u2713 API keys caricate'; statusEl.className='api-status ok'; }
     } else {
       if (statusEl) { statusEl.textContent='Nessuna API key salvata per ' + ex; statusEl.className='api-status err'; }
@@ -6042,10 +6061,15 @@ function roundRect(cx,x,y,w,h,r){
     const isBingx = ex === 'bingx';
     const isBybit = ex === 'bybit' || ex === 'bybit_demo';
     const isHL    = ex === 'hyperliquid';
-    const walletVal = document.getElementById('apiWalletInput')?.value?.trim()||'';
-    if (!k) { if(statusEl){statusEl.textContent='API Key obbligatoria';statusEl.className='api-status err';} return; }
-    if (!isHL&&!s) { if(statusEl){statusEl.textContent='Secret Key obbligatorio';statusEl.className='api-status err';} return; }
-    if (isHL&&!walletVal) { if(statusEl){statusEl.textContent='Wallet Address obbligatorio';statusEl.className='api-status err';} return; }
+    const walletVal  = document.getElementById('apiWalletInput')?.value?.trim()||'';
+    const agentVal   = document.getElementById('apiAgentInput')?.value?.trim()||'';
+    const privKeyVal = document.getElementById('apiPrivKeyInput')?.value?.trim()||'';
+
+    if (!isHL && !k) { if(statusEl){statusEl.textContent='API Key obbligatoria';statusEl.className='api-status err';} return; }
+    if (!isHL && !s) { if(statusEl){statusEl.textContent='Secret Key obbligatorio';statusEl.className='api-status err';} return; }
+    if (isHL && !walletVal)  { if(statusEl){statusEl.textContent='Main Wallet Address obbligatorio';statusEl.className='api-status err';} return; }
+    if (isHL && !agentVal)   { if(statusEl){statusEl.textContent='Agent Wallet Address obbligatorio';statusEl.className='api-status err';} return; }
+    if (isHL && !privKeyVal) { if(statusEl){statusEl.textContent='Private Key obbligatoria';statusEl.className='api-status err';} return; }
 
     const lsKeys = _lsKeysFor(ex);
     const lsKey    = lsKeys.k;
@@ -6055,10 +6079,19 @@ function roundRect(cx,x,y,w,h,r){
     const finalS = s.includes('•') ? localStorage.getItem(lsSecret)||s : s;
     const finalP = lsPass && p.includes('•') ? localStorage.getItem(lsPass)||p : p;
 
-    localStorage.setItem(lsKey, finalK);
-    if (!isHL) localStorage.setItem(lsSecret, finalS);
-    if (isHL && walletVal) localStorage.setItem('hl_wallet_address', walletVal);
-    if (lsPass && finalP) localStorage.setItem(lsPass, finalP);
+    if (isHL) {
+      // Salva i 3 campi HL separati
+      const finalPrivKey = privKeyVal.includes('•') ? localStorage.getItem('hl_private_key')||privKeyVal : privKeyVal;
+      const finalAgent   = agentVal.includes('•')   ? localStorage.getItem('hl_agent_wallet')||agentVal  : agentVal;
+      const finalWallet  = walletVal.includes('•')  ? localStorage.getItem('hl_wallet_address')||walletVal : walletVal;
+      localStorage.setItem('hl_private_key',    finalPrivKey);
+      localStorage.setItem('hl_agent_wallet',   finalAgent);
+      localStorage.setItem('hl_wallet_address', finalWallet);
+    } else {
+      localStorage.setItem(lsKey, finalK);
+      localStorage.setItem(lsSecret, finalS);
+      if (lsPass && finalP) localStorage.setItem(lsPass, finalP);
+    }
     localStorage.setItem('rf_exchange', ex);
     document.getElementById('apiModal').classList.remove('open');
     notify('API keys salvate ✓','ok');
@@ -6075,8 +6108,14 @@ function roundRect(cx,x,y,w,h,r){
     localStorage.removeItem(lsKeys.k);
     localStorage.removeItem(lsKeys.s);
     if (lsKeys.p) localStorage.removeItem(lsKeys.p);
-    if (ex==='hyperliquid') localStorage.removeItem('hl_wallet_address');
-    const wEl=document.getElementById('apiWalletInput'); if(wEl) wEl.value='';
+    if (ex==='hyperliquid') {
+      localStorage.removeItem('hl_wallet_address');
+      localStorage.removeItem('hl_agent_wallet');
+      localStorage.removeItem('hl_private_key');
+      const wEl=document.getElementById('apiWalletInput'); if(wEl) wEl.value='';
+      const aEl=document.getElementById('apiAgentInput');  if(aEl) aEl.value='';
+      const pEl=document.getElementById('apiPrivKeyInput');if(pEl) pEl.value='';
+    }
     document.getElementById('apiKeyInput').value='';
     document.getElementById('apiSecretInput').value='';
     document.getElementById('apiPassInput').value='';
