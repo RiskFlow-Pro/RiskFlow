@@ -528,15 +528,20 @@ code.inline { background:var(--surface3);padding:1px 6px;border-radius:3px;font-
 
 /* ── FOOTER ── */
 footer {
-  border-top: 1px solid var(--border); padding: 28px 80px;
-  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border); padding: 36px 80px;
   max-width: var(--max-w); margin: 0 auto;
+  display: flex; flex-direction: column; gap: 24px;
 }
-.footer-logo { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 15px; color: var(--accent); }
+.footer-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-logo { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 15px; color: var(--accent); text-decoration: none; }
 .footer-logo em { color: var(--muted); font-style: normal; font-weight: 400; }
-.footer-links { display: flex; gap: 24px; list-style: none; }
+.footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; align-items: center; }
 .footer-links a { font-size: 10px; color: var(--muted2); text-decoration: none; transition: color 0.15s; }
 .footer-links a:hover { color: var(--text); }
+.footer-socials { display: flex; gap: 10px; align-items: center; }
+.footer-social-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted2); text-decoration: none; transition: all 0.15s; }
+.footer-social-btn:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); }
 .footer-copy { font-size: 9.5px; color: var(--muted); }
 
 /* ── ANIMATIONS / SCROLL ── */
@@ -568,9 +573,7 @@ footer {
     Risk<em>Flow</em>
   </a>
   <ul class="nav-links">
-    <li><a href="#">Features</a></li>
-    <li><a href="#">Risk Tools</a></li>
-    <li><a href="#">Docs</a></li>
+    <li><a href="riskflowdocs.html">Docs</a></li>
     <li><a href="terminal.html" class="nav-cta">Open Terminal →</a></li>
   </ul>
 </nav>
@@ -902,21 +905,30 @@ footer {
 </section>
 
 <footer>
-  <span class="footer-logo">Risk<em>Flow</em></span>
-  <ul class="footer-links">
-    <li><a href="#">Changelog</a></li>
-    <li><a href="riskflowdocs.html">Docs</a></li>
-    <li><a href="#">Discord</a></li>
-    <li><a href="#">Twitter/X</a></li>
-    <li><a href="terminal.html">App</a></li>
-  </ul>
-  <ul class="footer-links" style="margin-top:0">
-    <li><a href="privacy.html">Privacy Policy</a></li>
-    <li><a href="terms.html">Termini di Servizio</a></li>
-    <li><a href="cookies.html">Cookie Policy</a></li>
-    <li><a href="#" onclick="rfOpenCookieModal();return false;">Gestisci Cookie</a></li>
-  </ul>
-  <span class="footer-copy">© 2026 RiskFlow — Beta · Nessun Analytics · Solo cookie necessari per default</span>
+  <div class="footer-top">
+    <a href="index.html" class="footer-logo">Risk<em>Flow</em></a>
+    <ul class="footer-links">
+      <li><a href="riskflowdocs.html">Docs</a></li>
+      <li><a href="terminal.html">Terminal</a></li>
+    </ul>
+    <div class="footer-socials">
+      <a href="#" class="footer-social-btn" title="Discord">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.032.054a19.9 19.9 0 0 0 5.993 3.03.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      </a>
+      <a href="#" class="footer-social-btn" title="X / Twitter">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy Policy</a></li>
+      <li><a href="terms.html">Termini di Servizio</a></li>
+      <li><a href="cookies.html">Cookie Policy</a></li>
+      <li><a href="#" onclick="rfOpenCookieModal();return false;">Gestisci Cookie</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 RiskFlow — Beta</span>
+  </div>
 </footer>
 
 <script src="JS/gdpr.js"></script>
