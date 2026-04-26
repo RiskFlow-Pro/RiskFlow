@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — RiskFlow</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#07070a;--surface:#0d0d11;--surface2:#121218;--surface3:#18181f;
+    --border:#1a1a22;--border2:#252530;--text:#dddde8;--muted:#3a3a48;--muted2:#686878;
+    --accent:#a855f7;--accent2:#9333ea;--red:#ff2d4a;--green:#00d17a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.7}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* HEADER */
+  .doc-header {
+    position: sticky;top:0;z-index:100;
+    background:rgba(7,7,10,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .doc-logo { font-family:'Syne',sans-serif;font-weight:800;font-size:17px;text-decoration:none }
+  .doc-logo span { color:#fff }
+  .doc-logo em { color:var(--accent);font-style:normal }
+  .doc-back { font-size:11px;color:var(--muted2);text-decoration:none;transition:color .15s }
+  .doc-back:hover { color:var(--text);text-decoration:none }
+  .doc-badge { font-size:9px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);letter-spacing:.05em;text-transform:uppercase }
+
+  /* LAYOUT */
+  .doc-layout { max-width:760px;margin:0 auto;padding:48px 32px 80px }
+  .doc-eyebrow { font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px }
+  .doc-title { font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#fff;margin-bottom:6px;line-height:1.2 }
+  .doc-meta { font-size:10px;color:var(--muted2);margin-bottom:40px }
+  .doc-meta span { color:var(--muted);margin:0 6px }
+
+  /* TOC */
+  .doc-toc { background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:40px }
+  .doc-toc-title { font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px }
+  .doc-toc ol { padding-left:16px;display:flex;flex-direction:column;gap:6px }
+  .doc-toc a { font-size:12px;color:var(--muted2) }
+  .doc-toc a:hover { color:var(--accent) }
+
+  /* CONTENT */
+  .doc-section { margin-bottom:40px }
+  .doc-section h2 { font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:14px;padding-top:8px;border-top:1px solid var(--border) }
+  .doc-section p { margin-bottom:12px;color:#b0b0bf;font-size:12.5px }
+  .doc-section ul, .doc-section ol { padding-left:18px;margin-bottom:12px;display:flex;flex-direction:column;gap:6px }
+  .doc-section li { color:#b0b0bf;font-size:12.5px }
+  .doc-section strong { color:var(--text) }
+  .doc-section .highlight { background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px 16px;margin:12px 0;font-size:12px;color:var(--muted2) }
+  .doc-section .highlight strong { color:var(--accent) }
+
+  /* TABLE */
+  .doc-table { width:100%;border-collapse:collapse;margin:16px 0;font-size:11.5px }
+  .doc-table th { text-align:left;padding:8px 12px;background:var(--surface2);color:var(--muted2);font-weight:500;border-bottom:1px solid var(--border) }
+  .doc-table td { padding:8px 12px;border-bottom:1px solid var(--border);color:#b0b0bf;vertical-align:top }
+  .doc-table tr:last-child td { border-bottom:none }
+
+  /* FOOTER */
+  .doc-footer { border-top:1px solid var(--border);padding:32px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between }
+  .doc-footer-links { display:flex;gap:20px;flex-wrap:wrap }
+  .doc-footer-links a { font-size:10px;color:var(--muted2) }
+  .doc-footer-links a:hover { color:var(--text) }
+  .doc-footer-copy { font-size:10px;color:var(--muted) }
+
+  @media(max-width:600px){
+    .doc-layout{padding:32px 20px 60px}
+    .doc-header{padding:12px 20px}
+    .doc-title{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <a class="doc-logo" href="terminal.html"><span>Risk</span><em>Flow</em></a>
+  <span class="doc-badge">Legal</span>
+  <a class="doc-back" href="terminal.html">← Torna all'app</a>
+</header>
+
+<main class="doc-layout">
+  <div class="doc-eyebrow">Documento legale</div>
+  <h1 class="doc-title">Privacy Policy</h1>
+  <div class="doc-meta">
+    Versione 1.0 <span>|</span> Ultimo aggiornamento: Aprile 2026 <span>|</span> Applicabile a riskflow.pro
+  </div>
+
+  <div class="doc-toc">
+    <div class="doc-toc-title">Indice</div>
+    <ol>
+      <li><a href="#titolare">Titolare del trattamento</a></li>
+      <li><a href="#dati">Dati raccolti</a></li>
+      <li><a href="#finalita">Finalità e base giuridica</a></li>
+      <li><a href="#terzi">Servizi di terze parti</a></li>
+      <li><a href="#conservazione">Conservazione dei dati</a></li>
+      <li><a href="#diritti">I tuoi diritti (GDPR)</a></li>
+      <li><a href="#sicurezza">Sicurezza</a></li>
+      <li><a href="#minori">Minori</a></li>
+      <li><a href="#modifiche">Modifiche alla policy</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+    </ol>
+  </div>
+
+  <div class="doc-section" id="titolare">
+    <h2>1. Titolare del trattamento</h2>
+    <p>Il titolare del trattamento dei dati personali è <strong>RiskFlow</strong>, raggiungibile all'indirizzo <a href="https://riskflow.pro">riskflow.pro</a>.</p>
+    <p>Per qualsiasi richiesta relativa ai tuoi dati personali puoi contattarci all'indirizzo email indicato nella sezione <a href="#contatti">Contatti</a>.</p>
+  </div>
+
+  <div class="doc-section" id="dati">
+    <h2>2. Dati raccolti</h2>
+    <p>RiskFlow raccoglie esclusivamente i dati necessari per il funzionamento del servizio:</p>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Categoria</th><th>Dati</th><th>Quando</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Account</strong></td>
+          <td>Email, username, password (hash), data di registrazione</td>
+          <td>Registrazione</td>
+        </tr>
+        <tr>
+          <td><strong>Profilo Google</strong></td>
+          <td>Email Google, nome display (solo se usi "Accedi con Google")</td>
+          <td>Login Google</td>
+        </tr>
+        <tr>
+          <td><strong>Dati di trading</strong></td>
+          <td>Impostazioni di trading, configurazione pair, parametri di rischio</td>
+          <td>Utilizzo dell'app</td>
+        </tr>
+        <tr>
+          <td><strong>API Keys exchange</strong></td>
+          <td>Chiavi API degli exchange collegati (Bitget, Bybit, Weex, BingX)</td>
+          <td>Configurazione exchange</td>
+        </tr>
+        <tr>
+          <td><strong>Consensi</strong></td>
+          <td>Accettazione Privacy Policy, Termini di Servizio, marketing (sì/no), timestamp, versione documento</td>
+          <td>Registrazione / Banner cookie</td>
+        </tr>
+        <tr>
+          <td><strong>Dati tecnici</strong></td>
+          <td>Log di errore Firebase (anonimi), tipo di browser (non memorizzato)</td>
+          <td>Automatico</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="highlight">
+      <strong>Nessun Analytics di terze parti.</strong> RiskFlow non utilizza Google Analytics, Meta Pixel, o sistemi di tracciamento pubblicitario. L'unico servizio backend è Firebase (Google LLC), usato per autenticazione e database.
+    </div>
+  </div>
+
+  <div class="doc-section" id="finalita">
+    <h2>3. Finalità e base giuridica</h2>
+    <table class="doc-table">
+      <thead>
+        <tr><th>Finalità</th><th>Base giuridica</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Creazione e gestione dell'account</td>
+          <td>Esecuzione del contratto (Art. 6(1)(b) GDPR)</td>
+        </tr>
+        <tr>
+          <td>Autenticazione e sicurezza</td>
+          <td>Interesse legittimo (Art. 6(1)(f) GDPR)</td>
+        </tr>
+        <tr>
+          <td>Funzionamento dell'app e salvataggio impostazioni</td>
+          <td>Esecuzione del contratto</td>
+        </tr>
+        <tr>
+          <td>Connessione agli exchange tramite API</td>
+          <td>Consenso esplicito dell'utente + esecuzione del contratto</td>
+        </tr>
+        <tr>
+          <td>Comunicazioni di servizio (es. reset password)</td>
+          <td>Esecuzione del contratto</td>
+        </tr>
+        <tr>
+          <td>Comunicazioni marketing</td>
+          <td>Consenso (Art. 6(1)(a) GDPR) — opzionale, revocabile</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="doc-section" id="terzi">
+    <h2>4. Servizi di terze parti</h2>
+    <p>RiskFlow utilizza i seguenti servizi di terze parti:</p>
+    <ul>
+      <li><strong>Firebase / Google LLC</strong> — Autenticazione utenti e database Firestore. Dati trattati: email, UID utente, dati profilo. Firebase è certificato GDPR-compliant. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Privacy Firebase →</a></li>
+      <li><strong>Proxy exchange (Bitget, Bybit, Weex, BingX)</strong> — Le richieste verso gli exchange avvengono tramite proxy server di RiskFlow. Le API Keys sono cifrate e non vengono mai condivise con terze parti non necessarie.</li>
+      <li><strong>Google Fonts</strong> — Caricamento font tipografici. Google può raccogliere dati tecnici minimi (IP). <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener">Privacy Google Fonts →</a></li>
+    </ul>
+    <p>Non vendiamo, affittiamo o condividiamo i tuoi dati personali con terze parti per scopi pubblicitari.</p>
+  </div>
+
+  <div class="doc-section" id="conservazione">
+    <h2>5. Conservazione dei dati</h2>
+    <ul>
+      <li><strong>Account e profilo:</strong> conservati fino alla cancellazione dell'account da parte dell'utente.</li>
+      <li><strong>API Keys:</strong> conservate fino alla cancellazione esplicita da parte dell'utente nell'app.</li>
+      <li><strong>Consensi:</strong> conservati per tutta la durata del rapporto contrattuale e per i successivi 5 anni (obbligo di accountability GDPR).</li>
+      <li><strong>Log di errore:</strong> massimo 90 giorni.</li>
+    </ul>
+  </div>
+
+  <div class="doc-section" id="diritti">
+    <h2>6. I tuoi diritti (GDPR)</h2>
+    <p>In qualità di interessato, hai i seguenti diritti ai sensi del Regolamento UE 2016/679:</p>
+    <ul>
+      <li><strong>Accesso</strong> — richiedere una copia dei tuoi dati personali</li>
+      <li><strong>Rettifica</strong> — correggere dati inesatti o incompleti</li>
+      <li><strong>Cancellazione</strong> — richiedere la cancellazione del tuo account e di tutti i dati associati ("diritto all'oblio")</li>
+      <li><strong>Limitazione</strong> — richiedere la limitazione del trattamento in determinate circostanze</li>
+      <li><strong>Portabilità</strong> — ricevere i tuoi dati in formato strutturato e leggibile</li>
+      <li><strong>Opposizione</strong> — opporti al trattamento basato su interesse legittimo</li>
+      <li><strong>Revoca del consenso</strong> — revocare in qualsiasi momento i consensi facoltativi (es. marketing) senza pregiudizio per il passato</li>
+    </ul>
+    <p>Per esercitare questi diritti, contattaci tramite i riferimenti indicati nella sezione <a href="#contatti">Contatti</a>. Risponderemo entro 30 giorni.</p>
+    <p>Hai inoltre il diritto di proporre reclamo all'autorità di controllo competente. Per l'Italia: <strong>Garante per la protezione dei dati personali</strong> — <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>.</p>
+  </div>
+
+  <div class="doc-section" id="sicurezza">
+    <h2>7. Sicurezza</h2>
+    <p>Adottiamo misure tecniche e organizzative adeguate per proteggere i tuoi dati, tra cui:</p>
+    <ul>
+      <li>Trasmissione dati esclusivamente tramite HTTPS/TLS</li>
+      <li>Password memorizzate esclusivamente in forma hash (gestito da Firebase Authentication)</li>
+      <li>Accesso ai dati Firestore limitato all'utente autenticato tramite Security Rules</li>
+      <li>Le API Keys degli exchange sono accessibili solo all'utente proprietario</li>
+    </ul>
+    <p>Nessun sistema di sicurezza è infallibile. In caso di violazione dei dati che possa comportare rischi per i tuoi diritti, ti notificheremo tempestivamente.</p>
+  </div>
+
+  <div class="doc-section" id="minori">
+    <h2>8. Minori</h2>
+    <p>RiskFlow è un servizio rivolto a utenti adulti. <strong>Non raccogliamo consapevolmente dati di persone di età inferiore a 18 anni.</strong> Se ritieni che un minore abbia creato un account, contattaci e provvederemo alla cancellazione immediata.</p>
+  </div>
+
+  <div class="doc-section" id="modifiche">
+    <h2>9. Modifiche alla Policy</h2>
+    <p>Potremmo aggiornare questa Privacy Policy periodicamente. In caso di modifiche sostanziali, ti informeremo tramite email o mediante un avviso prominente nell'app. La data dell'ultimo aggiornamento è sempre indicata in cima al documento. Il consenso verrà richiesto nuovamente se necessario.</p>
+  </div>
+
+  <div class="doc-section" id="contatti">
+    <h2>10. Contatti</h2>
+    <p>Per qualsiasi domanda relativa a questa Privacy Policy o al trattamento dei tuoi dati personali, puoi contattarci a:</p>
+    <div class="highlight">
+      <strong>RiskFlow</strong><br>
+      Sito web: <a href="https://riskflow.pro">riskflow.pro</a><br>
+      Email: <a href="mailto:riskflow@proton.me">riskflow@proton.me</a>
+    </div>
+  </div>
+</main>
+
+<footer class="doc-footer">
+  <span class="doc-footer-copy">© 2026 RiskFlow — Beta. Tutti i diritti riservati.</span>
+  <nav class="doc-footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Termini di Servizio</a>
+    <a href="cookies.html">Cookie Policy</a>
+    <a href="riskflowdocs.html">Documentazione</a>
+    <a href="terminal.html">App</a>
+  </nav>
+</footer>
+
+</body>
+</html>

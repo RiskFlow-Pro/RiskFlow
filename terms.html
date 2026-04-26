@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termini di Servizio — RiskFlow</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#07070a;--surface:#0d0d11;--surface2:#121218;--surface3:#18181f;
+    --border:#1a1a22;--border2:#252530;--text:#dddde8;--muted:#3a3a48;--muted2:#686878;
+    --accent:#a855f7;--accent2:#9333ea;--red:#ff2d4a;--green:#00d17a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.7}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .doc-header {
+    position:sticky;top:0;z-index:100;
+    background:rgba(7,7,10,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .doc-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;text-decoration:none}
+  .doc-logo span{color:#fff}
+  .doc-logo em{color:var(--accent);font-style:normal}
+  .doc-back{font-size:11px;color:var(--muted2);text-decoration:none;transition:color .15s}
+  .doc-back:hover{color:var(--text);text-decoration:none}
+  .doc-badge{font-size:9px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);letter-spacing:.05em;text-transform:uppercase}
+  .doc-layout{max-width:760px;margin:0 auto;padding:48px 32px 80px}
+  .doc-eyebrow{font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+  .doc-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#fff;margin-bottom:6px;line-height:1.2}
+  .doc-meta{font-size:10px;color:var(--muted2);margin-bottom:40px}
+  .doc-meta span{color:var(--muted);margin:0 6px}
+  .doc-toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:40px}
+  .doc-toc-title{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+  .doc-toc ol{padding-left:16px;display:flex;flex-direction:column;gap:6px}
+  .doc-toc a{font-size:12px;color:var(--muted2)}
+  .doc-toc a:hover{color:var(--accent)}
+  .doc-section{margin-bottom:40px}
+  .doc-section h2{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:14px;padding-top:8px;border-top:1px solid var(--border)}
+  .doc-section p{margin-bottom:12px;color:#b0b0bf;font-size:12.5px}
+  .doc-section ul,.doc-section ol{padding-left:18px;margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
+  .doc-section li{color:#b0b0bf;font-size:12.5px}
+  .doc-section strong{color:var(--text)}
+  .doc-section .highlight{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px 16px;margin:12px 0;font-size:12px;color:var(--muted2)}
+  .doc-section .highlight strong{color:var(--accent)}
+  .warning-box{background:rgba(255,45,74,.06);border:1px solid rgba(255,45,74,.2);border-radius:6px;padding:14px 18px;margin:16px 0}
+  .warning-box p{color:#e0606e!important;font-size:12px!important;margin:0!important}
+  .warning-box strong{color:var(--red)!important}
+  .doc-footer{border-top:1px solid var(--border);padding:32px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .doc-footer-links{display:flex;gap:20px;flex-wrap:wrap}
+  .doc-footer-links a{font-size:10px;color:var(--muted2)}
+  .doc-footer-links a:hover{color:var(--text)}
+  .doc-footer-copy{font-size:10px;color:var(--muted)}
+  @media(max-width:600px){.doc-layout{padding:32px 20px 60px}.doc-header{padding:12px 20px}.doc-title{font-size:22px}}
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <a class="doc-logo" href="terminal.html"><span>Risk</span><em>Flow</em></a>
+  <span class="doc-badge">Legal</span>
+  <a class="doc-back" href="terminal.html">← Torna all'app</a>
+</header>
+
+<main class="doc-layout">
+  <div class="doc-eyebrow">Documento legale</div>
+  <h1 class="doc-title">Termini di Servizio</h1>
+  <div class="doc-meta">
+    Versione 1.0 <span>|</span> Ultimo aggiornamento: Aprile 2026 <span>|</span> Applicabile a riskflow.pro
+  </div>
+
+  <div class="warning-box">
+    <p><strong>⚠ Disclaimer finanziario importante.</strong> RiskFlow è uno strumento di supporto per il position sizing e la gestione del rischio. Non costituisce consulenza finanziaria, di investimento o di trading. L'utilizzo di leva finanziaria e il trading di criptovalute comporta rischi significativi di perdita del capitale. L'utente è l'unico responsabile delle proprie decisioni di trading.</p>
+  </div>
+
+  <div class="doc-toc">
+    <div class="doc-toc-title">Indice</div>
+    <ol>
+      <li><a href="#accettazione">Accettazione dei termini</a></li>
+      <li><a href="#servizio">Descrizione del servizio</a></li>
+      <li><a href="#account">Account utente</a></li>
+      <li><a href="#api-keys">API Keys e integrazione exchange</a></li>
+      <li><a href="#uso-consentito">Uso consentito e vietato</a></li>
+      <li><a href="#disclaimer">Disclaimer e limitazione di responsabilità</a></li>
+      <li><a href="#proprieta">Proprietà intellettuale</a></li>
+      <li><a href="#sospensione">Sospensione e cancellazione</a></li>
+      <li><a href="#modifiche">Modifiche ai termini</a></li>
+      <li><a href="#legge">Legge applicabile</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+    </ol>
+  </div>
+
+  <div class="doc-section" id="accettazione">
+    <h2>1. Accettazione dei termini</h2>
+    <p>Accedendo o utilizzando RiskFlow ("il Servizio", "l'App") disponibile su <a href="https://riskflow.pro">riskflow.pro</a>, accetti di essere vincolato dai presenti Termini di Servizio ("Termini") e dalla nostra <a href="privacy.html">Privacy Policy</a>.</p>
+    <p>Se non accetti questi Termini, non puoi utilizzare il Servizio. L'uso continuato del Servizio dopo la pubblicazione di modifiche costituisce accettazione dei nuovi Termini.</p>
+    <p>Devi avere almeno <strong>18 anni</strong> per utilizzare RiskFlow.</p>
+  </div>
+
+  <div class="doc-section" id="servizio">
+    <h2>2. Descrizione del servizio</h2>
+    <p>RiskFlow è un'applicazione web per trader che fornisce:</p>
+    <ul>
+      <li>Strumenti di <strong>position sizing</strong> basati sul capitale e sul rischio percentuale</li>
+      <li>Visualizzazione grafica di Entry, Stop Loss e Take Profit su chart</li>
+      <li>Integrazione con exchange di criptovalute (Bitget, Bybit, Weex, BingX) tramite API</li>
+      <li>Monitoraggio del saldo e delle posizioni aperte</li>
+      <li>Strumenti di gestione del rischio (SL Shield, risk/reward calculator)</li>
+    </ul>
+    <p>Il Servizio è attualmente in fase <strong>Beta</strong>. Funzionalità, interfaccia e disponibilità possono variare senza preavviso.</p>
+  </div>
+
+  <div class="doc-section" id="account">
+    <h2>3. Account utente</h2>
+    <p>Per utilizzare RiskFlow devi creare un account. Sei responsabile di:</p>
+    <ul>
+      <li>Mantenere riservate le credenziali del tuo account (username e password)</li>
+      <li>Tutte le attività che avvengono tramite il tuo account</li>
+      <li>Notificarci immediatamente in caso di accesso non autorizzato</li>
+    </ul>
+    <p>Non puoi cedere, vendere o trasferire il tuo account a terzi. RiskFlow si riserva il diritto di chiudere account che violano questi Termini.</p>
+  </div>
+
+  <div class="doc-section" id="api-keys">
+    <h2>4. API Keys e integrazione exchange</h2>
+    <p>RiskFlow ti permette di collegare le API Keys dei tuoi exchange per leggere saldo e posizioni, e per inviare ordini. A tal proposito:</p>
+    <ul>
+      <li>Le API Keys sono memorizzate nel tuo profilo Firebase, accessibili solo a te</li>
+      <li>Sei <strong>l'unico responsabile</strong> della configurazione delle API Keys (permessi, restrizioni IP)</li>
+      <li>Raccomandiamo di configurare le chiavi con <strong>soli permessi di trading</strong>, disabilitando prelievi e trasferimenti</li>
+      <li>RiskFlow non è responsabile per perdite derivanti da chiavi con permessi eccessivi</li>
+      <li>Puoi eliminare le API Keys in qualsiasi momento dall'app</li>
+    </ul>
+    <div class="highlight">
+      <strong>Best practice sicurezza:</strong> Crea API Keys dedicate per RiskFlow, con restrizione IP al dominio del servizio, e senza permessi di prelievo.
+    </div>
+  </div>
+
+  <div class="doc-section" id="uso-consentito">
+    <h2>5. Uso consentito e vietato</h2>
+    <p>Puoi utilizzare RiskFlow per scopi legittimi di trading personale. È vietato:</p>
+    <ul>
+      <li>Tentare di accedere a sistemi, dati o account di altri utenti</li>
+      <li>Utilizzare il Servizio per attività illegali o non conformi alla normativa applicabile</li>
+      <li>Effettuare reverse engineering, decompilare o copiare il codice dell'app</li>
+      <li>Sovraccaricare deliberatamente le infrastrutture del Servizio</li>
+      <li>Creare account multipli per eludere limitazioni o ban</li>
+      <li>Utilizzare bot o script automatizzati per interagire con l'interfaccia web (le API degli exchange vanno usate direttamente a tal fine)</li>
+    </ul>
+  </div>
+
+  <div class="doc-section" id="disclaimer">
+    <h2>6. Disclaimer e limitazione di responsabilità</h2>
+    <div class="warning-box">
+      <p><strong>Il trading di criptovalute è ad alto rischio.</strong> Puoi perdere tutto il capitale investito. RiskFlow non garantisce profitti e non è responsabile delle perdite di trading derivanti dall'utilizzo del Servizio.</p>
+    </div>
+    <p>Il Servizio è fornito <strong>"così com'è"</strong> ("as is") senza garanzie di alcun tipo, esplicite o implicite. In particolare:</p>
+    <ul>
+      <li>Non garantiamo la continuità, accuratezza o disponibilità del Servizio</li>
+      <li>I dati di mercato (prezzi, candele) provengono da exchange terzi: non ne garantiamo l'accuratezza</li>
+      <li>Non siamo responsabili per interruzioni di servizio, bug o errori di calcolo</li>
+      <li>Non siamo responsabili per errori nell'invio di ordini dovuti a problemi di connettività o API degli exchange</li>
+    </ul>
+    <p>Nella misura massima consentita dalla legge applicabile, la responsabilità complessiva di RiskFlow nei tuoi confronti è limitata all'importo eventualmente pagato per il Servizio negli ultimi 12 mesi (o, nel caso di servizio gratuito, a zero).</p>
+  </div>
+
+  <div class="doc-section" id="proprieta">
+    <h2>7. Proprietà intellettuale</h2>
+    <p>Il Servizio, incluso il codice sorgente, il design, i loghi e i contenuti originali, è di proprietà di RiskFlow e protetto dalle leggi sul copyright e sulla proprietà intellettuale applicabili.</p>
+    <p>Ti viene concessa una licenza limitata, non esclusiva, non trasferibile per utilizzare il Servizio per uso personale. Non ti vengono ceduti diritti di proprietà intellettuale.</p>
+    <p>I dati di trading che inserisci nell'app rimangono di tua proprietà.</p>
+  </div>
+
+  <div class="doc-section" id="sospensione">
+    <h2>8. Sospensione e cancellazione</h2>
+    <p>Puoi cancellare il tuo account in qualsiasi momento contattandoci. A seguito della cancellazione:</p>
+    <ul>
+      <li>I tuoi dati di profilo e impostazioni verranno eliminati entro 30 giorni</li>
+      <li>I log di consenso sono mantenuti per obbligo legale per 5 anni</li>
+    </ul>
+    <p>RiskFlow si riserva il diritto di sospendere o terminare l'accesso al Servizio in caso di violazione di questi Termini, senza preavviso e senza responsabilità.</p>
+  </div>
+
+  <div class="doc-section" id="modifiche">
+    <h2>9. Modifiche ai termini</h2>
+    <p>Ci riserviamo il diritto di modificare questi Termini in qualsiasi momento. Le modifiche sostanziali saranno comunicate tramite email o avviso nell'app almeno 14 giorni prima dell'entrata in vigore. L'uso continuato del Servizio dopo tale periodo costituisce accettazione.</p>
+  </div>
+
+  <div class="doc-section" id="legge">
+    <h2>10. Legge applicabile</h2>
+    <p>I presenti Termini sono regolati dalla legge italiana. Per qualsiasi controversia è competente il foro del luogo di residenza dell'utente consumatore, in conformità con la normativa vigente a tutela del consumatore.</p>
+  </div>
+
+  <div class="doc-section" id="contatti">
+    <h2>11. Contatti</h2>
+    <div class="highlight">
+      <strong>RiskFlow</strong><br>
+      Sito web: <a href="https://riskflow.pro">riskflow.pro</a><br>
+      Email: <a href="mailto:riskflow@proton.me">riskflow@proton.me</a>
+    </div>
+  </div>
+</main>
+
+<footer class="doc-footer">
+  <span class="doc-footer-copy">© 2026 RiskFlow — Beta. Tutti i diritti riservati.</span>
+  <nav class="doc-footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Termini di Servizio</a>
+    <a href="cookies.html">Cookie Policy</a>
+    <a href="riskflowdocs.html">Documentazione</a>
+    <a href="terminal.html">App</a>
+  </nav>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Policy — RiskFlow</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#07070a;--surface:#0d0d11;--surface2:#121218;--surface3:#18181f;
+    --border:#1a1a22;--border2:#252530;--text:#dddde8;--muted:#3a3a48;--muted2:#686878;
+    --accent:#a855f7;--accent2:#9333ea;--red:#ff2d4a;--green:#00d17a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.7}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .doc-header{position:sticky;top:0;z-index:100;background:rgba(7,7,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .doc-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;text-decoration:none}
+  .doc-logo span{color:#fff}
+  .doc-logo em{color:var(--accent);font-style:normal}
+  .doc-back{font-size:11px;color:var(--muted2);text-decoration:none;transition:color .15s}
+  .doc-back:hover{color:var(--text);text-decoration:none}
+  .doc-badge{font-size:9px;padding:2px 8px;border-radius:3px;background:var(--surface2);border:1px solid var(--border2);color:var(--muted2);letter-spacing:.05em;text-transform:uppercase}
+  .doc-layout{max-width:760px;margin:0 auto;padding:48px 32px 80px}
+  .doc-eyebrow{font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+  .doc-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#fff;margin-bottom:6px;line-height:1.2}
+  .doc-meta{font-size:10px;color:var(--muted2);margin-bottom:40px}
+  .doc-meta span{color:var(--muted);margin:0 6px}
+  .doc-toc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:40px}
+  .doc-toc-title{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+  .doc-toc ol{padding-left:16px;display:flex;flex-direction:column;gap:6px}
+  .doc-toc a{font-size:12px;color:var(--muted2)}
+  .doc-toc a:hover{color:var(--accent)}
+  .doc-section{margin-bottom:40px}
+  .doc-section h2{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:14px;padding-top:8px;border-top:1px solid var(--border)}
+  .doc-section p{margin-bottom:12px;color:#b0b0bf;font-size:12.5px}
+  .doc-section ul,.doc-section ol{padding-left:18px;margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
+  .doc-section li{color:#b0b0bf;font-size:12.5px}
+  .doc-section strong{color:var(--text)}
+  .doc-section .highlight{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:12px 16px;margin:12px 0;font-size:12px;color:var(--muted2)}
+  .doc-section .highlight strong{color:var(--accent)}
+  .cookie-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:12px}
+  .cookie-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .cookie-card-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#fff}
+  .cookie-badge{font-size:9px;padding:2px 8px;border-radius:20px;letter-spacing:.05em}
+  .badge-required{background:rgba(168,85,247,.12);color:var(--accent);border:1px solid rgba(168,85,247,.3)}
+  .badge-analytics{background:rgba(90,180,255,.1);color:#5ab4ff;border:1px solid rgba(90,180,255,.25)}
+  .badge-marketing{background:rgba(255,201,64,.1);color:#ffc940;border:1px solid rgba(255,201,64,.25)}
+  .cookie-card-desc{font-size:11.5px;color:var(--muted2);line-height:1.6}
+  .cookie-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:11.5px}
+  .cookie-table th{text-align:left;padding:8px 12px;background:var(--surface2);color:var(--muted2);font-weight:500;border-bottom:1px solid var(--border)}
+  .cookie-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:#b0b0bf;vertical-align:top}
+  .cookie-table tr:last-child td{border-bottom:none}
+  .doc-footer{border-top:1px solid var(--border);padding:32px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .doc-footer-links{display:flex;gap:20px;flex-wrap:wrap}
+  .doc-footer-links a{font-size:10px;color:var(--muted2)}
+  .doc-footer-links a:hover{color:var(--text)}
+  .doc-footer-copy{font-size:10px;color:var(--muted)}
+  @media(max-width:600px){.doc-layout{padding:32px 20px 60px}.doc-header{padding:12px 20px}.doc-title{font-size:22px}}
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <a class="doc-logo" href="terminal.html"><span>Risk</span><em>Flow</em></a>
+  <span class="doc-badge">Legal</span>
+  <a class="doc-back" href="terminal.html">← Torna all'app</a>
+</header>
+
+<main class="doc-layout">
+  <div class="doc-eyebrow">Documento legale</div>
+  <h1 class="doc-title">Cookie Policy</h1>
+  <div class="doc-meta">
+    Versione 1.0 <span>|</span> Ultimo aggiornamento: Aprile 2026 <span>|</span> Applicabile a riskflow.pro
+  </div>
+
+  <div class="doc-toc">
+    <div class="doc-toc-title">Indice</div>
+    <ol>
+      <li><a href="#cosa-sono">Cosa sono i cookie</a></li>
+      <li><a href="#tipi">Tipologie di cookie usati</a></li>
+      <li><a href="#dettaglio">Dettaglio cookie e localStorage</a></li>
+      <li><a href="#terze-parti">Cookie di terze parti</a></li>
+      <li><a href="#gestione">Come gestire i cookie</a></li>
+      <li><a href="#consenso">Consenso e revoca</a></li>
+      <li><a href="#contatti">Contatti</a></li>
+    </ol>
+  </div>
+
+  <div class="doc-section" id="cosa-sono">
+    <h2>1. Cosa sono i cookie</h2>
+    <p>I cookie sono piccoli file di testo che i siti web salvano nel tuo browser quando li visiti. Vengono usati per ricordare le tue preferenze, mantenere la sessione attiva e, in alcuni casi, raccogliere dati statistici.</p>
+    <p>RiskFlow utilizza anche il <strong>localStorage</strong> del browser — una tecnologia simile ai cookie ma che non ha scadenza automatica e non viene trasmessa al server ad ogni richiesta. Il suo utilizzo è soggetto alle stesse regole dei cookie ai sensi della Direttiva ePrivacy e del GDPR.</p>
+  </div>
+
+  <div class="doc-section" id="tipi">
+    <h2>2. Tipologie di cookie usati</h2>
+
+    <div class="cookie-card">
+      <div class="cookie-card-head">
+        <span class="cookie-card-name">🔒 Cookie Tecnici / Necessari</span>
+        <span class="cookie-badge badge-required">Sempre attivi</span>
+      </div>
+      <div class="cookie-card-desc">Indispensabili per il funzionamento dell'app. Includono il token di sessione Firebase (autenticazione), le impostazioni dell'app salvate in localStorage e la memorizzazione delle preferenze cookie stesse. Non richiedono consenso ai sensi dell'art. 122 del Codice Privacy.</div>
+    </div>
+
+    <div class="cookie-card">
+      <div class="cookie-card-head">
+        <span class="cookie-card-name">📊 Cookie Analitici</span>
+        <span class="cookie-badge badge-analytics">Opzionali</span>
+      </div>
+      <div class="cookie-card-desc">RiskFlow attualmente <strong>non utilizza cookie analitici di terze parti</strong> (es. Google Analytics). Eventuali future integrazioni saranno esplicitamente comunicare e richederanno il tuo consenso.</div>
+    </div>
+
+    <div class="cookie-card">
+      <div class="cookie-card-head">
+        <span class="cookie-card-name">📣 Cookie Marketing</span>
+        <span class="cookie-badge badge-marketing">Opzionali</span>
+      </div>
+      <div class="cookie-card-desc">RiskFlow attualmente <strong>non utilizza cookie di profilazione o marketing</strong>. Nessun pixel pubblicitario, nessun tracciamento cross-site. Se in futuro questi venissero introdotti, sarà richiesto il tuo consenso esplicito.</div>
+    </div>
+  </div>
+
+  <div class="doc-section" id="dettaglio">
+    <h2>3. Dettaglio cookie e localStorage</h2>
+    <table class="cookie-table">
+      <thead>
+        <tr><th>Nome</th><th>Tipo</th><th>Scopo</th><th>Durata</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>firebase:authUser:*</code></td>
+          <td>localStorage — Tecnico</td>
+          <td>Sessione di autenticazione Firebase</td>
+          <td>Sessione / fino al logout</td>
+        </tr>
+        <tr>
+          <td><code>rf_hotkeys</code></td>
+          <td>localStorage — Tecnico</td>
+          <td>Hotkeys personalizzate dall'utente</td>
+          <td>Permanente (fino a reset)</td>
+        </tr>
+        <tr>
+          <td><code>rf_settings_*</code></td>
+          <td>localStorage — Tecnico</td>
+          <td>Impostazioni dell'app (pair, timeframe, preferenze UI)</td>
+          <td>Permanente (fino a cancellazione)</td>
+        </tr>
+        <tr>
+          <td><code>rf_cookie_consent</code></td>
+          <td>localStorage — Tecnico</td>
+          <td>Memorizzazione delle scelte del banner cookie</td>
+          <td>12 mesi</td>
+        </tr>
+        <tr>
+          <td>Cookie Firebase Authentication</td>
+          <td>Cookie — Tecnico</td>
+          <td>Token di autenticazione sicura (Firebase)</td>
+          <td>Sessione / 1 anno</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="highlight">
+      <strong>Nessun dato sensibile di trading</strong> (API Keys, posizioni) è memorizzato in localStorage o cookie. Questi dati risiedono esclusivamente nel database Firestore, protetto da autenticazione.
+    </div>
+  </div>
+
+  <div class="doc-section" id="terze-parti">
+    <h2>4. Cookie di terze parti</h2>
+    <p>RiskFlow carica risorse da servizi esterni che potrebbero impostare propri cookie:</p>
+    <ul>
+      <li><strong>Google Fonts</strong> — Font tipografici. Google potrebbe impostare cookie tecnici. <a href="https://developers.google.com/fonts/faq/privacy" target="_blank" rel="noopener">Privacy →</a></li>
+      <li><strong>Firebase (Google LLC)</strong> — Autenticazione e database. Imposta cookie tecnici di sessione. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Privacy →</a></li>
+    </ul>
+    <p>Non utilizziamo social plugin, pixel pubblicitari o script di analytics di terze parti.</p>
+  </div>
+
+  <div class="doc-section" id="gestione">
+    <h2>5. Come gestire i cookie</h2>
+    <p>Puoi controllare e cancellare i cookie e i dati localStorage direttamente dal tuo browser:</p>
+    <ul>
+      <li><strong>Chrome:</strong> Impostazioni → Privacy e sicurezza → Cookie e altri dati del sito</li>
+      <li><strong>Firefox:</strong> Impostazioni → Privacy e sicurezza → Cookie e dati del sito</li>
+      <li><strong>Safari:</strong> Preferenze → Privacy → Gestisci dati del sito</li>
+      <li><strong>Edge:</strong> Impostazioni → Cookie e autorizzazioni del sito</li>
+    </ul>
+    <p>Attenzione: disabilitare i cookie tecnici può compromettere il funzionamento dell'app, inclusa l'autenticazione.</p>
+  </div>
+
+  <div class="doc-section" id="consenso">
+    <h2>6. Consenso e revoca</h2>
+    <p>Al primo accesso a RiskFlow compare un banner cookie che ti permette di accettare o rifiutare le categorie opzionali. Puoi modificare le tue preferenze in qualsiasi momento.</p>
+    <p>Le scelte vengono registrate nel tuo browser (<code>rf_cookie_consent</code>) e, se sei registrato, nel database Firestore associato al tuo account (<code>/consents/{uid}</code>) per garantire la tracciabilità richiesta dal GDPR.</p>
+    <p>Per modificare le tue preferenze cookie, puoi usare il link "Gestisci preferenze cookie" presente nel footer di tutte le pagine dell'app.</p>
+  </div>
+
+  <div class="doc-section" id="contatti">
+    <h2>7. Contatti</h2>
+    <div class="highlight">
+      <strong>RiskFlow</strong><br>
+      Sito web: <a href="https://riskflow.pro">riskflow.pro</a><br>
+      Email: <a href="mailto:riskflow@proton.me">riskflow@proton.me</a>
+    </div>
+  </div>
+</main>
+
+<footer class="doc-footer">
+  <span class="doc-footer-copy">© 2026 RiskFlow — Beta. Tutti i diritti riservati.</span>
+  <nav class="doc-footer-links">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Termini di Servizio</a>
+    <a href="cookies.html">Cookie Policy</a>
+    <a href="riskflowdocs.html">Documentazione</a>
+    <a href="terminal.html">App</a>
+  </nav>
+</footer>
+
+</body>
+</html>
