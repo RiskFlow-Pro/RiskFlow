@@ -36,6 +36,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    overflow: hidden;
   }
 
   /* ── NOISE GRAIN ── */
@@ -301,24 +302,28 @@ function drawWaves() {
     }
     ctx.stroke();
   }
-  // top-right waves
+  // top-right waves — clipped to canvas
+  ctx.save();
+  ctx.rect(0, 0, W, H);
+  ctx.clip();
   for (let i = 0; i < 16; i++) {
     const prog = i / 16;
     const alpha = 0.03 + prog * 0.09;
     ctx.beginPath();
     ctx.strokeStyle = `rgba(168,85,247,${alpha})`;
     ctx.lineWidth = 1.1;
-    const yBase = -H * 0.1 + i * 8;
-    const amp = 50 + i * 5;
+    const yBase = H * 0.05 + i * 10;
+    const amp = 40 + i * 4;
     const freq = 0.005 + i * 0.0003;
     const phase = -t * 0.5 + i * 0.4 + Math.PI;
-    ctx.moveTo(W * 0.4, yBase);
-    for (let x = W * 0.4; x <= W + 100; x += 4) {
-      const y = yBase + amp * Math.sin(freq * x + phase) + (i * 4);
+    ctx.moveTo(0, yBase);
+    for (let x = 0; x <= W; x += 4) {
+      const y = yBase + amp * Math.sin(freq * x + phase) + (i * 3);
       ctx.lineTo(x, y);
     }
     ctx.stroke();
   }
+  ctx.restore();
   t += 0.015;
   requestAnimationFrame(drawWaves);
 }
