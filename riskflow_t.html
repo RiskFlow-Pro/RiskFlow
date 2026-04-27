@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow — Risk Management Assistant</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f0f10'/%3E%3C!-- candlestick wicks --%3E%3Cline x1='8' y1='5' x2='8' y2='27' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23a855f7' stroke-width='1.2' stroke-linecap='round'/%3E%3Cline x1='24' y1='7' x2='24' y2='25' stroke='%233dffa0' stroke-width='1.2' stroke-linecap='round'/%3E%3C!-- candlestick bodies --%3E%3Crect x='5' y='9' width='6' height='11' rx='1.2' fill='%23a855f7'/%3E%3Crect x='13' y='7' width='6' height='9' rx='1.2' fill='%23a855f7'/%3E%3Crect x='21' y='11' width='6' height='10' rx='1.2' fill='%233dffa0'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<link rel="stylesheet" href="CSS/riskflow.css">
+</head>
+<body>
+
+<!-- ── AUTH OVERLAY ── -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo-rf"><span style="color:#fff">Risk</span><span style="color:#a855f7">Flow</span></div>
+    
+    <div class="auth-sub-rf">Position sizing &amp; risk management</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="rfSwitchTab('login')">Accedi</button>
+      <button class="auth-tab" onclick="rfSwitchTab('register')">Registrati</button>
+      <button class="auth-tab" onclick="rfSwitchTab('forgot')">Password</button>
+    </div>
+    <!-- LOGIN -->
+    <div class="auth-form-rf" id="rf-form-login">
+      <div class="field-group"><label>Username</label><input type="text" id="rf-login-user" placeholder="il tuo username" autocomplete="username" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="field-group"><label>Password</label><input type="password" id="rf-login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')rfDoLogin()"/></div>
+      <div class="auth-err-rf" id="rf-login-err"></div>
+      <button class="auth-btn-rf" id="rf-login-btn" onclick="rfDoLogin()">Accedi</button>
+      <div class="forgot-link" onclick="rfSwitchTab('forgot')">Password dimenticata?</div>
+      <div class="auth-divider"><span>oppure</span></div>
+      <button class="auth-btn-google" onclick="rfDoGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Continua con Google
+      </button>
+    </div>
+    <!-- REGISTER -->
+    <div class="auth-form-rf hidden" id="rf-form-register">
+      <div class="field-group"><label>Username</label><input type="text" id="rf-reg-user" placeholder="scegli un username" maxlength="24"/></div>
+      <div class="field-group"><label>Email</label><input type="email" id="rf-reg-email" placeholder="tua@email.com"/></div>
+      <div class="field-group"><label>Password</label><input type="password" id="rf-reg-pass" placeholder="min 6 caratteri"/></div>
+      <div class="auth-err-rf" id="rf-reg-err"></div>
+      <div class="gdpr-row"><input type="checkbox" id="rf-reg-terms"/><label for="rf-reg-terms">Accetto i <a href="terms.html" target="_blank" style="color:var(--accent)">Termini di Servizio</a> <span style="color:var(--red)">*</span></label></div>
+      <div class="gdpr-row"><input type="checkbox" id="rf-reg-gdpr"/><label for="rf-reg-gdpr">Ho letto e accetto la <a href="privacy.html" target="_blank" style="color:var(--accent)">Privacy Policy</a> <span style="color:var(--red)">*</span></label></div>
+      <div class="gdpr-row"><input type="checkbox" id="rf-reg-marketing"/><label for="rf-reg-marketing">Accetto comunicazioni marketing <span style="color:var(--muted2);font-size:9px">(opzionale)</span></label></div>
+      <button class="auth-btn-rf" id="rf-reg-btn" onclick="rfDoRegister()">Crea account</button>
+      <div style="font-size:9px;color:var(--muted2);margin-top:6px;line-height:1.5">Registrandoti accetti anche la nostra <a href="cookies.html" target="_blank" style="color:var(--muted2)">Cookie Policy</a>.</div>
+    </div>
+    <!-- FORGOT -->
+    <div class="auth-form-rf hidden" id="rf-form-forgot">
+      <div class="field-group"><label>Email</label><input type="email" id="rf-forgot-email" placeholder="tua@email.com"/></div>
+      <div class="auth-err-rf" id="rf-forgot-err"></div>
+      <div class="auth-ok-rf" id="rf-forgot-ok"></div>
+      <button class="auth-btn-rf" id="rf-forgot-btn" onclick="rfDoForgot()">Invia link di recupero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── API KEYS MODAL ── -->
+<div id="apiModal">
+  <div class="api-card">
+    <div class="api-title">🔑 Connetti Exchange</div>
+
+    <!-- Exchange selector -->
+    <div class="api-exchange-tabs">
+      <button class="api-ex-btn active" id="exBtnBitget"   onclick="rfSelectExchange('bitget')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACoklEQVR42r1VXUuUURB+5ny853XDMKKotnULUqLUoKsSLexDLyws6bqIKIjoqi77Fd30H4IgqEgvgoSIIlwySFGTIrIMand1N3f3fc850419retiEg3n5nBmhmeemXkOIc/4Fybwj0zVe/Qe3oMABoSAEGtK5DwaBBp+BFeAEkB/m8g6bJDq5aS8dZNDg2yWunuic2e5wqCVcOW5+nyxsKzHJsPmtAEMELbtU1PvUHDI+Rr+eUaeRQ0sTVKPT8kTvfzpIwRRz/H4yTObTiMmEK2ua86jSeqJaXmil+dmEcfo6olv33HSYMGC6g/KT3hZhwqr1zNheqdRwgDhoSPyaxGWscgoM8qMnEeudmm0NJDMUJC5rO7cz3OzEJI6u+P7Q46UnH6LqIzAwDvf2sKO4bG8xt9K88wJw20dsA5K4vMcvZlBAnLufdDXpQ/s1Qfbg2tXaR2BPJjrlOZRZFGMTf+AAYwUYTKlMhNgDh4+DhvXB4E2gLl4hSwjb6s7+Mcl61HwohiZ/lMGMFqGqbQaHQdzMDQSNjaaQBsgvHCZLGPB/5GrmrasQ8GLQmROng4FGSDcuk09zYBZD4+Y7SmzLmEAc/4SLVSQd8vIrlqxQFDk5MsMa02Li7xxk9uzSzL0scM8+hw2pmRz9OKVTzTC/SS+5qTmPOYZMSNiVBiWZfZbePioIRglw9QO/WoKZUb2F6IVdo0InlFgOAcjZbyozwzyyCNoRVuS7sFwvKcF8x5S1N2137mvsMyXwqN9hmACHW5vVmOTsIwvcZXzyjLCDM3yw6weHOCxDADavMXeG7Z7W5G3UGr1wsYkSd2565NJtHcgitz1G7ZjN3I1sgCgeprNIANuADwggBJQquJllVJL4Aqj5H91QIo1afZSsPyvv8h3EP+qljDdOGgAAAAASUVORK5CYII=" width="24" height="24" style="border-radius:5px" alt="Bitget"/>
+        <span class="api-ex-name">Bitget</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBybit"    onclick="rfSelectExchange('bybit')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="24" height="24" style="border-radius:5px" alt="Bybit"/>
+        <span class="api-ex-name">Bybit</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBybitDemo" onclick="rfSelectExchange('bybit_demo')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACpklEQVR42u1UTUhUURQ+995338+8eU8JHbPSxsYgFaMWumjlphZZBEr0t2nXJjcGBbWJoB9qkxIGSptIF5FGmK0Cs3ITmhiKSmDZrz+TMzozvqdz7z0tZswCl24Cv+Xhu985h++7h4QKy2EjQGGDsCm0BrJRQkIBrlfXsn0IYYwBACJKKRljUkpKs20opQCoFCqlXEv5aQqEEUIAQCmllAIAZjv5hJCVlZVYbGFxMSGE0HUei8Uty/J93/N8pTAWjycSSUCgzHh07uvET/5hPLm8spRIJoUQpmkAgEYI9Zf9sj27Txw/lpPrvurt7+3rbzjfeLeptbpqf2RXePLzl6O1h0zT6Hza8/rtwBY7HbT1a7cuO6bUOB8dnWjv6LTtAKWULKW86qp99fVH+nrfNDfdKI2U1NQcOHO67tLFBkJp7eGDeyvLRkbG2h+2FBTkp3xBCJ2a/HTqZF1pJPzt+w9N0wCQAgClxPN83/OLi4uiv+anZ+YaL1y9ef2KaRj3W9o0jSHA9h3bJj9NLS4mLUNLp9MPWpuHhoYfP+l+/qzbskylcM01pTAej/v+ckm4aHDg3dj4x54XLwGXGGNCiLnZKOea69gLKUCkGs/TdT3HdQzbRcSsa0qhZZmBgBWNRrcW5IdCeSiFECItJAA4TpBROh+Ll4R35rr22bZC0CwkyaDjcM6FkJk5WNAJEUJEWnDOKyor2js6u7p6uGFRSkZHJ6ZnokKi67qRSPj2nXuD74cVDUiFFIAAGRkZm52Ncs4RkYQKyzP2JxIpqaTO9ZwchxCSSCS5zi3TTKWWPM+TSgUsKxi0AREBMgRd54ZhZFYjmXu0GkhEBCklADDGlFKIilJGKQEgf7KX3SVLwH+SjYhCiL8jn5Fbfb/On1glbN6j/1joNwmbStw79FONAAAAAElFTkSuQmCC" width="24" height="24" style="border-radius:5px;opacity:.5" alt="Bybit Demo"/>
+        <span class="api-ex-name">Bybit</span>
+        <span class="api-ex-badge api-ex-badge--demo">Demo</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnWeex" onclick="rfSelectExchange('weex')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAC90lEQVR42u2UW0hUURSG/7X3GXXmTDM64yXNcdIZM7s9dHkKeugpIagg8CEo0uwhksAoMoqoF6mIiK50oYJu1ENBBCIRhHSlHFBIIiodGwNLPc4c54xnztm7hzFSK4roKfrf1trw8bPW/hfF2sP4G2L4S/qHQcr3LVtIKQGAAM5JCABgDLZA5oEInNEvQLaA182zsggg25bDmqWqnBFGdNvn5Q6FSYm0JeMJiyazJoFsW+Z5lRv3Us86DUjpcSv7G3NvtRrJlFW31nPgxMigZgI0vypnw2o1rptsAkuZSCnwKaevJ5taYgU+RVHQ0lT8KJKu2x0FRIG/fPF8R+OBz5ZN524ODGoluxo8n4bSnNMkkG1Lf55y6XaqqaVvwxr/keYC1YkXXdby9e+XLfa4XFS7refe2YqeBxW6IfceG95/vN/tZFvWqYOaNT6vWHs4+jCsvay8cngmgNqafKOz+tPTUPu1kEPhVeXuj4/nxCNzlszzAKz1fMXnpyGjq7qhtgjAqX2BeMes6MNwrD3MADCCacrKmY7qkBrpTna/s7IU5s/lSxe5e/vHHr1MPYmYb6KphXPVonymKKzng/28czRY4pxbmTVmSiIAoEzWbAGPygaGsKIuqhui9UKwupwGhtnG5v4nEYMzml2RffVIcaBY9sTYys29+qhsuxgMBTCcEJxN+JCcIa4Lv1e2XQzmTVNW1Pd2vUVZKXZuKjJSaT1p7thUOKuS3vbRys1RYwz3LweDM+RQfJzyzdHXkUN1kqZTTX1MS6RP7gs07OkLlWU7s6njVfLyoeCuQ7FkCm2XykoLZXxUKPzb+mnKGbEyrDhfs/VD12t9QZXnzqmSnByxtvHj445EcIbr7pnSwPSpFAB8e51vUvYYTBNej6xZNi2ZchxtzvflCki5arl3JMEO7iwMl2FEl1MoP3CUkRBwOODK4UlDpG1JAGekurgxZpumZOz3QpvxZVnQEhaj8UjZQmqJNCNi7LfTP26VwIl+Vv4/tX+iL4hrR91qI+LIAAAAAElFTkSuQmCC" width="24" height="24" style="border-radius:5px" alt="Weex"/>
+        <span class="api-ex-name">Weex</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+      <button class="api-ex-btn" id="exBtnBingx" onclick="rfSelectExchange('bingx')">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAADTUlEQVR42q2UzWtdVRTFf2uf+95LXpIX049IMTiwFjSKIiJ+jBSxKlRQDIgWLIqgIEhFxUEH/gEdiJ0Kgoi26kwUa83EgaAO/MKKUosDK2pskubz5SXv7O3g3iQvaUfFPdx3nXX2WWvdrfEJF5JCQpIUMkkkIYUZyZCQMJEsJJlJwhSmQCFTwgwIIlAIIAICIEAQEREKqk6ESnSJLMHhkcnGRgUVhA1oRVUejiAqVNmTh7ykdgrYQlUeldanCMV6G+QRqiCAkAgcKaLYHEGSIiVJIfAIlwwF4Y6ZICShSCa0yRWB2JwoCHkwuxgB9RrNfhV1yKJ6k5mRM0ttRZCkwWaYlf4AqogksjM8GK886RcWOH2WH85oes6GB1Qzk3LOMb/EzuF86/WMX8PIULzziS0sq0geIalHI3f66hw6YGAQ56b8w8nuu59au5OSWVHkZx6OiXvtqlEDgb9/ynMmmUplNolKc0DliGOj6cUn7P4780uvd3PW0cPcvK9Y/wrgQQ68VBfS7vHXqtcB0O747LzvHI7+PutmXbnD9t8e99wWe8eK+SX1N2J2wb/83ie/9u9+tW4WqJxA4xPeO9TismSxZ5c/9ZA/+2jhIRMR/H0+WoMc/6z73kmmZgysNSCzjaiyhQhICaGuM78Yj9zdPXo4FYWZWFrxV4/lya+K1oBqhWOEC6pYwNZAbovmYpvVtajXcKdeqFFj1XGIMHl4BITnKgCbGpVPu7DAymqMtPy5iXzk6bS0bAP9SglJD9xlzb7uz79zfk7LHdULGUYV8x6N3Gn2x8EHfd/V3HGjdo+kmXmaDc79020NanRH6maKxPRc/uZ0/PYHJz63dtuSrdtcEkmsrrFnl3/xpvV4HD+dzS8cReLYy9ywt1cHv+95/pq2Ri22B3KbSH/+6x+c8rc+ss5qknj8SD50YO2x/TY2un6TB064YlsgzWh39PbHeW6RH8/w7S+amilaAzTqIZQ9vXEiHT+Zb7ku33QtVwyxtCIIX/d8e44WlokgJZoNajXcq90kkUxrmZUO3RwmhprlWryU/RIjrcp+D3Km945uDpMGm5gEZA8PVO6ri3PUe/gSykXkTAZJvf8dRMFlVWxZypJ0mUQX0xr/U/0Hws/NcaTg6KwAAAAASUVORK5CYII=" width="24" height="24" style="border-radius:5px" alt="BingX"/>
+        <span class="api-ex-name">BingX</span>
+        <span class="api-ex-badge">Live</span>
+      </button>
+    </div>
+
+    <div class="api-status" id="apiStatus"></div>
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Balance</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent)" id="apiBitgetBalance">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+        <div style="font-size:8px;color:var(--muted2);text-transform:uppercase;margin-bottom:2px">Unrealized PnL</div>
+        <div style="font-size:14px;font-weight:700" id="apiBitgetUpnl">—</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--muted2);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <span>Posizioni aperte: <span id="apiBitgetPositions">—</span></span>
+      <span id="apiSyncTime" style="color:var(--muted)"></span>
+    </div>
+
+    <!-- Fields -->
+    <div class="field-group" style="margin-bottom:10px"><label>API Key</label><input type="text" id="apiKeyInput" placeholder="la tua API key" autocomplete="off"/></div>
+    <div class="field-group" style="margin-bottom:10px"><label>Secret Key</label><input type="password" id="apiSecretInput" placeholder="secret key" autocomplete="off"/></div>
+    <!-- Passphrase: visibile solo per Bitget -->
+    <div class="field-group" id="apiPassRow" style="margin-bottom:12px"><label>Passphrase</label><input type="password" id="apiPassInput" placeholder="passphrase (solo Bitget)" autocomplete="off"/></div>
+
+    <div class="api-btns">
+      <button class="api-save-btn" onclick="rfSaveApiKeys()">Salva & Connetti</button>
+      <button class="api-save-btn" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text)" onclick="rfBitgetSync()">⟳ Sync</button>
+      <button class="api-del-btn" onclick="rfDeleteApiKeys()">Elimina</button>
+      <button class="api-cancel-btn" onclick="document.getElementById('apiModal').classList.remove('open')">✕</button>
+    </div>
+
+    <!-- Export / Import JSON -->
+    <div class="api-io-row">
+      <button class="api-io-btn" onclick="rfExportApiKeys()" title="Esporta tutte le chiavi in un file JSON">⬇ Esporta JSON</button>
+      <label class="api-io-btn" title="Importa chiavi da un file JSON precedentemente esportato">
+        ⬆ Importa JSON
+        <input type="file" id="apiImportInput" accept=".json" style="display:none" onchange="rfImportApiKeys(this)"/>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="logo"><span style="color:#fff">Risk</span><span style="color:#a855f7">Flow</span></div>
+  <div id="userBadge">
+    <div class="user-dot-rf"></div>
+    <span id="rfUsername">—</span>
+    <button class="logout-btn-rf" onclick="rfDoLogout()">Logout</button>
+    <button class="logout-btn-rf" style="border-color:var(--accent);color:var(--accent)" onclick="document.getElementById('apiModal').classList.add('open');rfLoadApiKeysUI()">🔑 API</button>
+  </div>
+  <div class="sep"></div>
+  <div class="sym-wrap" id="symWrap" onclick="openPairModal()" style="cursor:pointer">
+    <span style="font-size:10px;color:var(--muted2)">▼</span>
+    <span id="symInput" style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text)">BTCUSDT</span>
+  </div>
+  <div class="sep"></div>
+  <div class="tf-row">
+    <button class="tf-btn" onclick="setTF('1m')">1m</button>
+    <button class="tf-btn" onclick="setTF('5m')">5m</button>
+    <button class="tf-btn active" onclick="setTF('15m')">15m</button>
+    <button class="tf-btn" onclick="setTF('1H')">1h</button>
+    <button class="tf-btn" onclick="setTF('4H')">4h</button>
+    <button class="tf-btn" onclick="setTF('1D')">1D</button>
+  </div>
+  <div class="sep"></div>
+  <div class="price-display" id="topPrice">—</div>
+  <div class="price-chg" id="topChg"></div>
+  <div class="sep"></div>
+  <!-- HOTKEYS BUTTON -->
+  <button class="hk-topbar-btn" onclick="hkOpenModal()" title="Hotkeys (⌨️)">⌨️</button>
+  <div class="sep"></div>
+  <!-- SL PROTECT TOGGLE -->
+  <div class="slp-wrap" id="slpWrap" onclick="slpToggle()" title="SL Shield: impedisce di allargare lo stop loss dopo l'entrata">
+    <span class="slp-icon">🛡</span>
+    <span class="slp-label">SL Shield</span>
+    <div class="slp-sw" id="slpSw"></div>
+    <span class="slp-state" id="slpState">OFF</span>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <div class="tb-stat"><span class="tl">Balance</span><span class="tv acc" id="tbBalance">—</span></div>
+    <div class="tb-stat"><span class="tl">PnL</span><span class="tv" id="tbPnl">—</span></div>
+  </div>
+</div>
+
+<div class="workspace">
+  <div class="chart-wrap" id="chartWrap">
+    <div id="chart"></div>
+    <div class="chart-watermark" aria-hidden="true">
+      <span class="wm-main">RiskFlow</span><span class="wm-beta">BETA</span>
+      
+    </div>
+    <div class="chart-loading" id="chartLoading"><div class="spin"></div><span>Loading...</span></div>
+    <canvas id="dragCanvas"></canvas>
+    <button class="chart-calc-btn" id="chartCalcBtn" onclick="openModal()">
+      ⚡ OPEN — <span id="chartCalcSize">—</span> USDT
+    </button>
+    <div class="chart-hint" id="chartHint">Right-click → set lines &nbsp;|&nbsp; Drag linee sulla chart</div>
+    <button class="goto-price-btn" onclick="gotoPrice()" title="Vai al prezzo attuale">⊙ live</button>
+  </div>
+
+  <div class="panel-resize" id="panelResize"></div>
+  <div class="panel" id="panel">
+    <div class="panel-scroll">
+
+      <div class="sec">
+        <div class="sec-title">Account <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px" onclick="refreshAccount()">⟳</button></div>
+        <div class="acc-grid">
+          <div class="acc-card"><div class="al">Balance</div><div class="av acc" id="accBalance">—</div></div>
+          <div class="acc-card"><div class="al">Available</div><div class="av" id="accAvail">—</div></div>
+          <div class="acc-card"><div class="al">Unreal. PnL</div><div class="av" id="accPnl">—</div></div>
+          <div class="acc-card"><div class="al">Margin</div><div class="av" id="accMargin">—</div></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">Positions <span class="sec-badge" id="posCount">0</span> <button style="margin-left:auto;background:var(--red-dim);border:1px solid var(--red);color:var(--red);border-radius:3px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:9px;cursor:pointer" onclick="closeAllPositions()">✕ Chiudi tutto</button></div>
+        <div id="posList"><div class="no-pos">No open positions</div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">Orders <span class="sec-badge" id="ordCount">0</span> <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;margin-left:auto" onclick="fetchBitgetOrders()">⟳</button></div>
+        <div id="ordList"><div class="no-ord">Nessun ordine pending</div></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">Trade Setup</div>
+
+        <!-- ORDER TYPE — determines entry behaviour -->
+        <div class="otype-row">
+          <div class="otype-btn active" id="otMarket" onclick="setOType('market')">
+            <span class="ob-label">Market</span>
+            <span class="ob-sub">entry = live</span>
+          </div>
+          <div class="otype-btn" id="otLimit" onclick="setOType('limit')">
+            <span class="ob-label">Limit</span>
+            <span class="ob-sub">imposta prezzo</span>
+          </div>
+          <div class="otype-btn" id="otLadder" onclick="setOType('ladder')">
+            <span class="ob-label">Ladder</span>
+            <span class="ob-sub">ladder strategy</span>
+          </div>
+        </div>
+
+        <!-- LADDER PANEL -->
+        <div id="ladderPanel" style="display:none;margin-bottom:8px">
+          <!-- Range prezzi -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px">
+            <div>
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Top</div>
+              <div class="iwrap" style="border-color:var(--yellow)">
+                <input type="number" id="ladderTop" placeholder="0.00" step="0.01" oninput="onLadderInput()"/>
+                <span class="unit">$</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Prezzo Bottom</div>
+              <div class="iwrap" style="border-color:var(--yellow)">
+                <input type="number" id="ladderBottom" placeholder="0.00" step="0.01" oninput="onLadderInput()"/>
+                <span class="unit">$</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Numero ordini -->
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px">
+            <div style="font-size:10px;color:var(--muted2);flex-shrink:0">Ordini</div>
+            <div style="display:flex;gap:3px">
+              <div class="lev-p ladder-n active" onclick="setLadderN(2)">2</div>
+              <div class="lev-p ladder-n" onclick="setLadderN(3)">3</div>
+              <div class="lev-p ladder-n active-default" onclick="setLadderN(4)">4</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted2);margin-left:auto">più lontano = size maggiore</div>
+          </div>
+
+          <!-- Ordini ladder -->
+          <div id="ladderOrders" style="display:flex;flex-direction:column;gap:3px;margin-bottom:6px"></div>
+
+          <!-- Summary ladder -->
+          <div id="ladderSummary" style="display:none;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:7px 9px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px">
+              <div><div style="font-size:8px;color:var(--muted)">Size totale</div><div style="font-size:11px;font-weight:500;color:var(--accent)" id="laddTotalSize">—</div></div>
+              <div><div style="font-size:8px;color:var(--muted)">Risk totale</div><div style="font-size:11px;font-weight:500;color:var(--red)" id="laddTotalRisk">—</div></div>
+              <div><div style="font-size:8px;color:var(--muted)">Fee est.</div><div style="font-size:11px;font-weight:500;color:var(--muted2)" id="laddTotalFee">—</div></div>
+              <div><div style="font-size:8px;color:var(--muted)">Entry avg</div><div style="font-size:11px;font-weight:500" id="laddAvgEntry">—</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MARGIN MODE -->
+        <div class="risk-tabs" style="margin-bottom:8px">
+          <div class="risk-tab active" id="tabCross" onclick="setMarginMode('cross')">Cross</div>
+          <div class="risk-tab" id="tabIso" onclick="setMarginMode('isolated')">Isolated</div>
+        </div>
+
+        <!-- MARKET MODE: entry auto-sync banner -->
+        <div class="market-banner" id="mktBanner">
+          <div class="mb-dot"></div>
+          <div class="mb-txt">Entry = prezzo di mercato live<br>Imposta solo lo <strong>Stop Loss</strong></div>
+        </div>
+
+        <div class="dir-row">
+          <div class="dir-btn long active" id="btnLong" onclick="setDir('long')">▲ LONG</div>
+          <div class="dir-btn short" id="btnShort" onclick="setDir('short')">▼ SHORT</div>
+        </div>
+
+        <div class="risk-tabs">
+          <div class="risk-tab active" id="tabPct" onclick="setRiskMode('pct')">Risk %</div>
+          <div class="risk-tab" id="tabUsd" onclick="setRiskMode('usd')">Risk USDT</div>
+        </div>
+
+        <div class="irow">
+          <div class="ilabel">Risk</div>
+          <div class="iwrap">
+            <input type="number" id="riskVal" value="2" step="0.5" min="0.1" oninput="calc()"/>
+            <span class="unit" id="riskUnit">%</span>
+            <div class="stpr">
+              <button class="stpr-btn" onclick="step('riskVal',.5)">▲</button>
+              <button class="stpr-btn" onclick="step('riskVal',-.5)">▼</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="irow">
+          <div class="ilabel">Leva</div>
+          <div class="iwrap">
+            <input type="number" id="levVal" value="10" step="1" min="1" max="125" oninput="calc();updateLevPresets()"/>
+            <span class="unit">x</span>
+            <div class="stpr">
+              <button class="stpr-btn" onclick="step('levVal',1);updateLevPresets()">▲</button>
+              <button class="stpr-btn" onclick="step('levVal',-1);updateLevPresets()">▼</button>
+            </div>
+          </div>
+        </div>
+        <div class="lev-presets">
+          <div class="lev-p" onclick="setLev(5)">5x</div>
+          <div class="lev-p active" onclick="setLev(10)">10x</div>
+          <div class="lev-p" onclick="setLev(20)">20x</div>
+          <div class="lev-p" onclick="setLev(50)">50x</div>
+        </div>
+
+        <!-- ENTRY — hidden in market mode, visible+draggable in limit/stop -->
+        <div class="irow" id="entryRow">
+          <div class="ilabel">Entry</div>
+          <div class="iwrap hl-entry" id="wEntry">
+            <input type="number" id="entryVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('entry')"/>
+            <span class="unit">$</span>
+            <div class="stpr">
+              <button class="stpr-btn" onclick="stepP('entryVal',1)">▲</button>
+              <button class="stpr-btn" onclick="stepP('entryVal',-1)">▼</button>
+            </div>
+          </div>
+          <button class="set-line-btn hl-y" title="Click chart" onclick="activateClick('entry')">⊕</button>
+        </div>
+
+        <!-- ENTRY MARKET display -->
+        <div class="irow" id="entryMktRow">
+          <div class="ilabel">Entry</div>
+          <div class="iwrap hl-mkt">
+            <input type="text" id="entryMktVal" readonly class="mkt-val" placeholder="—"/>
+            <span class="unit" style="color:var(--yellow);font-size:8px">LIVE</span>
+          </div>
+        </div>
+
+        <!-- STOP LOSS — always visible, draggable -->
+        <div class="irow">
+          <div class="ilabel">SL</div>
+          <div class="iwrap hl-sl">
+            <input type="number" id="slVal" placeholder="0.00" step="0.01" oninput="calc();syncLine('sl')"/>
+            <span class="unit">$</span>
+            <div class="stpr">
+              <button class="stpr-btn" onclick="stepP('slVal',1)">▲</button>
+              <button class="stpr-btn" onclick="stepP('slVal',-1)">▼</button>
+            </div>
+          </div>
+          <button class="set-line-btn hl-r" title="Click chart" onclick="activateClick('sl')">⊕</button>
+        </div>
+
+        <div class="calc-box">
+          <div class="calc-main">
+            <div>
+              <div class="calc-size-label">Position Size</div>
+              <div><span class="calc-size" id="calcSize">—</span> <span class="calc-size-unit">USDT</span></div>
+            </div>
+            <div>
+              <div class="calc-margin-label">Margin req.</div>
+              <div class="calc-margin-val" id="calcMargin">—</div>
+            </div>
+          </div>
+          <div class="calc-details">
+            <div class="cd"><span class="cd-l">SL dist.</span><span class="cd-v r" id="cdSlDist">—</span></div>
+            <div class="cd"><span class="cd-l">Risk $</span><span class="cd-v r" id="cdRiskUsd">—</span></div>
+            <div class="cd"><span class="cd-l">Fee est.</span><span class="cd-v" style="color:var(--muted2)" id="cdFee">—</span></div>
+            <div class="cd"><span class="cd-l">R:R</span><span class="cd-v y" id="cdRR">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="tp-hdr">
+          <div class="sec-title" style="margin-bottom:0">Take Profits</div>
+          <div class="toggle" onclick="toggleTP()">
+            <div class="tgl-sw" id="tpSw"></div>
+            <span class="tgl-lbl" id="tpLbl">OFF</span>
+          </div>
+        </div>
+        <div id="tpRows">
+          <div style="display:grid;grid-template-columns:24px 1fr 36px 42px 16px;gap:4px;margin-bottom:2px;padding:0 1px">
+            <span></span><span></span><span style="font-size:8px;color:var(--muted);text-align:right;text-transform:uppercase;letter-spacing:.5px">R:R</span>
+            <span style="font-size:8px;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.5px">% pos.</span>
+            <span></span>
+          </div>
+          <div class="tp-row-grid" id="tpRow1">
+            <span class="tp-lbl">TP1</span>
+            <div class="iwrap"><input type="number" id="tp1" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp1')"/></div>
+            <span class="tp-rr" id="rr1">—</span>
+            <div class="tp-pct-wrap"><input type="number" id="tpPct1" value="25" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+            <input type="checkbox" class="tp-chk" id="tp1en" checked onchange="calc()"/>
+          </div>
+          <div class="tp-row-grid" id="tpRow2">
+            <span class="tp-lbl">TP2</span>
+            <div class="iwrap"><input type="number" id="tp2" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp2')"/></div>
+            <span class="tp-rr" id="rr2">—</span>
+            <div class="tp-pct-wrap"><input type="number" id="tpPct2" value="50" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+            <input type="checkbox" class="tp-chk" id="tp2en" onchange="calc()"/>
+          </div>
+          <div class="tp-row-grid" id="tpRow3">
+            <span class="tp-lbl">TP3</span>
+            <div class="iwrap"><input type="number" id="tp3" placeholder="0.00" step="0.01" oninput="calc();syncLine('tp3')"/></div>
+            <span class="tp-rr" id="rr3">—</span>
+            <div class="tp-pct-wrap"><input type="number" id="tpPct3" value="50" min="1" max="100" step="1" oninput="calc()"/><span class="unit">%</span></div>
+            <input type="checkbox" class="tp-chk" id="tp3en" onchange="calc()"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DAILY LOSS LIMIT ── -->
+      <div class="sec" id="dllSec">
+        <div class="tp-hdr">
+          <div class="sec-title" style="margin-bottom:0">Daily Loss Limit
+            <span class="dll-info-tip" title="Se perdi più della soglia % in un giorno, blocca le nuove posizioni per 24h. Una volta scattato, non si può disattivare fino alla scadenza.">ⓘ</span>
+          </div>
+          <div class="toggle" id="dllToggle" onclick="dllToggleSwitch()">
+            <div class="tgl-sw" id="dllSw"></div>
+            <span class="tgl-lbl" id="dllLbl">OFF</span>
+          </div>
+        </div>
+
+        <!-- Settings row — visibile solo quando attivo e non lockato -->
+        <div id="dllSettings" style="display:none;margin-top:9px">
+          <div class="irow">
+            <div class="ilabel" style="width:90px;color:var(--muted2)">Soglia perdita</div>
+            <div class="iwrap" style="max-width:100px">
+              <input type="number" id="dllPct" value="2" min="0.1" max="50" step="0.5" oninput="dllSaveSettings()"/>
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div class="dll-hint">Se il wallet scende di questa % in 24h, nessuna nuova posizione.</div>
+        </div>
+
+        <!-- BANNER TRIGGERED — visibile quando il circuit breaker è scattato -->
+        <div id="dllBanner" style="display:none;margin-top:9px">
+          <div class="dll-triggered-box">
+            <div class="dll-triggered-icon">🛑</div>
+            <div class="dll-triggered-body">
+              <div class="dll-triggered-title">Trading bloccato</div>
+              <div class="dll-triggered-sub">Hai superato il limite di perdita giornaliero</div>
+              <div class="dll-countdown" id="dllCountdown">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FEE SETTINGS ── -->
+      <div class="sec" id="feeSec">
+        <div class="sec-title" style="margin-bottom:7px">Fee Exchange
+          <span class="dll-info-tip" title="Taker: ordini market/stop. Maker: ordini limit (apertura). La size viene calcolata col round-trip corretto in base al tipo ordine.">ⓘ</span>
+        </div>
+        <div class="irow" style="margin-bottom:5px">
+          <div class="ilabel" style="width:90px;color:var(--muted2)">Taker fee</div>
+          <div class="iwrap" style="max-width:110px">
+            <input type="number" id="feeTakerInput" value="0.055" min="0" max="1" step="0.001" oninput="saveTakerFee()"/>
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="irow" style="margin-bottom:5px">
+          <div class="ilabel" style="width:90px;color:var(--muted2)">Maker fee</div>
+          <div class="iwrap" style="max-width:110px">
+            <input type="number" id="feeMakerInput" value="0.02" min="0" max="1" step="0.001" oninput="saveMakerFee()"/>
+            <span class="unit">%</span>
+          </div>
+        </div>
+        <div class="dll-hint">Market/Stop → taker×2 · Limit → maker+taker</div>
+      </div>
+
+      <div class="sec">
+        <button class="btn-open long" id="btnOpen" onclick="openModal()">OPEN LONG</button>
+        <div class="btn-row">
+          <button class="btn-sec" onclick="clearAll()">Clear</button>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MONEYSHOT MODAL -->
+<div id="moneyShotModal">
+  <div class="ms-wrap">
+    <div class="ms-card-outer">
+      <canvas id="msShotCanvas"></canvas>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button id="msSaveBtn" onclick="msSave()">⬇ Salva immagine</button>
+      <button id="msCloseBtn" onclick="closeMoneyShotModal()">✕ Chiudi</button>
+    </div>
+  </div>
+</div>
+<!-- POSITION MANAGEMENT MODAL -->
+<div id="posModal">
+  <div class="pos-modal-card">
+    <div class="pos-modal-title" id="pmTitle">Chiudi posizione</div>
+    <div class="pos-modal-sub" id="pmSub"></div>
+    <div class="pos-modal-rows" id="pmRows"></div>
+    <div class="pos-modal-btns">
+      <button class="pmb-cancel" onclick="closePosModal()">Annulla</button>
+      <button class="pmb-confirm" id="pmConfirmBtn" onclick="executePosAction()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" onclick="ctxSet('entry')"><div class="ctx-dot" style="background:var(--yellow)"></div>Set Entry</div>
+  <div class="ctx-item" onclick="ctxSet('sl')"><div class="ctx-dot" style="background:var(--red)"></div>Set Stop Loss</div>
+  <div class="ctx-item" onclick="ctxSet('tp1')"><div class="ctx-dot" style="background:var(--green)"></div>Set TP1</div>
+  <div class="ctx-item" onclick="ctxSet('tp2')"><div class="ctx-dot" style="background:#3dffcc"></div>Set TP2</div>
+  <div class="ctx-item" onclick="ctxSet('tp3')"><div class="ctx-dot" style="background:#3dddff"></div>Set TP3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(0)"><div class="ctx-dot" style="background:#ffc940"></div>Set L1</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(1)"><div class="ctx-dot" style="background:#f59e0b"></div>Set L2</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(2)"><div class="ctx-dot" style="background:#fb923c"></div>Set L3</div>
+  <div class="ctx-item" style="display:none" onclick="ctxSetLadder(3)"><div class="ctx-dot" style="background:#ef4444"></div>Set L4</div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">Confirm Order</div>
+    <div class="modal-rows" id="modalRows"></div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn confirm" onclick="executeOrder()">Open Trade</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<!-- PAIR MODAL -->
+<div id="pairModal" onclick="if(event.target===this)closePairModal()">
+  <div class="pm-box">
+    <div class="pm-head">
+      <span class="pm-title">Seleziona Pair</span>
+      <button class="pm-close" onclick="closePairModal()">✕</button>
+    </div>
+    <div class="pm-search-wrap">
+      <input class="pm-search" id="pmSearch" placeholder="Cerca pair… es. BTC, SOL, PEPE"
+        oninput="renderPairModal(this.value)" autocomplete="off" spellcheck="false"/>
+    </div>
+    <div class="pm-cats" id="pmCats"></div>
+    <div class="pm-body" id="pmBody"></div>
+  </div>
+</div>
+
+<!-- HOTKEYS MODAL -->
+<div id="hkModal" class="hk-modal-bg" onclick="if(event.target===this)hkCloseModal()">
+  <div class="hk-modal-card">
+    <div class="hk-modal-head">
+      <div class="hk-modal-title">⌨️ Hotkeys</div>
+      <div class="hk-modal-sub">Clicca su un tasto per personalizzarlo, poi premi il nuovo tasto</div>
+      <button class="hk-modal-close" onclick="hkCloseModal()">✕</button>
+    </div>
+    <div class="hk-modal-body" id="hkModalBody"></div>
+    <div class="hk-modal-footer">
+      <button class="hk-reset-btn" onclick="hkResetDefaults()">↺ Ripristina default</button>
+      <div class="hk-footer-hint">Le combo Alt+* non sono personalizzabili</div>
+    </div>
+  </div>
+</div>
+<!-- HOTKEY CAPTURE OVERLAY -->
+<div id="hkCaptureOverlay" class="hk-capture-overlay" style="display:none">
+  <div class="hk-capture-card">
+    <div class="hk-capture-icon">⌨️</div>
+    <div class="hk-capture-title">Premi il nuovo tasto</div>
+    <div class="hk-capture-sub" id="hkCaptureAction">—</div>
+    <div class="hk-capture-hint">Premi Esc per annullare</div>
+  </div>
+</div>
+
+<script src="JS/riskflow.js"></script>
+<script src="JS/hotkeys.js"></script>
+<script src="JS/gdpr.js"></script>
+<script>
+  // Inject app footer dopo il DOM
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof rfInjectAppFooter === 'function') rfInjectAppFooter();
+  });
+</script>
+</body>
+</html>
