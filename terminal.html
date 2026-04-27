@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow — Coming Soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a12;
+    --purple: #7c3aed;
+    --purple2: #a855f7;
+    --purple-dim: #4c1d95;
+    --white: #ffffff;
+    --grey: #8b8fa8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* ── CANVAS WAVES ── */
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── NOISE GRAIN ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── GLOW BLOBS ── */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .blob-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, #4c1d9566, transparent 70%);
+    bottom: -200px; left: -150px;
+    animation: blobFloat 8s ease-in-out infinite;
+  }
+  .blob-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #6d28d944, transparent 70%);
+    top: -150px; right: -100px;
+    animation: blobFloat 10s ease-in-out infinite reverse;
+  }
+  @keyframes blobFloat {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(30px, -30px); }
+  }
+
+  /* ── MAIN CONTENT ── */
+  .container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  /* ── LOGO ── */
+  .logo {
+    font-family: 'Barlow', sans-serif;
+    font-size: clamp(72px, 12vw, 130px);
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+    filter: drop-shadow(0 0 60px #7c3aed66);
+  }
+  .logo .risk { color: #fff; }
+  .logo .flow { color: #8b5cf6; }
+
+  /* ── DIVIDER BAR ── */
+  .bar {
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--purple2));
+    border-radius: 2px;
+    animation: barGrow 0.8s cubic-bezier(0.16,1,0.3,1) 0.8s forwards;
+  }
+  @keyframes barGrow {
+    to { width: 200px; }
+  }
+
+  /* ── TERMINAL TEXT ── */
+  .terminal-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 1s forwards;
+  }
+  .terminal-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--purple2);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .terminal-text {
+    font-family: 'Barlow', sans-serif;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 1px;
+    line-height: 1.4;
+  }
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1.1em;
+    background: var(--purple2);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── SOCIALS ── */
+  .socials {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 1.4s forwards;
+  }
+  .social-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border: 1px solid #7c3aed55;
+    border-radius: 6px;
+    background: #7c3aed0d;
+    color: var(--white);
+    text-decoration: none;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .social-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #7c3aed22, transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .social-btn:hover {
+    border-color: var(--purple2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px #7c3aed33;
+  }
+  .social-btn:hover::before { opacity: 1; }
+  .social-btn svg { flex-shrink: 0; }
+  .social-btn .handle {
+    font-size: 12px;
+    color: var(--purple2);
+    font-family: 'JetBrains Mono', monospace;
+    display: block;
+    margin-top: 1px;
+  }
+  .btn-inner { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+
+  /* ── BOTTOM TAG ── */
+  .bottom-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--grey);
+    letter-spacing: 3px;
+    opacity: 0;
+    animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 1.8s forwards;
+  }
+  .bottom-tag span { color: var(--purple2); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="container">
+
+  <div class="logo">
+    <span class="risk">Risk</span><span class="flow">Flow</span>
+  </div>
+
+  <div class="bar"></div>
+
+  <div class="terminal-wrap">
+    <div class="terminal-label">// status update</div>
+    <div class="terminal-text" id="typed"></div>
+  </div>
+
+  <div class="socials">
+    <!-- X / Twitter -->
+    <a class="social-btn" href="https://x.com/RiskflowPro" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <div class="btn-inner">
+        <span>Seguici su X</span>
+        <span class="handle">@RiskflowPro</span>
+      </div>
+    </a>
+
+    <!-- Telegram -->
+    <a class="social-btn" href="https://t.me/riskflowpro" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      <div class="btn-inner">
+        <span>Canale Telegram</span>
+        <span class="handle">t.me/riskflowpro</span>
+      </div>
+    </a>
+
+    <!-- Website -->
+    <a class="social-btn" href="https://riskflow.pro" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <div class="btn-inner">
+        <span>Sito Web</span>
+        <span class="handle">riskflow.pro</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="bottom-tag">position sizing &amp; risk management <span>·</span> © 2025 RiskFlow</div>
+
+</div>
+
+<script>
+// ── ANIMATED WAVES ──────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function drawWaves() {
+  ctx.clearRect(0, 0, W, H);
+  const lines = 22;
+  for (let i = 0; i < lines; i++) {
+    const prog = i / lines;
+    const alpha = 0.04 + prog * 0.13;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(124,58,237,${alpha})`;
+    ctx.lineWidth = 1.3;
+    const yBase = H * 0.85 + i * 6;
+    const amp = 60 + i * 4;
+    const freq = 0.004 + i * 0.0002;
+    const phase = t * 0.6 + i * 0.3;
+    ctx.moveTo(0, yBase);
+    for (let x = 0; x <= W; x += 4) {
+      const y = yBase - amp * Math.sin(freq * x + phase) - (i * 3);
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  // top-right waves
+  for (let i = 0; i < 16; i++) {
+    const prog = i / 16;
+    const alpha = 0.03 + prog * 0.09;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(168,85,247,${alpha})`;
+    ctx.lineWidth = 1.1;
+    const yBase = -H * 0.1 + i * 8;
+    const amp = 50 + i * 5;
+    const freq = 0.005 + i * 0.0003;
+    const phase = -t * 0.5 + i * 0.4 + Math.PI;
+    ctx.moveTo(W * 0.4, yBase);
+    for (let x = W * 0.4; x <= W + 100; x += 4) {
+      const y = yBase + amp * Math.sin(freq * x + phase) + (i * 4);
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  t += 0.015;
+  requestAnimationFrame(drawWaves);
+}
+drawWaves();
+
+// ── TYPEWRITER ──────────────────────────────────────────────
+const msg = "Stiamo arrivando — seguici sui nostri social\nper la data d'uscita";
+const el = document.getElementById('typed');
+let idx = 0;
+
+function type() {
+  if (idx <= msg.length) {
+    const text = msg.slice(0, idx).replace('\n', '<br>');
+    el.innerHTML = text + '<span class="cursor"></span>';
+    idx++;
+    setTimeout(type, idx === 1 ? 1200 : 38);
+  }
+}
+setTimeout(type, 1200);
+</script>
+</body>
+</html>
