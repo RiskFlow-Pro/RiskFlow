@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow EA — Guida Installazione</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:        #0B1220;
+    --surface:   #0E1A2E;
+    --surface2:  #121F35;
+    --border:    #1C2D4A;
+    --border2:   #243657;
+    --accent:    #7C5CFC;
+    --accent2:   #A48AFF;
+    --accent3:   #C4AAFF;
+    --green:     #3DDC8C;
+    --green-dim: #1a8c4e;
+    --yellow:    #F0C040;
+    --red:       #E05555;
+    --text:      #E8EEF5;
+    --muted:     #6478A0;
+    --muted2:    #4A5A80;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Sora', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 2rem;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #7C5CFC18 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #7C5CFC18; border: 1px solid #7C5CFC40;
+    border-radius: 999px; padding: 4px 14px;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent2); font-weight: 500;
+    margin-bottom: 1.1rem;
+  }
+  .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .hero h1 {
+    font-size: 2rem; font-weight: 600; color: var(--text);
+    letter-spacing: -.02em; margin-bottom: .5rem;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent2); }
+  .hero p { font-size: 14px; color: var(--muted); max-width: 520px; line-height: 1.65; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.2rem; }
+  .pill {
+    font-size: 11px; font-weight: 500; padding: 3px 11px;
+    border-radius: 999px; border: 1px solid;
+  }
+  .pill-blue   { color: #60AAFF; border-color: #60AAFF44; background: #60AAFF0D; }
+  .pill-green  { color: var(--green); border-color: #3DDC8C44; background: #3DDC8C0D; }
+  .pill-purple { color: var(--accent2); border-color: #7C5CFC44; background: #7C5CFC0D; }
+
+  /* ── Section title ── */
+  .sec-title {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted2); margin: 2.5rem 0 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── File list ── */
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 8px; margin-bottom: .5rem;
+  }
+  .file-chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px;
+    font-family: var(--mono); font-size: 12px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted);
+  }
+  .file-chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-main   { background: var(--accent); }
+  .dot-inc    { background: var(--green); }
+  .file-chip.main-file { border-color: #7C5CFC44; color: var(--accent3); }
+
+  /* ── Alert box ── */
+  .alert {
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; line-height: 1.6; margin-top: 10px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-purple { background: #7C5CFC12; border: 1px solid #7C5CFC35; color: var(--accent3); }
+  .alert-green  { background: #3DDC8C0F; border: 1px solid #3DDC8C30; color: #7AEFB8; }
+  .alert-yellow { background: #F0C04010; border: 1px solid #F0C04035; color: #F5D06A; }
+
+  /* ── Steps ── */
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    align-items: start;
+    transition: border-color .2s;
+  }
+  .step:hover { border-color: var(--border2); }
+
+  .step-num {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff;
+    flex-shrink: 0;
+  }
+  .step-num.done { background: var(--green-dim); }
+
+  .step-body {}
+  .step-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+  .step-desc  { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  .path-code {
+    display: flex; align-items: center; gap: 10px;
+    background: #0A1020; border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 14px;
+    margin-top: 10px; font-family: var(--mono); font-size: 12px;
+    color: var(--accent2);
+  }
+  .path-code svg { flex-shrink: 0; opacity: .6; }
+
+  .kbd-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .kbd {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 4px 10px;
+    font-family: var(--mono); font-size: 12px; color: var(--accent3);
+  }
+
+  .tip {
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    background: #7C5CFC0A;
+    padding: 9px 14px; margin-top: 10px;
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+  }
+  .tip strong { color: var(--accent2); }
+
+  /* ── Params table ── */
+  .params-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin-top: 10px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; padding: 9px 14px;
+    font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted2); border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #ffffff04; }
+  .td-name { font-family: var(--mono); font-size: 12px; color: var(--accent2); white-space: nowrap; }
+  .td-val  { font-family: var(--mono); font-size: 12px; color: var(--green); }
+  .td-desc { color: var(--muted); font-size: 13px; }
+
+  /* ── Success banner ── */
+  .success {
+    background: #1a8c4e18; border: 1px solid #1a8c4e55;
+    border-radius: 12px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 2rem;
+  }
+  .success-icon { font-size: 24px; }
+  .success-text { font-size: 14px; color: var(--green); line-height: 1.5; }
+  .success-text strong { color: #7AEFB8; display: block; font-size: 15px; margin-bottom: 3px; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center; margin-top: 4rem;
+    font-size: 12px; color: var(--muted2);
+  }
+  .footer span { color: var(--accent2); }
+
+  b, strong { font-weight: 500; }
+  code { font-family: var(--mono); font-size: .88em; color: var(--accent2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow"><span></span> Expert Advisor · MetaTrader 5</div>
+    <h1>RiskFlow <em>EA</em> — Installazione</h1>
+    <p>Pannello di risk management visuale per MT5. Calcolo automatico del lot size, gestione SL/TP multipli e protezione del capitale integrata.</p>
+    <div class="hero-pills">
+      <span class="pill pill-blue">MT5 only</span>
+      <span class="pill pill-green">v2.00</span>
+      <span class="pill pill-purple">già compilato — pronto all'uso</span>
+    </div>
+  </div>
+
+  <!-- File del pacchetto -->
+  <div class="sec-title">File nel pacchetto</div>
+  <div class="file-grid">
+    <div class="file-chip main-file"><span class="dot dot-main"></span>RiskFlow_EA.ex5</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>panel.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>risk.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>lines.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>orders.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>protection.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>hotkeys.mqh</div>
+    <div class="file-chip"><span class="dot dot-inc"></span>trades.mqh</div>
+  </div>
+  <div class="alert alert-purple">
+    <span class="alert-icon">ℹ</span>
+    <div>Hai già il file <code>.ex5</code> compilato — <strong>non serve aprire MetaEditor né compilare nulla</strong>. I file <code>.mqh</code> non servono per l'uso, sono inclusi solo come riferimento.</div>
+  </div>
+
+  <!-- Steps -->
+  <div class="sec-title">Passi di installazione</div>
+  <div class="steps">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Apri la cartella dati di MetaTrader 5</div>
+        <div class="step-desc">Avvia MetaTrader 5. Dal menu in alto clicca su <b>File → Apri cartella dati</b>. Si aprirà una finestra di Esplora File nella directory di installazione di MT5.</div>
+        <div class="kbd-row">
+          <span class="kbd">File</span>
+          <span class="kbd">→</span>
+          <span class="kbd">Apri cartella dati</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Naviga fino alla cartella degli Expert Advisors</div>
+        <div class="step-desc">Nella finestra di Esplora File appena aperta, entra nella cartella:</div>
+        <div class="path-code">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3.5" width="12" height="9" rx="1.5" stroke="#A48AFF" stroke-width="1"/><path d="M1 6h12M1 6l2.5-2.5h3.5" stroke="#A48AFF" stroke-width="1" stroke-linecap="round"/></svg>
+          MQL5 / Experts /
+        </div>
+        <div class="tip">Puoi anche creare una sottocartella dedicata, ad esempio <code>Experts/RiskFlow/</code>, per tenere l'EA separato dagli altri.</div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Copia il file <code>RiskFlow_EA.ex5</code> nella cartella</div>
+        <div class="step-desc">Incolla il file <code>RiskFlow_EA.ex5</code> nella cartella <code>MQL5/Experts/</code> (o nella sottocartella che hai scelto). I file <code>.mqh</code> non sono necessari per far girare l'EA.</div>
+        <div class="alert alert-yellow" style="margin-top:10px;">
+          <span class="alert-icon">⚠</span>
+          <div>Assicurati di copiare il file <code>.ex5</code> e <strong>non</strong> il file <code>.mq5</code> (sorgente). Il file già compilato è quello con estensione <code>.ex5</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Ricarica gli Expert Advisors in MT5</div>
+        <div class="step-desc">Torna in MetaTrader 5. Nel pannello <b>Navigator</b> (aprilo con <b>Ctrl+N</b> se non è visibile), fai clic destro su <b>Expert Advisors</b> e scegli <b>Aggiorna</b>. L'EA apparirà nell'elenco.</div>
+        <div class="kbd-row">
+          <span class="kbd">Ctrl + N</span>
+          <span style="font-size:12px; color:var(--muted);">apre il Navigator</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Trascina l'EA su un grafico aperto</div>
+        <div class="step-desc">Nel Navigator, espandi <b>Expert Advisors</b> e trova <code>RiskFlow_EA</code>. Trascinalo direttamente sul grafico del simbolo che vuoi usare (es. EURUSD, BTCUSD…). Si aprirà la finestra di configurazione.</div>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Configura i parametri iniziali</div>
+        <div class="step-desc">Nella finestra che si apre, vai sulla scheda <b>Ingressi</b> e imposta i valori in base alla tua operatività:</div>
+        <div class="params-wrap">
+          <table>
+            <thead>
+              <tr><th>Parametro</th><th>Default</th><th>Descrizione</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-name">InpRiskPct</td>
+                <td class="td-val">0.2</td>
+                <td class="td-desc">Rischio per trade in % sul bilancio. Es. 0.5 = 0.5%</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpDLLPct</td>
+                <td class="td-val">2.0</td>
+                <td class="td-desc">Limite di perdita giornaliera % (Daily Loss Limit)</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpDLLActive</td>
+                <td class="td-val">false</td>
+                <td class="td-desc">Attiva il blocco automatico al raggiungimento del DLL</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpSLPActive</td>
+                <td class="td-val">false</td>
+                <td class="td-desc">Attiva lo SL Shield (protezione stop loss)</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpSpreadInSL</td>
+                <td class="td-val">true</td>
+                <td class="td-desc">Include lo spread nel calcolo della distanza SL</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpFeeTaker</td>
+                <td class="td-val">0.0</td>
+                <td class="td-desc">Commissione taker % (per crypto/CFD con fee)</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpConfirmTrade</td>
+                <td class="td-val">true</td>
+                <td class="td-desc">Mostra finestra di conferma prima di aprire ogni ordine</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpPanelScale</td>
+                <td class="td-val">130</td>
+                <td class="td-desc">Scala grafica del pannello (valori: 100–170)</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpTextScale</td>
+                <td class="td-val">100</td>
+                <td class="td-desc">Scala del testo nel pannello (valori: 50–130)</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpMagic</td>
+                <td class="td-val">202401</td>
+                <td class="td-desc">Magic number per identificare gli ordini dell'EA</td>
+              </tr>
+              <tr>
+                <td class="td-name">InpSlippage</td>
+                <td class="td-val">3</td>
+                <td class="td-desc">Slippage massimo consentito in punti</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tip"><strong>Consiglio:</strong> se usi più EA contemporaneamente, cambia <code>InpMagic</code> con un numero diverso per ognuno, così non si confondono tra loro.</div>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <div class="step-title">Abilita il trading automatico in MT5</div>
+        <div class="step-desc">Vai sulla scheda <b>Common</b> nella stessa finestra di configurazione e assicurati che la voce <b>"Consenti trading automatico"</b> sia spuntata. Poi clicca <b>OK</b>.</div>
+        <div class="alert alert-yellow" style="margin-top:10px;">
+          <span class="alert-icon">⚠</span>
+          <div>Controlla anche il pulsante <b>AutoTrading</b> nella barra degli strumenti di MT5 (deve essere verde e attivo), altrimenti l'EA non potrà aprire ordini.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step">
+      <div class="step-num done">✓</div>
+      <div class="step-body">
+        <div class="step-title">Verifica che il pannello sia attivo</div>
+        <div class="step-desc">Se tutto è andato a buon fine, il pannello grafico di RiskFlow apparirà sul lato destro del grafico, con il tema navy/viola. In basso a destra del grafico vedrai anche la faccina sorridente (😊) che indica che l'EA è in esecuzione.</div>
+        <div class="alert alert-green" style="margin-top:10px;">
+          <span class="alert-icon">✓</span>
+          <div>Il messaggio <b>"RiskFlow v2 MT5 pronto"</b> comparirà nella barra delle notifiche in basso — installazione completata!</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- Success -->
+  <div class="success">
+    <div class="success-icon">🚀</div>
+    <div class="success-text">
+      <strong>Pronto per fare trading</strong>
+      RiskFlow EA è installato e attivo. Consulta la guida all'utilizzo per imparare a impostare SL, TP e aprire ordini con il pannello.
+    </div>
+  </div>
+
+  <div class="footer">
+    RiskFlow EA v2.00 · MetaTrader 5 · <span>Guida installazione</span>
+  </div>
+
+</div>
+</body>
+</html>
