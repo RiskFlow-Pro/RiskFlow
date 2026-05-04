@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiskFlow — License Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bricolage+Grotesque:wght@400;600;800&display=swap');
+
+  :root {
+    --bg:      #07080a;
+    --s1:      #0e1014;
+    --s2:      #13161c;
+    --border:  #1c2030;
+    --accent:  #3de8a0;
+    --blue:    #4da6ff;
+    --red:     #ff5566;
+    --yellow:  #ffc84a;
+    --text:    #dde2ee;
+    --muted:   #4a5070;
+    --mono:    'DM Mono', monospace;
+    --sans:    'Bricolage Grotesque', sans-serif;
+    --radius:  10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+  /* ── LOGIN SCREEN ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(61,232,160,0.07) 0%, transparent 70%);
+  }
+  .login-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 44px;
+    width: 380px;
+    text-align: center;
+  }
+  .login-logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .login-logo span { color: var(--accent); }
+  .login-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 36px; }
+  .login-card input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .login-card input:focus { border-color: var(--accent); }
+  .btn-login {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.88rem;
+    padding: 13px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.15s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-login:hover { opacity: 0.88; transform: translateY(-1px); }
+  #loginError { color: var(--red); font-size: 0.78rem; margin-top: 12px; min-height: 20px; }
+
+  /* ── APP SHELL ── */
+  #appScreen { display: none; }
+
+  header {
+    background: var(--s1);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .hlogo { font-weight: 800; font-size: 1rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: blink 2.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .hright { display: flex; align-items: center; gap: 14px; font-size: 0.78rem; color: var(--muted); }
+  .btn-sm {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 36px 32px; display: grid; gap: 24px; }
+
+  /* ── STATS ── */
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .stat {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color, var(--accent));
+    opacity: 0.5;
+  }
+  .stat-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .stat-val { font-family: var(--mono); font-size: 2rem; font-weight: 500; color: var(--accent-color, var(--accent)); }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .panel-head {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .panel-head h2 { font-size: 0.88rem; font-weight: 600; }
+
+  /* ── FORM ── */
+  .form-grid { padding: 24px; display: grid; grid-template-columns: 2.5fr 1.6fr 0.8fr 0.8fr 2fr auto; gap: 12px; align-items: end; }
+  .fld { display: flex; flex-direction: column; gap: 5px; }
+  .fld label { font-size: 0.67rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .fld input, .fld select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 9px 12px;
+    border-radius: 7px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .fld input:focus, .fld select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61,232,160,0.08); }
+  .fld select option { background: #13161c; }
+
+  .btn-create {
+    background: var(--accent);
+    color: #000;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 9px 20px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.15s;
+    align-self: end;
+  }
+  .btn-create:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* Generated key display */
+  .key-result {
+    margin: 0 24px 20px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .key-result.show { display: flex; }
+  .key-result-text { font-family: var(--mono); font-size: 0.95rem; color: var(--accent); letter-spacing: 0.12em; word-break: break-all; }
+  .btn-copy {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── TABLE ── */
+  .table-toolbar { display: flex; align-items: center; gap: 10px; }
+  .search {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 7px 12px;
+    border-radius: 6px;
+    outline: none;
+    width: 200px;
+    transition: border-color 0.2s;
+  }
+  .search:focus { border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: rgba(255,255,255,0.018); }
+  th { padding: 10px 20px; text-align: left; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 20px; font-size: 0.8rem; border-bottom: 1px solid rgba(28,32,48,0.7); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .key-val { font-family: var(--mono); color: var(--accent); cursor: pointer; font-size: 0.76rem; letter-spacing: 0.04em; }
+  .key-val:hover { color: #fff; }
+  .mono-sm { font-family: var(--mono); font-size: 0.76rem; }
+
+  /* badges */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 20px; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.04em; }
+  .badge::before { content:''; width:4px; height:4px; border-radius:50%; background:currentColor; }
+  .b-green  { background:rgba(61,232,160,0.1);  color:var(--accent);  border:1px solid rgba(61,232,160,0.2); }
+  .b-red    { background:rgba(255,85,102,0.1);   color:var(--red);     border:1px solid rgba(255,85,102,0.2); }
+  .b-yellow { background:rgba(255,200,74,0.1);   color:var(--yellow);  border:1px solid rgba(255,200,74,0.2); }
+
+  /* action buttons */
+  .acts { display:flex; gap:6px; }
+  .btn-act {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+  }
+  .btn-act:hover { border-color: var(--text); color: var(--text); }
+  .btn-act.danger { border-color: rgba(255,85,102,0.3); color: var(--red); }
+  .btn-act.danger:hover { background: rgba(255,85,102,0.08); }
+
+  /* hwid chips */
+  .chips { display:flex; flex-wrap:wrap; gap:3px; }
+  .chip { font-family:var(--mono); font-size:0.6rem; background:rgba(77,166,255,0.08); border:1px solid rgba(77,166,255,0.15); color:var(--blue); padding:2px 6px; border-radius:3px; }
+
+  /* empty */
+  .empty { padding: 60px 20px; text-align:center; color:var(--muted); font-size:0.82rem; }
+
+  /* toast */
+  #toast {
+    position:fixed; bottom:24px; right:24px;
+    background:var(--s2); border:1px solid var(--border);
+    padding:12px 18px; border-radius:9px;
+    font-size:0.8rem; display:none;
+    align-items:center; gap:8px;
+    z-index:999; box-shadow:0 8px 28px rgba(0,0,0,0.5);
+    animation: toastIn 0.2s ease; max-width:300px;
+  }
+  #toast.show { display:flex; }
+  @keyframes toastIn { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  @media(max-width:800px) {
+    .form-grid { grid-template-columns:1fr 1fr; }
+    .stats { grid-template-columns:1fr 1fr; }
+    main { padding:20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">Risk<span>Flow</span></div>
+    <div class="login-sub">License Manager — Accesso admin</div>
+    <input id="loginEmail" type="email" placeholder="Email admin" autocomplete="email">
+    <input id="loginPass" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="btn-login" onclick="doLogin()">Accedi</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appScreen">
+  <header>
+    <div class="hlogo"><div class="dot"></div>RiskFlow <span style="color:var(--muted);font-weight:400">/ Licenze</span></div>
+    <div class="hright">
+      <span id="userEmail"></span>
+      <button class="btn-sm" onclick="doLogout()">Esci</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat" style="--accent-color:var(--accent)">
+        <div class="stat-label">Totale</div>
+        <div class="stat-val" id="sTotal">—</div>
+      </div>
+      <div class="stat" style="--accent-color:var(--accent)">
+        <div class="stat-label">Attive</div>
+        <div class="stat-val" id="sActive">—</div>
+      </div>
+      <div class="stat" style="--accent-color:var(--yellow)">
+        <div class="stat-label">Scadute</div>
+        <div class="stat-val" id="sExpired" style="color:var(--yellow)">—</div>
+      </div>
+      <div class="stat" style="--accent-color:var(--red)">
+        <div class="stat-label">Revocate</div>
+        <div class="stat-val" id="sRevoked" style="color:var(--red)">—</div>
+      </div>
+    </div>
+
+    <!-- CREATE -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>➕ Crea licenza</h2>
+        <button class="btn-sm" onclick="genKey()">🎲 Genera chiave casuale</button>
+      </div>
+      <div class="form-grid">
+        <div class="fld">
+          <label>Chiave licenza</label>
+          <input id="fKey" type="text" placeholder="RF-XXXXX-XXXXX-XXXXX">
+        </div>
+        <div class="fld">
+          <label>Scadenza</label>
+          <input id="fExpiry" type="date">
+        </div>
+        <div class="fld">
+          <label>Max PC</label>
+          <input id="fMax" type="number" value="1" min="1" max="10">
+        </div>
+        <div class="fld">
+          <label>Piano</label>
+          <select id="fPlan">
+            <option value="standard">Standard</option>
+            <option value="pro">Pro</option>
+            <option value="lifetime">Lifetime</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Note (cliente, email…)</label>
+          <input id="fNotes" type="text" placeholder="Mario Rossi — mario@email.com">
+        </div>
+        <button class="btn-create" onclick="createLicense()">Crea</button>
+      </div>
+      <div class="key-result" id="keyResult">
+        <span class="key-result-text" id="keyResultText"></span>
+        <button class="btn-copy" onclick="copyResult()">📋 Copia</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>🔑 Licenze</h2>
+        <div class="table-toolbar">
+          <input class="search" id="searchBox" placeholder="Cerca…" oninput="filterTable()">
+          <button class="btn-sm" onclick="loadLicenses()">↻ Aggiorna</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Chiave</th>
+            <th>Scadenza</th>
+            <th>PC</th>
+            <th>Piano</th>
+            <th>Stato</th>
+            <th>HWID</th>
+            <th>Note</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="8"><div class="empty">Caricamento…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<!-- ── FIREBASE SDK ── -->
+<script type="module">
+import { initializeApp }         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                                  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc,
+         setDoc, updateDoc, arrayUnion, Timestamp }
+                                  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ══════════════════════════════════════════════════════════════════
+//  ⚙️  CONFIGURA QUI — copia da Firebase Console → Impostazioni
+// ══════════════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "INSERISCI_apiKey",
+  authDomain:        "TUOPROGETTO.firebaseapp.com",
+  projectId:         "TUOPROGETTO",
+  storageBucket:     "TUOPROGETTO.appspot.com",
+  messagingSenderId: "INSERISCI_messagingSenderId",
+  appId:             "INSERISCI_appId"
+};
+// ══════════════════════════════════════════════════════════════════
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let allLics = [];
+
+// ── AUTH ─────────────────────────────────────────────────────────
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("appScreen").style.display   = "block";
+    document.getElementById("userEmail").textContent     = user.email;
+    loadLicenses();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+    document.getElementById("appScreen").style.display   = "none";
+  }
+});
+
+window.doLogin = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPass").value;
+  document.getElementById("loginError").textContent = "";
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    document.getElementById("loginError").textContent =
+      e.code === "auth/invalid-credential" ? "❌ Email o password errata"
+      : "❌ " + e.message;
+  }
+};
+
+window.doLogout = () => signOut(auth);
+
+// ── LOAD ─────────────────────────────────────────────────────────
+window.loadLicenses = async () => {
+  try {
+    const snap = await getDocs(collection(db, "licenses"));
+    allLics = [];
+    snap.forEach(d => allLics.push({ id: d.id, ...d.data() }));
+    renderTable(allLics);
+    updateStats(allLics);
+  } catch(e) {
+    toast("❌ " + e.message, "red");
+  }
+};
+
+// ── STATS ─────────────────────────────────────────────────────────
+function updateStats(lics) {
+  const now     = new Date().toISOString().slice(0,10);
+  const active  = lics.filter(l =>  l.active && l.expiry >= now).length;
+  const expired = lics.filter(l =>  l.active && l.expiry <  now).length;
+  const revoked = lics.filter(l => !l.active).length;
+  document.getElementById("sTotal").textContent   = lics.length;
+  document.getElementById("sActive").textContent  = active;
+  document.getElementById("sExpired").textContent = expired;
+  document.getElementById("sRevoked").textContent = revoked;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function renderTable(lics) {
+  const tb  = document.getElementById("tbody");
+  const now = new Date().toISOString().slice(0,10);
+  if (!lics.length) {
+    tb.innerHTML = `<tr><td colspan="8"><div class="empty">Nessuna licenza</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = lics.map(l => {
+    const expired = l.expiry < now;
+    const badge   = !l.active   ? `<span class="badge b-red">Revocata</span>`
+                  : expired     ? `<span class="badge b-yellow">Scaduta</span>`
+                                : `<span class="badge b-green">Attiva</span>`;
+    const hwids   = (l.hwids||[]).map(h =>
+      `<span class="chip">${h.slice(0,10)}…</span>`).join("") || `<span style="color:var(--muted);font-size:.72rem">nessuno</span>`;
+    const pcColor = (l.hwids||[]).length >= (l.maxInstalls||1) ? "var(--red)" : "var(--text)";
+    const plan    = l.plan==="lifetime" ? `<span style="color:var(--yellow)">${l.plan}</span>`
+                  : l.plan==="pro"      ? `<span style="color:var(--blue)">${l.plan}</span>`
+                  : l.plan || "—";
+    return `<tr>
+      <td class="key-val" onclick="copyText('${l.id}')" title="Clicca per copiare">${l.id}</td>
+      <td class="mono-sm">${l.expiry||"—"}</td>
+      <td class="mono-sm" style="color:${pcColor}">${(l.hwids||[]).length}/${l.maxInstalls||1}</td>
+      <td>${plan}</td>
+      <td>${badge}</td>
+      <td><div class="chips">${hwids}</div></td>
+      <td style="font-size:.72rem;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.notes||''}">${l.notes||"—"}</td>
+      <td><div class="acts">
+        ${l.active
+          ? `<button class="btn-act danger" onclick="revoke('${l.id}')">Revoca</button>`
+          : `<button class="btn-act" onclick="reactivate('${l.id}')">Riattiva</button>`}
+        <button class="btn-act" onclick="resetHWID('${l.id}')">Reset PC</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+}
+
+// ── FILTER ─────────────────────────────────────────────────────────
+window.filterTable = () => {
+  const q = document.getElementById("searchBox").value.toLowerCase();
+  renderTable(allLics.filter(l =>
+    (l.id||"").toLowerCase().includes(q) ||
+    (l.notes||"").toLowerCase().includes(q) ||
+    (l.plan||"").toLowerCase().includes(q)
+  ));
+};
+
+// ── GENERATE KEY ───────────────────────────────────────────────────
+window.genKey = () => {
+  const abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const seg = () => Array.from({length:5},()=>abc[Math.floor(Math.random()*abc.length)]).join("");
+  const k   = `RF-${seg()}-${seg()}-${seg()}`;
+  document.getElementById("fKey").value = k;
+  showResult(k);
+};
+
+function showResult(k) {
+  document.getElementById("keyResultText").textContent = k;
+  document.getElementById("keyResult").classList.add("show");
+}
+
+// ── CREATE ─────────────────────────────────────────────────────────
+window.createLicense = async () => {
+  let key    = document.getElementById("fKey").value.trim();
+  const exp  = document.getElementById("fExpiry").value;
+  const max  = parseInt(document.getElementById("fMax").value)||1;
+  const plan = document.getElementById("fPlan").value;
+  const note = document.getElementById("fNotes").value.trim();
+
+  if (!key) { window.genKey(); key = document.getElementById("fKey").value; }
+  if (!exp)  { toast("⚠ Inserisci data scadenza","yellow"); return; }
+
+  try {
+    await setDoc(doc(db,"licenses",key), {
+      key, expiry: exp, maxInstalls: max, plan,
+      notes: note, active: true, hwids: [],
+      accountNumbers: [],
+      createdAt: new Date().toISOString(),
+      lastSeen: null
+    });
+    toast("✅ Licenza creata: " + key, "green");
+    showResult(key);
+    loadLicenses();
+  } catch(e) { toast("❌ " + e.message,"red"); }
+};
+
+// ── REVOKE ─────────────────────────────────────────────────────────
+window.revoke = async (id) => {
+  if (!confirm("Revocare la licenza "+id+"?")) return;
+  try {
+    await updateDoc(doc(db,"licenses",id), { active: false });
+    toast("🚫 Revocata","red"); loadLicenses();
+  } catch(e) { toast("❌ "+e.message,"red"); }
+};
+
+// ── REACTIVATE ─────────────────────────────────────────────────────
+window.reactivate = async (id) => {
+  try {
+    await updateDoc(doc(db,"licenses",id), { active: true });
+    toast("✅ Riattivata","green"); loadLicenses();
+  } catch(e) { toast("❌ "+e.message,"red"); }
+};
+
+// ── RESET HWID ─────────────────────────────────────────────────────
+window.resetHWID = async (id) => {
+  if (!confirm("Reset HWID per "+id+"?\nIl cliente potrà registrare nuovi PC.")) return;
+  try {
+    await updateDoc(doc(db,"licenses",id), { hwids: [] });
+    toast("♻ HWID resettato","blue"); loadLicenses();
+  } catch(e) { toast("❌ "+e.message,"red"); }
+};
+
+// ── COPY ───────────────────────────────────────────────────────────
+window.copyText   = t => navigator.clipboard.writeText(t).then(()=>toast("📋 Copiato","blue"));
+window.copyResult = () => copyText(document.getElementById("keyResultText").textContent);
+
+// ── TOAST ──────────────────────────────────────────────────────────
+let _tt;
+function toast(msg, type="green") {
+  const el = document.getElementById("toast");
+  const c  = {green:"var(--accent)",red:"var(--red)",yellow:"var(--yellow)",blue:"var(--blue)"};
+  el.style.borderColor = c[type]||c.green;
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(_tt);
+  _tt = setTimeout(()=>el.classList.remove("show"),3200);
+}
+
+// ── DEFAULT DATE (+1 mese) ─────────────────────────────────────────
+const d = new Date(); d.setMonth(d.getMonth()+1);
+document.getElementById("fExpiry").value = d.toISOString().slice(0,10);
+</script>
+</body>
+</html>
