@@ -38,7 +38,6 @@
     min-height: 100vh;
   }
 
-  /* ── Layout ── */
   .wrap {
     max-width: 780px;
     margin: 0 auto;
@@ -124,6 +123,7 @@
   .alert-purple { background: #7C5CFC12; border: 1px solid #7C5CFC35; color: var(--accent3); }
   .alert-green  { background: #3DDC8C0F; border: 1px solid #3DDC8C30; color: #7AEFB8; }
   .alert-yellow { background: #F0C04010; border: 1px solid #F0C04035; color: #F5D06A; }
+  .alert-red    { background: #E0555510; border: 1px solid #E0555535; color: #FF8888; }
 
   /* ── Steps ── */
   .steps { display: flex; flex-direction: column; gap: 12px; }
@@ -140,6 +140,14 @@
     transition: border-color .2s;
   }
   .step:hover { border-color: var(--border2); }
+  .step.step-license {
+    border-color: #7C5CFC44;
+    background: linear-gradient(135deg, #0E1A2E 0%, #130D2A 100%);
+  }
+  .step.step-license:hover { border-color: #7C5CFC88; }
+  .step.step-warning {
+    border-color: #F0C04035;
+  }
 
   .step-num {
     width: 34px; height: 34px; border-radius: 50%;
@@ -148,7 +156,9 @@
     font-size: 13px; font-weight: 600; color: #fff;
     flex-shrink: 0;
   }
-  .step-num.done { background: var(--green-dim); }
+  .step-num.done   { background: var(--green-dim); }
+  .step-num.purple { background: var(--accent); box-shadow: 0 0 12px #7C5CFC55; }
+  .step-num.warn   { background: #8a6a10; }
 
   .step-body {}
   .step-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
@@ -163,7 +173,74 @@
   }
   .path-code svg { flex-shrink: 0; opacity: .6; }
 
-  .kbd-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  /* ── Screenshot mockup per whitelist ── */
+  .mockup-window {
+    background: #0A1018;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .mockup-titlebar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 7px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mockup-titlebar::before {
+    content: '';
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #F0C040; opacity: .7;
+    display: inline-block;
+  }
+  .mockup-body { padding: 14px 16px; }
+  .mockup-tabs {
+    display: flex; gap: 2px; margin-bottom: 14px;
+  }
+  .mockup-tab {
+    padding: 5px 14px; font-size: 11px; border-radius: 5px 5px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    color: var(--muted);
+  }
+  .mockup-tab.active {
+    background: var(--surface2); color: var(--accent2);
+    border-color: var(--accent);
+  }
+  .mockup-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 0; font-size: 12px; color: var(--muted);
+    border-bottom: 1px solid #1a2540;
+  }
+  .mockup-row:last-child { border-bottom: none; }
+  .mockup-row.highlight { color: var(--text); }
+  .mockup-checkbox {
+    width: 13px; height: 13px; border-radius: 3px;
+    border: 1px solid var(--border2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+  }
+  .mockup-checkbox.checked {
+    background: var(--accent); border-color: var(--accent);
+    color: white;
+  }
+  .mockup-url-row {
+    display: flex; align-items: center; gap: 8px;
+    background: #060E1A; border: 1px solid var(--accent);
+    border-radius: 6px; padding: 6px 10px; margin-top: 8px;
+  }
+  .mockup-url-row span { color: var(--green); font-size: 12px; }
+  .mockup-arrow {
+    color: var(--accent2); font-size: 11px;
+    background: #7C5CFC20; border: 1px solid #7C5CFC40;
+    border-radius: 4px; padding: 2px 8px;
+    margin-left: auto;
+  }
+
+  .kbd-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
   .kbd {
     background: var(--surface2); border: 1px solid var(--border2);
     border-radius: 6px; padding: 4px 10px;
@@ -178,6 +255,32 @@
     font-size: 13px; color: var(--muted); line-height: 1.6;
   }
   .tip strong { color: var(--accent2); }
+
+  .tip-yellow {
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 8px 8px 0;
+    background: #F0C04008;
+    padding: 9px 14px; margin-top: 10px;
+    font-size: 13px; color: #c9a84c; line-height: 1.6;
+  }
+  .tip-yellow strong { color: var(--yellow); }
+
+  /* ── License key box ── */
+  .license-box {
+    background: #080F1E;
+    border: 1px solid #7C5CFC44;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .license-icon { font-size: 20px; flex-shrink: 0; }
+  .license-key {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--accent2); letter-spacing: .08em;
+    flex: 1;
+  }
+  .license-key small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; letter-spacing: 0; }
 
   /* ── Params table ── */
   .params-wrap {
@@ -197,6 +300,7 @@
   .td-name { font-family: var(--mono); font-size: 12px; color: var(--accent2); white-space: nowrap; }
   .td-val  { font-family: var(--mono); font-size: 12px; color: var(--green); }
   .td-desc { color: var(--muted); font-size: 13px; }
+  .td-name.highlight { color: #F0C040; }
 
   /* ── Success banner ── */
   .success {
@@ -218,6 +322,23 @@
 
   b, strong { font-weight: 500; }
   code { font-family: var(--mono); font-size: .88em; color: var(--accent2); }
+
+  /* ── Journal log preview ── */
+  .log-preview {
+    background: #060D18;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.8;
+  }
+  .log-line { display: flex; gap: 10px; }
+  .log-time { color: var(--muted2); flex-shrink: 0; }
+  .log-ok   { color: var(--green); }
+  .log-err  { color: var(--red); }
+  .log-info { color: var(--accent2); }
 </style>
 </head>
 <body>
@@ -227,7 +348,7 @@
   <div class="hero">
     <div class="hero-eyebrow"><span></span> Expert Advisor · MetaTrader 5</div>
     <h1>RiskFlow <em>EA</em> — Installazione</h1>
-    <p>Pannello di risk management visuale per MT5. Calcolo automatico del lot size, gestione SL/TP multipli e protezione del capitale integrata.</p>
+    <p>Pannello di risk management visuale per MT5. Calcolo automatico del lot size, gestione SL/TP multipli, protezione del capitale e sistema licenze integrato.</p>
     <div class="hero-pills">
       <span class="pill pill-blue">MT5 only</span>
       <span class="pill pill-green">v2.00</span>
@@ -237,19 +358,12 @@
 
   <!-- File del pacchetto -->
   <div class="sec-title">File nel pacchetto</div>
-  <div class="file-grid">
-    <div class="file-chip main-file"><span class="dot dot-main"></span>RiskFlow_EA.ex5</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>panel.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>risk.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>lines.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>orders.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>protection.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>hotkeys.mqh</div>
-    <div class="file-chip"><span class="dot dot-inc"></span>trades.mqh</div>
+  <div class="file-grid" style="grid-template-columns: auto;">
+    <div class="file-chip main-file" style="width: fit-content;"><span class="dot dot-main"></span>RiskFlow_EA.ex5</div>
   </div>
   <div class="alert alert-purple">
     <span class="alert-icon">ℹ</span>
-    <div>Hai già il file <code>.ex5</code> compilato — <strong>non serve aprire MetaEditor né compilare nulla</strong>. I file <code>.mqh</code> non servono per l'uso, sono inclusi solo come riferimento.</div>
+    <div>Il file <code>.ex5</code> è già compilato — <strong>non serve aprire MetaEditor né compilare nulla</strong>. Copia e incolla direttamente nella cartella di MT5.</div>
   </div>
 
   <!-- Steps -->
@@ -264,7 +378,7 @@
         <div class="step-desc">Avvia MetaTrader 5. Dal menu in alto clicca su <b>File → Apri cartella dati</b>. Si aprirà una finestra di Esplora File nella directory di installazione di MT5.</div>
         <div class="kbd-row">
           <span class="kbd">File</span>
-          <span class="kbd">→</span>
+          <span style="font-size:12px; color:var(--muted);">→</span>
           <span class="kbd">Apri cartella dati</span>
         </div>
       </div>
@@ -289,17 +403,51 @@
       <div class="step-num">3</div>
       <div class="step-body">
         <div class="step-title">Copia il file <code>RiskFlow_EA.ex5</code> nella cartella</div>
-        <div class="step-desc">Incolla il file <code>RiskFlow_EA.ex5</code> nella cartella <code>MQL5/Experts/</code> (o nella sottocartella che hai scelto). I file <code>.mqh</code> non sono necessari per far girare l'EA.</div>
+        <div class="step-desc">Incolla il file <code>RiskFlow_EA.ex5</code> nella cartella <code>MQL5/Experts/</code> (o nella sottocartella che hai scelto).</div>
         <div class="alert alert-yellow" style="margin-top:10px;">
           <span class="alert-icon">⚠</span>
-          <div>Assicurati di copiare il file <code>.ex5</code> e <strong>non</strong> il file <code>.mq5</code> (sorgente). Il file già compilato è quello con estensione <code>.ex5</code>.</div>
+          <div>Assicurati che il file abbia estensione <code>.ex5</code> — è il file compilato pronto all'uso.</div>
         </div>
       </div>
     </div>
 
-    <!-- Step 4 -->
+    <!-- Step 4 — WHITELIST (nuovo) -->
+    <div class="step step-warning">
+      <div class="step-num warn">4</div>
+      <div class="step-body">
+        <div class="step-title">⚠ Configura le Opzioni di MT5</div>
+        <div class="step-desc">
+          Vai su <b>Tools → Opzioni</b> e configura due impostazioni obbligatorie prima di avviare l'EA.
+        </div>
+
+        <div style="margin-top:14px; font-size:12px; color:var(--muted); font-family:var(--mono);">1 — Expert Advisors → Permetti WebRequests per gli URL elencati</div>
+        <div style="margin-top:6px; border-radius:10px; overflow:hidden; border:1px solid var(--border2);">
+          <img src="mt5_options.png" alt="MT5 Options — Expert Advisors" style="width:100%; display:block;">
+        </div>
+        <div class="tip" style="margin-top:8px;">Spunta <b>Permetti WebRequests per gli URL elencati</b> e aggiungi <code>https://firestore.googleapis.com</code>. Senza questo l'EA si chiude subito con <code>INIT_FAILED</code>.</div>
+
+        <div style="margin-top:14px; font-size:12px; color:var(--muted); font-family:var(--mono);">2 — Compravendita → Trading con un click</div>
+        <div style="margin-top:6px; border-radius:10px; overflow:hidden; border:1px solid var(--border2);">
+          <img src="mt5_oneclick.png" alt="MT5 Options — Compravendita" style="width:100%; display:block;">
+        </div>
+        <div class="tip" style="margin-top:8px;">Spunta <b>Trading con un click</b> per poter aprire ordini direttamente dal pannello.</div>
+
+        <div class="kbd-row" style="margin-top:12px;">
+          <span class="kbd">Tools</span>
+          <span style="font-size:12px; color:var(--muted);">→</span>
+          <span class="kbd">Opzioni</span>
+        </div>
+
+        <div class="alert alert-red" style="margin-top:10px;">
+          <span class="alert-icon">🚫</span>
+          <div>Se salti questo step, l'EA si chiude subito con errore <code>INIT_FAILED</code> e nel tab <b>Experts</b> non vedrai nessun messaggio. <strong>È il primo controllo da fare.</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
     <div class="step">
-      <div class="step-num">4</div>
+      <div class="step-num">5</div>
       <div class="step-body">
         <div class="step-title">Ricarica gli Expert Advisors in MT5</div>
         <div class="step-desc">Torna in MetaTrader 5. Nel pannello <b>Navigator</b> (aprilo con <b>Ctrl+N</b> se non è visibile), fai clic destro su <b>Expert Advisors</b> e scegli <b>Aggiorna</b>. L'EA apparirà nell'elenco.</div>
@@ -310,21 +458,64 @@
       </div>
     </div>
 
-    <!-- Step 5 -->
+    <!-- Step 6 -->
     <div class="step">
-      <div class="step-num">5</div>
+      <div class="step-num">6</div>
       <div class="step-body">
         <div class="step-title">Trascina l'EA su un grafico aperto</div>
         <div class="step-desc">Nel Navigator, espandi <b>Expert Advisors</b> e trova <code>RiskFlow_EA</code>. Trascinalo direttamente sul grafico del simbolo che vuoi usare (es. EURUSD, BTCUSD…). Si aprirà la finestra di configurazione.</div>
       </div>
     </div>
 
-    <!-- Step 6 -->
-    <div class="step">
-      <div class="step-num">6</div>
+    <!-- Step 7 — LICENSE KEY (nuovo) -->
+    <div class="step step-license">
+      <div class="step-num purple">7</div>
       <div class="step-body">
-        <div class="step-title">Configura i parametri iniziali</div>
-        <div class="step-desc">Nella finestra che si apre, vai sulla scheda <b>Ingressi</b> e imposta i valori in base alla tua operatività:</div>
+        <div class="step-title">Inserisci la tua License Key</div>
+        <div class="step-desc">
+          Nella finestra di configurazione, vai sulla scheda <b>Ingressi</b>. Il primo parametro è <code>LicenseKey</code> — incolla la chiave che hai ricevuto (formato <code>RF-XXXXX-XXXXX-XXXXX</code>).
+        </div>
+
+        <div class="license-box">
+          <div class="license-icon">🔑</div>
+          <div class="license-key">
+            <small>License Key (esempio)</small>
+            RF-9N8SH-JJFLJ-2AFVK
+          </div>
+        </div>
+
+        <div class="params-wrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr><th>Parametro</th><th>Valore</th><th>Note</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-name highlight">LicenseKey</td>
+                <td class="td-val" style="color:#F0C040;">RF-XXXXX-XXXXX-XXXXX</td>
+                <td class="td-desc">La tua chiave personale — non condividere con altri</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tip" style="margin-top:10px;">
+          <strong>Come funziona:</strong> all'avvio l'EA contatta il server licenze, registra il tuo PC (HWID) e verifica che la chiave sia attiva e non scaduta. La verifica richiede 1–2 secondi. Ogni 5 minuti invia un heartbeat automatico.
+        </div>
+
+        <div class="alert alert-yellow" style="margin-top:10px;">
+          <span class="alert-icon">⚠</span>
+          <div>La licenza è legata a <strong>un PC alla volta</strong>. Se vuoi usarla su un altro computer, attendi 10 minuti dall'ultimo utilizzo oppure contatta il supporto per uno sblocco manuale.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-body">
+        <div class="step-title">Configura i parametri operativi</div>
+        <div class="step-desc">Sempre nella scheda <b>Ingressi</b>, imposta i valori in base alla tua operatività:</div>
         <div class="params-wrap">
           <table>
             <thead>
@@ -393,33 +584,92 @@
       </div>
     </div>
 
-    <!-- Step 7 -->
+    <!-- Step 9 -->
     <div class="step">
-      <div class="step-num">7</div>
+      <div class="step-num warn">9</div>
       <div class="step-body">
-        <div class="step-title">Abilita il trading automatico in MT5</div>
-        <div class="step-desc">Vai sulla scheda <b>Common</b> nella stessa finestra di configurazione e assicurati che la voce <b>"Consenti trading automatico"</b> sia spuntata. Poi clicca <b>OK</b>.</div>
-        <div class="alert alert-yellow" style="margin-top:10px;">
-          <span class="alert-icon">⚠</span>
-          <div>Controlla anche il pulsante <b>AutoTrading</b> nella barra degli strumenti di MT5 (deve essere verde e attivo), altrimenti l'EA non potrà aprire ordini.</div>
+        <div class="step-title">⚠ Abilita il trading algoritmico</div>
+        <div class="step-desc">Nella finestra di configurazione dell'EA, vai sulla scheda <b>Common</b> e assicurati che sia spuntato:</div>
+
+        <div class="mockup-window" style="margin-top:12px;">
+          <div class="mockup-titlebar">Finestra configurazione EA → scheda Common</div>
+          <div class="mockup-body">
+            <div class="mockup-row highlight">
+              <div class="mockup-checkbox checked">✓</div>
+              <span style="color:#F0C040; font-weight:500;">Consenti trading algoritmico</span>
+              <span class="mockup-arrow">← obbligatorio</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-red" style="margin-top:10px;">
+          <span class="alert-icon">🚫</span>
+          <div>Se non è spuntato, l'EA si avvia e il pannello appare, ma <strong>non può inviare nessun ordine</strong> — senza mostrare errori visibili.</div>
         </div>
       </div>
     </div>
 
-    <!-- Step 8 -->
+    <!-- Step 10 -->
     <div class="step">
       <div class="step-num done">✓</div>
       <div class="step-body">
         <div class="step-title">Verifica che il pannello sia attivo</div>
-        <div class="step-desc">Se tutto è andato a buon fine, il pannello grafico di RiskFlow apparirà sul lato destro del grafico, con il tema navy/viola. In basso a destra del grafico vedrai anche la faccina sorridente (😊) che indica che l'EA è in esecuzione.</div>
+        <div class="step-desc">Se tutto è andato a buon fine, il pannello grafico di RiskFlow apparirà sul lato destro del grafico. Nel tab <b>Experts</b> di MT5 (in basso) vedrai questi messaggi:</div>
+
+        <div class="log-preview">
+          <div class="log-line"><span class="log-time">08:01:15</span><span class="log-ok">[License] ✅ Licenza valida. Scade: 2026-06-05</span></div>
+          <div class="log-line"><span class="log-time">08:01:15</span><span class="log-ok">[RiskFlow] ✅ Licenza attiva | HWID: RF1234ABCD</span></div>
+          <div class="log-line"><span class="log-time">08:01:15</span><span class="log-info">[RiskFlow] RiskFlow v2 MT5 pronto - EURUSD</span></div>
+        </div>
+
         <div class="alert alert-green" style="margin-top:10px;">
           <span class="alert-icon">✓</span>
-          <div>Il messaggio <b>"RiskFlow v2 MT5 pronto"</b> comparirà nella barra delle notifiche in basso — installazione completata!</div>
+          <div>Il messaggio <b>"RiskFlow v2 MT5 pronto"</b> comparirà nella barra delle notifiche del pannello — installazione completata!</div>
         </div>
       </div>
     </div>
 
   </div><!-- /steps -->
+
+  <!-- Troubleshooting -->
+  <div class="sec-title">Risoluzione problemi comuni</div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num" style="background:#E05555; font-size:16px;">!</div>
+      <div class="step-body">
+        <div class="step-title">L'EA si chiude subito — <code>INIT_FAILED</code></div>
+        <div class="step-desc">Le cause più comuni in ordine di probabilità:</div>
+        <div class="params-wrap" style="margin-top:10px;">
+          <table>
+            <thead><tr><th>Problema</th><th>Soluzione</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="td-desc" style="color:#FF8888;">URL non in whitelist MT5</td>
+                <td class="td-desc">Tools → Options → Expert Advisors → aggiungi <code>https://firestore.googleapis.com</code></td>
+              </tr>
+              <tr>
+                <td class="td-desc" style="color:#FF8888;">License Key non inserita</td>
+                <td class="td-desc">Parametro <code>LicenseKey</code> deve contenere la tua chiave <code>RF-XXXXX-...</code></td>
+              </tr>
+              <tr>
+                <td class="td-desc" style="color:#FF8888;">Licenza scaduta o revocata</td>
+                <td class="td-desc">Controlla lo stato nel pannello admin o contatta il supporto</td>
+              </tr>
+              <tr>
+                <td class="td-desc" style="color:#FF8888;">Licenza in uso su altro PC</td>
+                <td class="td-desc">Attendi 10 minuti dall'ultimo utilizzo sull'altro computer</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tip-yellow" style="margin-top:10px;">
+          <strong>Come diagnosticare:</strong> apri il tab <b>Experts</b> in MT5 (non "Journal") subito dopo il crash — i messaggi <code>[License]</code> ti diranno esattamente cosa non va.
+        </div>
+      </div>
+    </div>
+
+  </div>
 
   <!-- Success -->
   <div class="success">
