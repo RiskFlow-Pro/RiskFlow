@@ -514,6 +514,48 @@
     <div class="step">
       <div class="step-num">8</div>
       <div class="step-body">
+        <div class="step-title">Regola la dimensione del pannello al tuo schermo</div>
+        <div class="step-desc">
+          Il pannello ha due parametri di scala che <strong>devi regolare in base al tuo monitor e alla dimensione della finestra del grafico</strong> — ogni setup è diverso, non esiste un valore universale.
+        </div>
+
+        <div class="params-wrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr><th>Parametro</th><th>Default</th><th>Cosa fa</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-name highlight">InpPanelScale</td>
+                <td class="td-val" style="color:#F0C040;">130</td>
+                <td class="td-desc">Dimensione generale del pannello — larghezza, altezza, spaziatura. Range consigliato: <code>80</code> – <code>200</code></td>
+              </tr>
+              <tr>
+                <td class="td-name highlight">InpTextScale</td>
+                <td class="td-val" style="color:#F0C040;">100</td>
+                <td class="td-desc">Dimensione dei caratteri dentro il pannello. Range consigliato: <code>50</code> – <code>130</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tip" style="margin-top:10px;">
+          <strong>Come trovare i valori giusti:</strong> avvia l'EA con i valori di default, guarda come appare il pannello sul tuo grafico, poi fai doppio click sull'EA nel Navigator per riaprire i parametri e aggiusta i valori. Ripeti finché il pannello è leggibile e proporzionato. Le modifiche si vedono subito dopo aver cliccato OK.
+        </div>
+
+        <div class="alert alert-yellow" style="margin-top:10px;">
+          <span class="alert-icon">💡</span>
+          <div>
+            Su <b>monitor 4K o ad alta densità</b> potrebbe servire un valore più alto (es. <code>PanelScale 160–180</code>). Su <b>grafici piccoli</b> o laptop con schermo ridotto prova valori più bassi (es. <code>PanelScale 90–110</code>).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 8b -->
+    <div class="step">
+      <div class="step-num">9</div>
+      <div class="step-body">
         <div class="step-title">Configura i parametri operativi</div>
         <div class="step-desc">Sempre nella scheda <b>Ingressi</b>, imposta i valori in base alla tua operatività:</div>
         <div class="params-wrap">
@@ -556,16 +598,6 @@
                 <td class="td-name">InpConfirmTrade</td>
                 <td class="td-val">true</td>
                 <td class="td-desc">Mostra finestra di conferma prima di aprire ogni ordine</td>
-              </tr>
-              <tr>
-                <td class="td-name">InpPanelScale</td>
-                <td class="td-val">130</td>
-                <td class="td-desc">Scala grafica del pannello (valori: 100–170)</td>
-              </tr>
-              <tr>
-                <td class="td-name">InpTextScale</td>
-                <td class="td-val">100</td>
-                <td class="td-desc">Scala del testo nel pannello (valori: 50–130)</td>
               </tr>
               <tr>
                 <td class="td-name">InpMagic</td>
